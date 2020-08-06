@@ -1,6 +1,7 @@
 import serial
 import time
 
+# Initialize serial
 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=.1)
 time.sleep(2) #give the connection a second to settle
 
