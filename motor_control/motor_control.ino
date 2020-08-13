@@ -1,8 +1,15 @@
  //Declare pin functions on RedBoard
 #define stp 2
-#define dir 3
-
-int x; // counter for the stepping functions
+#define dir 3 // LOW -> step forward, HIGH -> step in reverse
+long x; // counter for the stepping functions
+unsigned long time_now = 0;
+int spd = 350;
+int steps_per_rot = 400;
+int thread_pitch = 4;
+long pos = 0; 
+long steps = 0;
+bool stp_finished = true;
+bool dir_forward;
 
 void setup() {
   pinMode(stp, OUTPUT);
@@ -10,49 +17,62 @@ void setup() {
   resetEDPins(); //Set step, direction, microstep and enable pins to default states
   Serial.begin(9600);
 }
+
 void loop() {
-  if(Serial.available() > 0) {
-    //char data = Serial.read();
-    //char str[2];
-    //str[0] = data;
-    //str[1] = '\0';
-    //Serial.print(str);
-    int steps = Serial.parseInt();
-    Serial.print(steps);
-    // If usr input is -steps then in reverse
-    if(steps > 0){
-      StepForwardDefault(steps);
+  if (steps == 0){
+    if (Serial.available() > 0) {
+      long distance = Serial.parseInt();
+      Serial.print(steps);
+      steps = (distance/thread_pitch) * steps_per_rot;
+      if (steps > 0){
+        PullDirPinLow();
+        dir_forward = true;
+      }
+      else{
+        PullDirPinHigh();
+        dir_forward = false;
+      }
     }
-    else{
-      ReverseStepDefault(abs(steps));
+  }
+  else{
+    if ((unsigned long)(micros() - time_now) > spd){
+      //Serial.print(micros()-time_now);
+      if (stp_finished == true){
+          PullStepPinHigh();
+          stp_finished = false;
+      }
+      else{
+          PullStepPinLow();
+          stp_finished = true;
+          if (dir_forward == true){
+            steps--;
+            pos++;
+          }
+          else{
+            steps++;
+            pos--;
+          }
+      }
+      time_now = micros();
     }
   }
 }
 
-// Move forward
-void StepForwardDefault(int steps)
-{
-  digitalWrite(dir, LOW); //Pull direction pin low to move "forward"
-  for(x= 0; x<steps; x++)  //Loop the forward stepping enough times for motion to be visible
-  {
-    digitalWrite(stp,HIGH); //Trigger one step forward
-    delayMicroseconds(350);
-    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
-    delayMicroseconds(350);
-  }
+
+void PullStepPinHigh(){
+  digitalWrite(stp, HIGH);
 }
 
-// Move reverse
-void ReverseStepDefault(int steps)
-{
-  digitalWrite(dir, HIGH); //Pull direction pin high to move in "reverse"
-  for(x= 0; x<steps; x++)  //Loop the stepping enough times for motion to be visible
-  {
-    digitalWrite(stp,HIGH); //Trigger one step
-    delayMicroseconds(350);
-    digitalWrite(stp,LOW); //Pull step pin low so it can be triggered again
-    delayMicroseconds(350);
-  }
+void PullStepPinLow(){
+  digitalWrite(stp, LOW);
+}
+
+void PullDirPinHigh(){
+  digitalWrite(dir, HIGH);
+}
+
+void PullDirPinLow(){
+  digitalWrite(dir, LOW);
 }
 
 
