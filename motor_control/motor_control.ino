@@ -1,15 +1,28 @@
  //Declare pin functions on RedBoard
 #define stp 2
 #define dir 3 // LOW -> step forward, HIGH -> step in reverse
-long x; // counter for the stepping functions
-unsigned long time_now = 0;
-int spd = 350;
+
+// stepper timing
+unsigned long t_spd = 0;
+int spd = 350; // microseconds
+bool stp_finished = true;
+
+// data acquisition timing
+unsigned long t_data = 0;
+int dt_data = 1000; // time interval in milliseconds
+
+// parameters of the mechanics
 int steps_per_rot = 400;
 int thread_pitch = 4;
-long pos = 0; 
+
+// counter, position, distance, direction
+long x;
+long pos_steps = 0; 
+long pos_mm = 0;
 long steps = 0;
-bool stp_finished = true;
 bool dir_forward;
+
+
 
 void setup() {
   pinMode(stp, OUTPUT);
@@ -19,11 +32,15 @@ void setup() {
 }
 
 void loop() {
+  if ((unsigned long)(millis() - t_data) > dt_data){
+    pos_mm = (thread_pitch*pos_steps)/steps_per_rot;
+    Serial.print(pos_mm);
+    t_data = millis();
+  }
   if (steps == 0){
     if (Serial.available() > 0) {
       long distance = Serial.parseInt();
-      Serial.print(steps);
-      steps = (distance/thread_pitch) * steps_per_rot;
+      steps = (distance * steps_per_rot)/thread_pitch;
       if (steps > 0){
         PullDirPinLow();
         dir_forward = true;
@@ -35,8 +52,7 @@ void loop() {
     }
   }
   else{
-    if ((unsigned long)(micros() - time_now) > spd){
-      //Serial.print(micros()-time_now);
+    if ((unsigned long)(micros() - t_spd) > spd){
       if (stp_finished == true){
           PullStepPinHigh();
           stp_finished = false;
@@ -46,14 +62,14 @@ void loop() {
           stp_finished = true;
           if (dir_forward == true){
             steps--;
-            pos++;
+            pos_steps++;
           }
           else{
             steps++;
-            pos--;
+            pos_steps--;
           }
       }
-      time_now = micros();
+      t_spd = micros();
     }
   }
 }

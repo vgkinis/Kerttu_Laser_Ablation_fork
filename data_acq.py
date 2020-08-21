@@ -1,21 +1,15 @@
 import serial
 
-ser = serial.Serial(
-		port = '/dev/ttyACM0',
-		baudrate = 9600,
-		parity = serial.PARITY_NONE,
-		stopbits = serial.STOPBITS_ONE,
-		bytesize = serial.EIGHTBITS
-)
-
-def ExecCmd(command):
-	#send the command with the appropriate <CR> terminator...
-	RS232.write(command + chr(13))
+RS232 = serial.Serial('/dev/ttyUSB0',9600, 8, 'N', 1)
+    
+def ExecCmd(RS232, command):
+	# Send the command with the appropriate <CR> terminator...
+	RS232.write(str.encode(command + chr(13)))
 	#and collect the response...
 	buf = ""
 	while True:
 		# reading one byte at a time until <CR> is read
-		c = RS232.Read(1)
+		c = RS232.read()
 		if c == chr(13):
 			break
 		else:
@@ -28,7 +22,6 @@ def ExecCmd(command):
 			#No error - return the response string (w/o <CR>)...
 			return buf
 
-command = list(bytes(b'_Meas_GetConc'))
-command.append(13)
+command = '_Instr_GetStatus'
 
-print(ExecCmd(13))
+print(ExecCmd(RS232, command))
