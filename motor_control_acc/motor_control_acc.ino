@@ -8,7 +8,7 @@ unsigned long slowMicrosBetweenSteps = 4000; // microseconds
 unsigned long fastMicrosBetweenSteps = 700;
 unsigned long stepIntervalMicros;
 unsigned long stepAdjustmentMicros;
-long numAccelSteps = 200; // 100 is a half turn of a 200 step motor
+long numAccelSteps = 400; // 100 is a half turn of a 200 step motor
 
 // data acquisition timing
 unsigned long t_loop = millis();
@@ -16,7 +16,7 @@ unsigned long t_data = millis();
 int dt_data = 1000; // time interval in milliseconds
 
 // parameters of the mechanics
-int steps_per_rot = 400;
+int steps_per_rot = 800;
 int thread_pitch = 4;
 
 // counter, position, distance, direction
