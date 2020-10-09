@@ -1,10 +1,12 @@
- //Declare pin functions on RedBoard
-#define stp 2
-#define dir 3 // LOW -> step forward, HIGH -> step in reverse
+//Declare pin functions on RedBoard
+#define stp 5
+#define dir 6 // LOW -> step forward, HIGH -> step in reverse
 
 // stepper timing
+//unsigned long t_acc = 0;
 unsigned long t_spd = 0;
-int spd = 350; // microseconds
+//int current_spd;
+int spd = 5000; // microseconds
 bool stp_finished = true;
 
 // data acquisition timing
@@ -40,56 +42,40 @@ void loop() {
   if (steps == 0){
     if (Serial.available() > 0) {
       long distance = Serial.parseInt();
-      steps = (distance * steps_per_rot)/thread_pitch;
+      steps = (distance * steps_per_rot)/thread_pitch; 
       if (steps > 0){
-        PullDirPinLow();
+        digitalWrite(dir, LOW);
         dir_forward = true;
       }
       else{
-        PullDirPinHigh();
+        digitalWrite(dir, HIGH);
         dir_forward = false;
       }
     }
   }
   else{
-    if ((unsigned long)(micros() - t_spd) > spd){
+    if ((unsigned long)(micros() - t_spd) >  spd){
       if (stp_finished == true){
-          PullStepPinHigh();
+          digitalWrite(stp, HIGH);
           stp_finished = false;
-      }
+          }
       else{
-          PullStepPinLow();
+          digitalWrite(stp, LOW);
           stp_finished = true;
           if (dir_forward == true){
             steps--;
             pos_steps++;
-          }
+            }
           else{
             steps++;
             pos_steps--;
+            }
           }
-      }
       t_spd = micros();
+      }
     }
   }
-}
 
-
-void PullStepPinHigh(){
-  digitalWrite(stp, HIGH);
-}
-
-void PullStepPinLow(){
-  digitalWrite(stp, LOW);
-}
-
-void PullDirPinHigh(){
-  digitalWrite(dir, HIGH);
-}
-
-void PullDirPinLow(){
-  digitalWrite(dir, LOW);
-}
 
 
 //Reset Easy Driver pins to default states
