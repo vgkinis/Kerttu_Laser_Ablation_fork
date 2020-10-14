@@ -14,6 +14,7 @@ class LinearStage():
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
         self.json_path = json_path
+        self.velocity_delay_micros = None
         return
 
     def read_json(self):
@@ -39,18 +40,19 @@ class LinearStage():
         return
 
     def set_velocity_mm(self, velocity_mm):
-        velocity_delay_micros = 1/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
+        self.velocity_delay_micros = 1/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
         serial_cmd = "V" + str(velocity_delay_micros) + "r"
         send_cmd("V", str(velocity_delay_micros))
         return
 
     def set_velocity_stp(self, velocity_stp):
-        velocity_delay_micros = self.thread_pitch/velocity_stp
+        self.velocity_delay_micros = self.thread_pitch/velocity_stp
         send_cmd("V", str(velocity_delay_micros))
         return
 
     def set_velocity_delay_micros(self, velocity_delay_micros):
-        send_cmd("V", str(velocity_delay_micros))
+        self.velocity_delay_micros = velocity_delay_micros
+        send_cmd("V", str(self.velocity_delay_micros))
         return
 
     def get_velocity(self):
