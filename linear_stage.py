@@ -25,3 +25,12 @@ class LinearStage():
                 self.stp_per_rev = json_dict["stp_per_rev"]
 
         return
+
+    def send_cmd(cat, parameter):
+        if cat not in ["S", "V", "P", "D", "R"]:
+            print("Unkown command category")
+        else:
+            serial_cmd = cat + parameter + "r"
+            ser = serial.Serial('/dev/ttyACM0', 250000, timeout=.1)
+            ser.write(serial_cmd)
+        return
