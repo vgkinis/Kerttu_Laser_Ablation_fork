@@ -26,11 +26,43 @@ class LinearStage():
 
         return
 
-    def send_cmd(cat, parameter):
+    def send_cmd(self, cat, parameter):
         if cat not in ["S", "V", "P", "D", "R"]:
-            print("Unkown command category")
+            print("Unkown command category: %s" %cat)
         else:
-            serial_cmd = cat + parameter + "r"
-            ser = serial.Serial('/dev/ttyACM0', 250000, timeout=.1)
-            ser.write(serial_cmd)
+            serial_cmd = cat + str(parameter) + "r"
+            try:
+                ser = serial.Serial('/dev/ttyACM0', 250000, timeout=.1)
+                ser.write(serial_cmd)
+            except:
+                print("Command %s not sent. Could not open serial" %serial_cmd)
+        return
+
+    def set_velocity(self):
+        return
+
+    def get_velocity(self):
+        return
+
+    def set_direction(self):
+        return
+
+    def get_direction(self):
+        return
+
+    def get_current_position(self):
+        return
+
+    def move_mm(self, pos_mm):
+        stp = pos_mm * self.thread_pitch * self.stp_per_rev
+        serial_cmd = "S" + str(stp) + "r"
+        send_cmd(serial_cmd)
+        return
+
+    def move_stp(self, stp):
+        serial_cmd = "S" + str(stp) + "r"
+        send_cmd(serial_cmd)
+        return
+
+    def reset_position(self):
         return
