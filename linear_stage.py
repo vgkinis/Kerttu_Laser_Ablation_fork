@@ -38,13 +38,27 @@ class LinearStage():
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
 
-    def set_velocity(self):
+    def set_velocity_mm(self, velocity_mm):
+        velocity_delay_micros = 1/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
+        serial_cmd = "V" + str(velocity_delay_micros) + "r"
+        send_cmd("V", str(velocity_delay_micros))
+        return
+
+    def set_velocity_stp(self, velocity_stp):
+        velocity_delay_micros = self.thread_pitch/velocity_stp
+        send_cmd("V", str(velocity_delay_micros))
+        return
+
+    def set_velocity_delay_micros(self, velocity_delay_micros):
+        send_cmd("V", str(velocity_delay_micros))
         return
 
     def get_velocity(self):
         return
 
-    def set_direction(self):
+    def set_direction(self, direction):
+        serial_cmd = "D" + str(direction) + "r"
+        send_cmd("D", str(direction))
         return
 
     def get_direction(self):
