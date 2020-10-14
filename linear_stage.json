@@ -2,5 +2,5 @@
   "stepper_name": "iHSS57-36-10",
   "stp_per_rev": 800,
   "thread_pitch": 4,
-  "_thread_pitch_units": "mm/rev",
+  "_thread_pitch_units": "mm/rev"
 }
