@@ -49,8 +49,8 @@ while (new_t - start_t)/60 < operating_time:
 				if len(data) == 3:
 					loop_time, abs_pos, speed = float(data[0])*10**(-3), float(data[1]), float(data[2])
 					abs_pos = int(abs_pos)
-					writer.writerow(["{:11.4f}".format(loop_time), "{:4.0f}".format(abs_pos), "{:7.1f}".format(speed)])
 					print("Loop_time", "{:11.4f}".format(loop_time), "Absolute position", "{:4.0}".format(abs_pos), "speed", "{:7.1f}".format(speed), "us")
+					writer.writerow(["{:11.4f}".format(loop_time), "{:4.0f}".format(abs_pos), "{:7.1f}".format(speed)])
 
 			if (abs_pos-last_abs_pos) == pos:
 				if dir_change == False:
