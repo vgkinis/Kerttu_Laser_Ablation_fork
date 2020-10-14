@@ -40,19 +40,18 @@ class LinearStage():
         return
 
     def set_velocity_mm(self, velocity_mm):
-        self.velocity_delay_micros = 1/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
-        serial_cmd = "V" + str(velocity_delay_micros) + "r"
-        send_cmd("V", str(velocity_delay_micros))
+        self.velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
+        self.send_cmd("V", str(self.velocity_delay_micros))
         return
 
     def set_velocity_stp(self, velocity_stp):
-        self.velocity_delay_micros = self.thread_pitch/velocity_stp
-        send_cmd("V", str(velocity_delay_micros))
+        self.velocity_delay_micros = 1e6/velocity_stp
+        self.send_cmd("V", str(self.velocity_delay_micros))
         return
 
     def set_velocity_delay_micros(self, velocity_delay_micros):
         self.velocity_delay_micros = velocity_delay_micros
-        send_cmd("V", str(self.velocity_delay_micros))
+        self.send_cmd("V", str(self.velocity_delay_micros))
         return
 
     def get_velocity(self):
@@ -60,7 +59,7 @@ class LinearStage():
 
     def set_direction(self, direction):
         serial_cmd = "D" + str(direction) + "r"
-        send_cmd("D", str(direction))
+        self.send_cmd("D", str(direction))
         return
 
     def get_direction(self):
@@ -72,12 +71,12 @@ class LinearStage():
     def move_mm(self, pos_mm):
         stp = pos_mm * self.thread_pitch * self.stp_per_rev
         serial_cmd = "S" + str(stp) + "r"
-        send_cmd(serial_cmd)
+        self.send_cmd(serial_cmd)
         return
 
     def move_stp(self, stp):
         serial_cmd = "S" + str(stp) + "r"
-        send_cmd(serial_cmd)
+        self.send_cmd(serial_cmd)
         return
 
     def reset_position(self):
