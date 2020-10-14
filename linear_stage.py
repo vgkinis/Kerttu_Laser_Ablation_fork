@@ -45,7 +45,8 @@ class LinearStage():
 
     def _serial_read(self):
         line = self.ser.readline()
-        print(line)
+        line = line.decode("utf-8")
+        return line
 
     def send_cmd(self, cat, parameter):
         if cat not in ["S", "V", "P", "D", "R"]:
@@ -115,6 +116,26 @@ if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
     ls.start_serial("/dev/ttyACM1")
-    ls.move_mm(4)
-    time.sleep(1.3)
-    ls._serial_read()
+    abs_pos = 0
+    last_abs_pos = 0
+
+    usr_pos_str = input("Enter the distance in mm (press x to exit): ")
+    usr_pos = int(usr_pos_str)
+    ls.move_mm(usr_pos)
+    while True:
+        serial_data = ls._serial_read()
+        if len(serial_data) == 3:
+            loop_time, abs_pos, velocity = float(data[0])*10**(-3), float(data[1]), float(data[2])
+            abs_pos = int((4*abs_pos)/800)
+            print("Loop_time", "{:11.4f}".format(loop_time), "Absolute position", "{:4.0f}".format(abs_pos), "speed", "{:7.1f}".format(speed), "us")
+        else:
+            print(serial_data)
+
+        if (abs_pos-last_abs_pos) == usr_pos:
+            usr_pos_str = input("Enter the distance in mm (press x to exit): ")
+            if usr_pos_str == "x":
+                break
+            usr_pos = int(usr_pos_str)
+            ls.move_mm(usr_pos)
+            last_abs_pos = abs_pos
+            ser.flushInput()
