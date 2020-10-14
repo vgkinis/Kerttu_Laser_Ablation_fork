@@ -16,4 +16,10 @@ class LinearStage():
         self.json_path = json_path
         return
 
-    
+    def read_json(self):
+        if self.json_path:
+            json_dict = json.load(self.json_path)
+            self.thread_pitch = json_dict["thread_pitch"]
+            self.stp_per_rev = json_dict["stp_per_rev"]
+
+        return
