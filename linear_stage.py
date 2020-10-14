@@ -43,6 +43,9 @@ class LinearStage():
             self.ser.close()
         return
 
+    def _serial_read(self):
+        line = self.ser.readline()
+        print(line)
 
     def send_cmd(self, cat, parameter):
         if cat not in ["S", "V", "P", "D", "R"]:
@@ -50,7 +53,8 @@ class LinearStage():
         else:
             serial_cmd = cat + str(parameter) + "r"
             try:
-                self.ser.write(serial_cmd)
+                self.ser.write(str.encode(serial_cmd))
+                print("Sending command: ", serial_cmd)
             except:
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
@@ -79,7 +83,6 @@ class LinearStage():
 
 
     def set_direction(self, direction):
-        serial_cmd = "D" + str(direction) + "r"
         self.send_cmd("D", str(direction))
         return
 
@@ -94,16 +97,24 @@ class LinearStage():
 
     def move_mm(self, pos_mm):
         stp = pos_mm * self.thread_pitch * self.stp_per_rev
-        serial_cmd = "S" + str(stp) + "r"
-        self.send_cmd(serial_cmd)
+        self.send_cmd("S", stp)
         return
 
 
     def move_stp(self, stp):
-        serial_cmd = "S" + str(stp) + "r"
-        self.send_cmd(serial_cmd)
+        self.send_cmd("S", stp)
         return
 
 
     def reset_position(self):
         return
+
+
+
+if __name__ == "__main__":
+    ls = LinearStage(json_path="linear_stage.json")
+    ls.read_json()
+    ls.start_serial("/dev/ttyACM0")
+    ls.move_mm(4)
+    time.sleep(1.3)
+    ls._serial_read()
