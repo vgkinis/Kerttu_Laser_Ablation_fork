@@ -2,23 +2,28 @@
 # define dir 6
 
 float serial_read_delay = 1200;
+float serial_write_delay = 1000;
 unsigned long serial_time = millis();
 unsigned long loop_time = millis();
-unsigned long velocity_delay_micros;
 
+unsigned long step_time = micros();
+unsigned long velocity_delay_micros;
 int direction;
-unsigned long steps;
-unsigned long abs_pos;
+long steps;
+long abs_pos;
 
 
 
 void setup() {
   Serial.begin(9600);
+  reset_pins();
 }
 
 void loop() {
   loop_time = millis();
+  move_to_position();
   serial_read();
+  serial_write();
 }
 
 
@@ -36,37 +41,85 @@ void serial_read(){
 }
 
 
-void categorize_cmd(serial_string){
-  int index_r = serial_string.indexOf("r\n");
-  
-  if serial_string.startsWith("D"){
-    set_direction(serial_string.substring(1, index_r);
+void serial_write(){
+  if ((unsigned long)(loop_time - serial_time) >= serial_write_delay){
+    Serial.print(loop_time);
+    Serial.print(";");
+    Serial.print(abs_pos);
+    Serial.print(";");
+    Serial.print(velocity_delay_micros);
   }
-  else if serial_string.startsWith("V"){
-    set_velocity(serial_string.substring(1, index_r);
-  }
-  else if serial_string.startsWith("S"){
-  }
-  else if serial_string.startsWith("P"){
-  }
-  else if serial_string.startsWith("R"){
-    
-  }
-
-
-  
-  int index_V = serial_string.indexOf("V");
-  Serial.println(serial_string.substring(index_V+1, index_r));
 }
 
 
-void set_direction(){
-  if (direction == 1){
+void categorize_cmd(String serial_string){
+  int index_r = serial_string.indexOf("r\n");
+  
+  if (serial_string.startsWith("D")){
+    int serial_direction = serial_string.substring(1, index_r).toInt();
+    set_direction(serial_direction);
+  }
+  else if (serial_string.startsWith("V")){
+    int serial_velocity = serial_string.substring(1, index_r).toInt();
+    set_velocity(serial_velocity);
+  }
+  else if (serial_string.startsWith("S")){
+    long serial_steps = atol(serial_string.substring(1, index_r).c_str());
+    set_steps(serial_steps);
+  }
+}
+
+
+void set_direction(int serial_direction){
+  if (serial_direction == 1){
+    direction = serial_direction;
     digitalWrite(dir, HIGH);
     Serial.println("Direction was changed to 1");
   }
-  else if (direction == 0){
+  else if (serial_direction == 0){
+    direction = serial_direction;
     digitalWrite(dir, LOW);
-    Serial.println("Direction was changed to 0);
+    Serial.println("Direction was changed to 0");
   }
+}
+
+void set_velocity(int serial_velocity){
+  velocity_delay_micros = serial_velocity;
+}
+
+
+void set_steps(long serial_steps){
+  steps = serial_steps;
+}
+
+
+void move_to_position(){
+  if (steps > 0){
+    if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
+      step_time = micros();
+      single_step();
+      if (direction == 1){
+        steps--;
+        abs_pos++;
+      }
+      else if (direction == 0){
+        steps++;
+        abs_pos--;
+      }
+    }
+  }
+}
+
+
+void single_step() {
+  digitalWrite(stp, HIGH);
+  delayMicroseconds(3);
+  digitalWrite(stp, LOW);
+}
+
+
+void reset_pins()
+{
+  digitalWrite(stp, LOW);
+  digitalWrite(dir, LOW);
 }

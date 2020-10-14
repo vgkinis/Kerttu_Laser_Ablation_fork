@@ -114,7 +114,7 @@ class LinearStage():
 if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
-    ls.start_serial("/dev/ttyACM0")
+    ls.start_serial("/dev/ttyACM1")
     ls.move_mm(4)
     time.sleep(1.3)
     ls._serial_read()
