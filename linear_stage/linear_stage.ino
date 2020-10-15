@@ -3,12 +3,13 @@
 
 float serial_read_delay = 1200;
 float serial_write_delay = 1000;
-unsigned long serial_time = millis();
+unsigned long serial_read_time = millis();
+unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();
 
 unsigned long step_time = micros();
-unsigned long velocity_delay_micros;
-int direction;
+unsigned long velocity_delay_micros = 5000;
+int direction = 1;
 long steps;
 long abs_pos;
 
@@ -29,8 +30,8 @@ void loop() {
 
 void serial_read(){
   String serial_string;
-  if ((unsigned long)(loop_time - serial_time) >= serial_read_delay){
-    serial_time = loop_time;
+  if ((unsigned long)(loop_time - serial_read_time) >= serial_read_delay){
+    serial_read_time = loop_time;
     if (Serial.available() > 0){
       serial_string = Serial.readString();
       if (serial_string.endsWith("r")) {
@@ -42,7 +43,8 @@ void serial_read(){
 
 
 void serial_write(){
-  if ((unsigned long)(loop_time - serial_time) >= serial_write_delay){
+  if ((unsigned long)(loop_time - serial_write_time) >= serial_write_delay){
+    serial_write_time = loop_time;
     Serial.print(loop_time);
     Serial.print(";");
     Serial.print(abs_pos);

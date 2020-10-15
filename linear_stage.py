@@ -97,7 +97,7 @@ class LinearStage():
 
 
     def move_mm(self, pos_mm):
-        stp = pos_mm * self.thread_pitch * self.stp_per_rev
+        stp = (pos_mm * self.stp_per_rev)/self.thread_pitch
         self.send_cmd("S", stp)
         return
 
@@ -115,7 +115,7 @@ class LinearStage():
 if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
-    ls.start_serial("/dev/ttyACM1")
+    ls.start_serial("/dev/ttyACM0")
     abs_pos = 0
     last_abs_pos = 0
 
@@ -123,13 +123,11 @@ if __name__ == "__main__":
     usr_pos = int(usr_pos_str)
     ls.move_mm(usr_pos)
     while True:
-        serial_data = ls._serial_read()
+        serial_data = ls._serial_read().split(";")
         if len(serial_data) == 3:
-            loop_time, abs_pos, velocity = float(data[0])*10**(-3), float(data[1]), float(data[2])
+            loop_time, abs_pos, velocity = float(serial_data[0])*10**(-3), float(serial_data[1]), float(serial_data[2])
             abs_pos = int((4*abs_pos)/800)
-            print("Loop_time", "{:11.4f}".format(loop_time), "Absolute position", "{:4.0f}".format(abs_pos), "speed", "{:7.1f}".format(speed), "us")
-        else:
-            print(serial_data)
+            print("Loop_time", "{:11.4f}".format(loop_time), "Absolute position", "{:4.0f}".format(abs_pos), "velocity", "{:7.1f}".format(velocity), "us")
 
         if (abs_pos-last_abs_pos) == usr_pos:
             usr_pos_str = input("Enter the distance in mm (press x to exit): ")
@@ -138,4 +136,4 @@ if __name__ == "__main__":
             usr_pos = int(usr_pos_str)
             ls.move_mm(usr_pos)
             last_abs_pos = abs_pos
-            ser.flushInput()
+            ls.ser.flushInput()
