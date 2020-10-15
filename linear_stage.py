@@ -10,6 +10,7 @@ class LinearStage():
 
     """
 
+#--------------------------------- Initializing --------------------------------
     def __init__(self, thread_pitch = None, stp_per_rev = None, json_path = None):
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
@@ -17,9 +18,17 @@ class LinearStage():
         self.velocity_delay_micros = None
         self.ser = serial.Serial()
         self.loop_time = None
+
+        self.sent_pos_stp = None
+        self.sent_pos_mm = None
+
         self.abs_pos_stp = 0
         self.abs_pos_mm = 0
+
+        self.last_abs_pos_stp = 0
         self.last_abs_pos_mm = 0
+
+        self.direction = 1
         return
 
 
@@ -33,6 +42,7 @@ class LinearStage():
         return
 
 
+#------------------------------- Serial functions ------------------------------
     def start_serial(self, serial_name):
         try:
             self.ser = serial.Serial(serial_name, 9600, timeout=.1)
@@ -71,6 +81,15 @@ class LinearStage():
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
 
+#--------------------------------- Conversions ---------------------------------
+
+    def stp_to_mm(self, stp):
+        return int((self.thread_pitch*stp)/self.stp_per_rev)
+
+    def mm_to_stp(self, mm):
+        return int((mm * self.stp_per_rev)/self.thread_pitch)
+
+#--------------------------------- Set & Get -----------------------------------
 
     def set_velocity_mm(self, velocity_mm):
         self.velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
@@ -108,39 +127,62 @@ class LinearStage():
 
 
     def move_mm(self, pos_mm):
-        stp = (pos_mm * self.stp_per_rev)/self.thread_pitch
-        self.send_cmd("S", stp)
+        self.sent_pos_mm = pos_mm
+        stp = self.mm_to_stp(pos_mm)
+        self.sent_pos_stp = stp
+        self.send_cmd("S", abs(self.sent_pos_stp))
         return
 
 
     def move_stp(self, stp):
-        self.send_cmd("S", stp)
+        self.sent_pos_stp = stp
+        self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
+        self.send_cmd("S", abs(self.sent_pos_stp))
         return
 
 
     def reset_position(self):
         return
 
+    def check_if_ready(self):
+        if self.sent_pos_mm == None and self.sent_pos_stp == None:
+            print("Ready! No positions have been sent.")
+            return True
+        elif (self.abs_pos_mm-self.last_abs_pos_mm) == self.sent_pos_mm:
+            self.last_abs_pos_mm = self.abs_pos_mm
+            self.last_abs_pos_stp = self.abs_pos_stp
+
+            self.sent_pos_stp = None
+            self.sent_pos_mm = None
+            print("Ready! Position reached.")
+            return True
+        else:
+            return False
 
 
+#--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
     ls.start_serial("/dev/ttyACM0")
     time.sleep(2)
 
-    usr_pos_str = input("Enter the distance in mm (press x to exit): ")
-    usr_pos = int(usr_pos_str)
-    ls.move_mm(usr_pos)
     while True:
+        if ls.check_if_ready():
+            usr_pos_mm = int(input("Enter the distance in mm:"))
+            if usr_pos_mm > 0:
+                if ls.direction != 1:
+                    ls.set_direction(1)
+                    ls.direction = 1
+                    time.sleep(2)
+            else:
+                if ls.direction != 0:
+                    ls.set_direction(0)
+                    ls.direction = 0
+                    time.sleep(2)
+            ls.sent_pos_mm = usr_pos_mm
+            ls.sent_pos_stp = ls.mm_to_stp(ls.sent_pos_mm)
+            ls.move_mm(ls.sent_pos_mm)
+            ls.ser.flushInput()
         serial_data = ls.serial_read()
         if serial_data: print(serial_data)
-
-        if (ls.abs_pos_mm-ls.last_abs_pos_mm) == usr_pos:
-            usr_pos_str = input("Enter the distance in mm (press x to exit): ")
-            if usr_pos_str == "x":
-                break
-            usr_pos = int(usr_pos_str)
-            ls.move_mm(usr_pos)
-            ls.last_abs_pos_mm = ls.abs_pos_mm
-            ls.ser.flushInput()
