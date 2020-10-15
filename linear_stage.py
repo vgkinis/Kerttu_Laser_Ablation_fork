@@ -16,6 +16,10 @@ class LinearStage():
         self.json_path = json_path
         self.velocity_delay_micros = None
         self.ser = serial.Serial()
+        self.loop_time = None
+        self.abs_pos_stp = 0
+        self.abs_pos_mm = 0
+        self.last_abs_pos_mm = 0
         return
 
 
@@ -43,9 +47,16 @@ class LinearStage():
             self.ser.close()
         return
 
-    def _serial_read(self):
+    def serial_read(self):
         line = self.ser.readline()
         line = line.decode("utf-8")
+        if ";" in line:
+            data = line.split(";")
+            if len(data) == 3:
+                self.loop_time, self.abs_pos_stp, self.velocity_delay_micros = float(data[0])*10**(-3), float(data[1]), float(data[2])
+                self.abs_pos_mm = int((self.thread_pitch*self.abs_pos_stp)/self.stp_per_rev)
+                data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position", "{:4.0f}".format(self.abs_pos_mm), "velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
+                return data_str
         return line
 
     def send_cmd(self, cat, parameter):
@@ -116,24 +127,20 @@ if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
     ls.start_serial("/dev/ttyACM0")
-    abs_pos = 0
-    last_abs_pos = 0
+    time.sleep(2)
 
     usr_pos_str = input("Enter the distance in mm (press x to exit): ")
     usr_pos = int(usr_pos_str)
     ls.move_mm(usr_pos)
     while True:
-        serial_data = ls._serial_read().split(";")
-        if len(serial_data) == 3:
-            loop_time, abs_pos, velocity = float(serial_data[0])*10**(-3), float(serial_data[1]), float(serial_data[2])
-            abs_pos = int((4*abs_pos)/800)
-            print("Loop_time", "{:11.4f}".format(loop_time), "Absolute position", "{:4.0f}".format(abs_pos), "velocity", "{:7.1f}".format(velocity), "us")
+        serial_data = ls.serial_read()
+        if serial_data: print(serial_data)
 
-        if (abs_pos-last_abs_pos) == usr_pos:
+        if (ls.abs_pos_mm-ls.last_abs_pos_mm) == usr_pos:
             usr_pos_str = input("Enter the distance in mm (press x to exit): ")
             if usr_pos_str == "x":
                 break
             usr_pos = int(usr_pos_str)
             ls.move_mm(usr_pos)
-            last_abs_pos = abs_pos
+            ls.last_abs_pos_mm = ls.abs_pos_mm
             ls.ser.flushInput()

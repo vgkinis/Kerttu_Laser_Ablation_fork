@@ -10,8 +10,8 @@ unsigned long loop_time = millis();
 unsigned long step_time = micros();
 unsigned long velocity_delay_micros = 5000;
 int direction = 1;
-long steps;
-long abs_pos;
+long steps = 0;
+long abs_pos = 0;
 
 
 
