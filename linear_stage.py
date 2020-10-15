@@ -167,7 +167,7 @@ if __name__ == "__main__":
     ls.start_serial("/dev/ttyACM0")
     time.sleep(2)
 
-    ls.set_velocity_delay_micros(1000)
+    #ls.set_velocity_delay_micros(1000)
     time.sleep(2)
     while True:
         if ls.check_if_ready():
@@ -182,9 +182,9 @@ if __name__ == "__main__":
                     ls.set_direction(0)
                     ls.direction = 0
                     time.sleep(2)
-            ls.ser.flushInput()
             ls.sent_pos_mm = usr_pos_mm
             ls.sent_pos_stp = ls.mm_to_stp(ls.sent_pos_mm)
+            ls.ser.flushInput()
             ls.move_stp(ls.sent_pos_stp)
         serial_data = ls.serial_read()
         if serial_data: print(serial_data)
