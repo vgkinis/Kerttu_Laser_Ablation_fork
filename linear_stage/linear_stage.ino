@@ -91,22 +91,27 @@ void set_velocity(int serial_velocity){
 
 
 void set_steps(long serial_steps){
-  steps = serial_steps;
+  if (direction == 1){
+    steps = serial_steps;
+  }
+  else{
+    steps = -serial_steps;
+  }
 }
 
 
 void move_to_position(){
-  if (steps > 0){
+  if (abs(steps) > 0){
     if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
       step_time = micros();
       single_step();
       if (direction == 1){
-        steps--;
         abs_pos++;
+        steps--;
       }
-      else if (direction == 0){
-        steps++;
+      else {
         abs_pos--;
+        steps++;
       }
     }
   }

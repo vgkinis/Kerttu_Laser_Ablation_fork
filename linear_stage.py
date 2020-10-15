@@ -64,9 +64,9 @@ class LinearStage():
             data = line.split(";")
             if len(data) == 3:
                 self.loop_time, self.abs_pos_stp, self.velocity_delay_micros = float(data[0])*10**(-3), float(data[1]), float(data[2])
-                self.abs_pos_mm = int((self.thread_pitch*self.abs_pos_stp)/self.stp_per_rev)
-                data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position", "{:4.0f}".format(self.abs_pos_mm), "velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
-                return data_str
+                self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
+                data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
+                return str(data_str)
         return line
 
     def send_cmd(self, cat, parameter):
@@ -148,7 +148,7 @@ class LinearStage():
         if self.sent_pos_mm == None and self.sent_pos_stp == None:
             print("Ready! No positions have been sent.")
             return True
-        elif (self.abs_pos_mm-self.last_abs_pos_mm) == self.sent_pos_mm:
+        elif (self.abs_pos_stp-self.last_abs_pos_stp) == self.sent_pos_stp:
             self.last_abs_pos_mm = self.abs_pos_mm
             self.last_abs_pos_stp = self.abs_pos_stp
 
@@ -167,6 +167,8 @@ if __name__ == "__main__":
     ls.start_serial("/dev/ttyACM0")
     time.sleep(2)
 
+    ls.set_velocity_delay_micros(1000)
+    time.sleep(2)
     while True:
         if ls.check_if_ready():
             usr_pos_mm = int(input("Enter the distance in mm:"))
@@ -180,9 +182,9 @@ if __name__ == "__main__":
                     ls.set_direction(0)
                     ls.direction = 0
                     time.sleep(2)
+            ls.ser.flushInput()
             ls.sent_pos_mm = usr_pos_mm
             ls.sent_pos_stp = ls.mm_to_stp(ls.sent_pos_mm)
-            ls.move_mm(ls.sent_pos_mm)
-            ls.ser.flushInput()
+            ls.move_stp(ls.sent_pos_stp)
         serial_data = ls.serial_read()
         if serial_data: print(serial_data)
