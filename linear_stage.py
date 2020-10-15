@@ -164,27 +164,28 @@ class LinearStage():
 if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
-    ls.start_serial("/dev/ttyACM0")
-    time.sleep(2)
+    ls.start_serial("/dev/ttyACM2")
+    # time.sleep(2)
+    ls.serial_read()
 
     #ls.set_velocity_delay_micros(1000)
-    time.sleep(2)
-    while True:
-        if ls.check_if_ready():
-            usr_pos_mm = int(input("Enter the distance in mm:"))
-            if usr_pos_mm > 0:
-                if ls.direction != 1:
-                    ls.set_direction(1)
-                    ls.direction = 1
-                    time.sleep(2)
-            else:
-                if ls.direction != 0:
-                    ls.set_direction(0)
-                    ls.direction = 0
-                    time.sleep(2)
-            ls.sent_pos_mm = usr_pos_mm
-            ls.sent_pos_stp = ls.mm_to_stp(ls.sent_pos_mm)
-            ls.ser.flushInput()
-            ls.move_stp(ls.sent_pos_stp)
-        serial_data = ls.serial_read()
-        if serial_data: print(serial_data)
+    # time.sleep(2)
+    # while True:
+    #     if ls.check_if_ready():
+    #         usr_pos_mm = int(input("Enter the distance in mm:"))
+    #         if usr_pos_mm > 0:
+    #             if ls.direction != 1:
+    #                 ls.set_direction(1)
+    #                 ls.direction = 1
+    #                 time.sleep(2)
+    #         else:
+    #             if ls.direction != 0:
+    #                 ls.set_direction(0)
+    #                 ls.direction = 0
+    #                 time.sleep(2)
+    #         ls.sent_pos_mm = usr_pos_mm
+    #         ls.sent_pos_stp = ls.mm_to_stp(ls.sent_pos_mm)
+    #         ls.ser.flushInput()
+    #         ls.move_stp(ls.sent_pos_stp)
+    #     serial_data = ls.serial_read()
+    #     if serial_data: print(serial_data)

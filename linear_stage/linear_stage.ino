@@ -6,9 +6,10 @@ float serial_write_delay = 1000;
 unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();
+bool system_available = True;
 
 unsigned long step_time = micros();
-unsigned long velocity_delay_micros = 5000;
+unsigned long velocity_delay_micros = 1000;
 int direction = 1;
 long steps = 0;
 long abs_pos = 0;
@@ -16,15 +17,19 @@ long abs_pos = 0;
 
 
 void setup() {
+  pinMode(stp, OUTPUT);
+  pinMode(dir, OUTPUT);
   Serial.begin(9600);
   reset_pins();
 }
 
 void loop() {
   loop_time = millis();
-  move_to_position();
+  //move_to_position();
   serial_read();
   serial_write();
+  
+  
 }
 
 
@@ -67,6 +72,7 @@ void categorize_cmd(String serial_string){
   }
   else if (serial_string.startsWith("S")){
     long serial_steps = atol(serial_string.substring(1, index_r).c_str());
+    n_steps(serial_steps);
     set_steps(serial_steps);
   }
 }
@@ -117,6 +123,13 @@ void move_to_position(){
   }
 }
 
+
+void n_steps(long n_steps) {
+  for (int i=0; i<= n_steps; i++){
+    single_step();
+    delayMicroseconds(velocity_delay_micros);
+  }
+}
 
 void single_step() {
   digitalWrite(stp, HIGH);
