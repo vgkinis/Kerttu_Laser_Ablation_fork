@@ -91,10 +91,10 @@ void set_direction(int serial_direction){
       digitalWrite(dir, HIGH);
       Serial.println("Direction was changed to 1");
     }
-    else if (serial_direction == 0){
+    else if (serial_direction == -1){
       direction = serial_direction;
       digitalWrite(dir, LOW);
-      Serial.println("Direction was changed to 0");
+      Serial.println("Direction was changed to -1");
     }
   }
   else {
