@@ -3,6 +3,7 @@ import serial
 import os
 import time
 import json
+from serial.tools import list_ports
 
 
 class LinearStage():
@@ -164,7 +165,10 @@ class LinearStage():
 if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
-    ls.start_serial("/dev/ttyACM2")
+    ports = (list(list_ports.comports()))
+    port_name = list(map(lambda p : p["ttyACM" in p.device], ports)) [0]
+    serial_port = "/dev/" + port_name
+    ls.start_serial(serial_port)
     # time.sleep(2)
     ls.serial_read()
 
