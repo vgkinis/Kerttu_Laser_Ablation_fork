@@ -127,10 +127,12 @@ void reset_system(){
 void n_steps() {
   if (steps_to_do > 0){
     if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
-      step_time = micros();
-      single_step();
-      steps_to_do--;
-      abs_pos += abs_pos*direction;
+      if (system_available == true){
+        step_time = micros();
+        single_step();
+        steps_to_do--;
+        abs_pos += abs_pos*direction;
+      }
     }
   }
 }
