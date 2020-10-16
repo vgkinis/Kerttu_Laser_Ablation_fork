@@ -11,9 +11,7 @@ bool system_available = true;
 unsigned long step_time = micros();
 unsigned long velocity_delay_micros = 1000;
 int direction = 1;
-long steps = 0;
 long abs_pos = 0;
-
 long steps_to_do = 0;
 
 
@@ -29,10 +27,7 @@ void loop() {
   loop_time = millis();
   serial_read();
   n_steps();
-  //move_to_position();
-  //serial_write();
-  
-  
+  serial_write();  
 }
 
 
@@ -42,7 +37,16 @@ void serial_read(){
     serial_read_time = loop_time;
     if (Serial.available() > 0){
       serial_string = Serial.readString();
-      if (serial_string.endsWith("r")) {
+      if (serial_string == "STOP"){
+        stop_system();
+      }
+      else if (serial_string == "START") {
+        start_system();
+      }
+      else if (serial_string == "RESET"){
+        reset_system();
+      }
+      else if (serial_string.endsWith("r")) {
         categorize_cmd(serial_string);
       }
     }
@@ -75,21 +79,26 @@ void categorize_cmd(String serial_string){
   }
   else if (serial_string.startsWith("S")){
     long serial_steps = atol(serial_string.substring(1, index_r).c_str());
-    steps_to_do = serial_steps;
+    set_steps_to_do(serial_steps);
   }
 }
 
 
 void set_direction(int serial_direction){
-  if (serial_direction == 1){
-    direction = serial_direction;
-    digitalWrite(dir, HIGH);
-    Serial.println("Direction was changed to 1");
+  if (system_available == true){
+    if (serial_direction == 1){
+      direction = serial_direction;
+      digitalWrite(dir, HIGH);
+      Serial.println("Direction was changed to 1");
+    }
+    else if (serial_direction == 0){
+      direction = serial_direction;
+      digitalWrite(dir, LOW);
+      Serial.println("Direction was changed to 0");
+    }
   }
-  else if (serial_direction == 0){
-    direction = serial_direction;
-    digitalWrite(dir, LOW);
-    Serial.println("Direction was changed to 0");
+  else {
+    Serial.println("System not available");
   }
 }
 
@@ -97,48 +106,44 @@ void set_velocity(int serial_velocity){
   velocity_delay_micros = serial_velocity;
 }
 
-
-void set_steps(long serial_steps){
-  if (direction == 1){
-    steps = serial_steps;
-  }
-  else{
-    steps = -serial_steps;
-  }
+void set_steps_to_do(long serial_steps){
+  steps_to_do = serial_steps;
 }
 
+void stop_system(){
+  system_available = false;
+}
 
-void move_to_position(){
-  if (abs(steps) > 0){
-    if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
-      step_time = micros();
-      single_step();
-      if (direction == 1){
-        abs_pos++;
-        steps--;
-      }
-      else {
-        abs_pos--;
-        steps++;
-      }
-    }
-  }
+void start_system(){
+  system_available = true;
+}
+
+void reset_system(){
+  system_available = true;
+  steps_to_do = 0;
 }
 
 
 void n_steps() {
   if (steps_to_do > 0){
-    single_step();
-    steps_to_do--;
-    abs_pos += abs_pos*direction;
-    delayMicroseconds(velocity_delay_micros);
+    if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
+      step_time = micros();
+      single_step();
+      steps_to_do--;
+      abs_pos += abs_pos*direction;
+    }
   }
 }
 
 void single_step() {
-  digitalWrite(stp, HIGH);
-  delayMicroseconds(3);
-  digitalWrite(stp, LOW);
+  if (system_available == true){
+    digitalWrite(stp, HIGH);
+    delayMicroseconds(3);
+    digitalWrite(stp, LOW);
+  }
+  else {
+    Serial.println("System not available");
+  }
 }
 
 

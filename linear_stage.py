@@ -60,17 +60,20 @@ class LinearStage():
 
     def serial_read(self):
         line = self.ser.readline()
-        line = line.decode("utf-8")
-        if ";" in line:
-            data = line.split(";")
-            if len(data) == 3:
-                self.loop_time, self.abs_pos_stp, self.velocity_delay_micros = float(data[0])*10**(-3), float(data[1]), float(data[2])
-                self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
-                data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
-                return str(data_str)
+        try:
+            line = line.decode("utf-8")
+            if ";" in line:
+                data = line.split(";")
+                if len(data) == 3:
+                    self.loop_time, self.abs_pos_stp, self.velocity_delay_micros = float(data[0])*10**(-3), float(data[1]), float(data[2])
+                    self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
+                    data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
+                    return str(data_str)
+        except UnicodeDecodeError:
+            print("Couldn't decode the serial input.")
         return line
 
-    def send_cmd(self, cat, parameter):
+    def send_motor_cmd(self, cat, parameter):
         if cat not in ["S", "V", "P", "D", "R"]:
             print("Unkown command category: %s" %cat)
         else:
@@ -82,6 +85,10 @@ class LinearStage():
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
 
+    def send_sys_cmd(self,cmd):
+        self.ser.write(str.encode(cmd))
+        print("Sending command: ", cmd)
+        return
 #--------------------------------- Conversions ---------------------------------
 
     def stp_to_mm(self, stp):
@@ -94,19 +101,19 @@ class LinearStage():
 
     def set_velocity_mm(self, velocity_mm):
         self.velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
-        self.send_cmd("V", str(self.velocity_delay_micros))
+        self.send_motor_cmd("V", str(self.velocity_delay_micros))
         return
 
 
     def set_velocity_stp(self, velocity_stp):
         self.velocity_delay_micros = 1e6/velocity_stp
-        self.send_cmd("V", str(self.velocity_delay_micros))
+        self.send_motor_cmd("V", str(self.velocity_delay_micros))
         return
 
 
     def set_velocity_delay_micros(self, velocity_delay_micros):
         self.velocity_delay_micros = velocity_delay_micros
-        self.send_cmd("V", str(self.velocity_delay_micros))
+        self.send_motor_cmd("V", str(self.velocity_delay_micros))
         return
 
 
@@ -115,7 +122,7 @@ class LinearStage():
 
 
     def set_direction(self, direction):
-        self.send_cmd("D", str(direction))
+        self.send_motor_cmd("D", str(direction))
         return
 
 
@@ -131,14 +138,14 @@ class LinearStage():
         self.sent_pos_mm = pos_mm
         stp = self.mm_to_stp(pos_mm)
         self.sent_pos_stp = stp
-        self.send_cmd("S", abs(self.sent_pos_stp))
+        self.send_motor_cmd("S", abs(self.sent_pos_stp))
         return
 
 
     def move_stp(self, stp):
         self.sent_pos_stp = stp
         self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
-        self.send_cmd("S", abs(self.sent_pos_stp))
+        self.send_motor_cmd("S", abs(self.sent_pos_stp))
         return
 
 
