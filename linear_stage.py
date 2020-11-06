@@ -64,11 +64,11 @@ class LinearStage():
             line = line.decode("utf-8")
             if ";" in line:
                 data = line.split(";")
-                if len(data) == 3:
-                    self.loop_time, self.abs_pos_stp, self.velocity_delay_micros = float(data[0])*10**(-3), float(data[1]), float(data[2])
+                if len(data) == 5:
+                    self.loop_time, self.abs_pos_stp, steps_to_do, self.velocity_delay_micros, dir = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4])
                     self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
-                    data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
-                    return str(data_str)
+                    #data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
+                    return data
         except UnicodeDecodeError:
             print("Couldn't decode the serial input.")
         return line
@@ -99,19 +99,19 @@ class LinearStage():
 
     def set_velocity_mm(self, velocity_mm):
         self.velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
-        self.send_motor_cmd("V", str(self.velocity_delay_micros))
+        self.send_cmd("V", str(self.velocity_delay_micros))
         return
 
 
     def set_velocity_stp(self, velocity_stp):
         self.velocity_delay_micros = 1e6/velocity_stp
-        self.send_motor_cmd("V", str(self.velocity_delay_micros))
+        self.send_cmd("V", str(self.velocity_delay_micros))
         return
 
 
     def set_velocity_delay_micros(self, velocity_delay_micros):
         self.velocity_delay_micros = velocity_delay_micros
-        self.send_motor_cmd("V", str(self.velocity_delay_micros))
+        self.send_cmd("V", str(self.velocity_delay_micros))
         return
 
 
@@ -120,7 +120,7 @@ class LinearStage():
 
 
     def set_direction(self, direction):
-        self.send_motor_cmd("D", str(direction))
+        self.send_cmd("D", str(direction))
         return
 
 
@@ -136,14 +136,14 @@ class LinearStage():
         self.sent_pos_mm = pos_mm
         stp = self.mm_to_stp(pos_mm)
         self.sent_pos_stp = stp
-        self.send_motor_cmd("S", abs(self.sent_pos_stp))
+        self.send_cmd("S", abs(self.sent_pos_stp))
         return
 
 
     def move_stp(self, stp):
         self.sent_pos_stp = stp
         self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
-        self.send_motor_cmd("S", abs(self.sent_pos_stp))
+        self.send_cmd("S", abs(self.sent_pos_stp))
         return
 
 

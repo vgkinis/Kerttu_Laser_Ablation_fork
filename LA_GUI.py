@@ -14,15 +14,15 @@ class WorkerThread(QThread):
         QThread.__init__(self)
 
     def run(self):
-        """ls = LinearStage(json_path="linear_stage.json")
+        ls = LinearStage(json_path="linear_stage.json")
         ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
         serial_port = "/dev/" + port_name
-        ls.start_serial(serial_port)"""
+        ls.start_serial(serial_port)
         # time.sleep(2)
         while True:
-            #print(ls.serial_read())
+            print(ls.serial_read())
             t_now = datetime.now()
             self.motor_signals.emit(float(t_now.hour), float(t_now.minute), int(t_now.second))
 
@@ -98,6 +98,7 @@ class App(QWidget):
         self.comboBoxSpd.addItem("mm/s")
         self.comboBoxSpd.addItem("steps/s")
         self.comboBoxSpd.addItem("rev/s")
+        self.comboBoxSpd.addItem("us/rev")
         self.comboBoxSpd.setGeometry(QRect(x_coords[1], y_coords[5], 88, 34))
 
 

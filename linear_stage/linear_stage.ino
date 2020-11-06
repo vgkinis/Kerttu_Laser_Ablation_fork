@@ -52,7 +52,11 @@ void serial_write(){
     Serial.print(";");
     Serial.print(abs_pos);
     Serial.print(";");
+    Serial.print(steps_to_do);
+    Serial.print(";");
     Serial.print(velocity_delay_micros);
+    Serial.print(";");
+    Serial.print(direction);
   }
 }
 
