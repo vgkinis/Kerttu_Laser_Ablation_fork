@@ -14,16 +14,16 @@ class WorkerThread(QThread):
         QThread.__init__(self)
 
     def run(self):
-        ls = LinearStage(json_path="linear_stage.json")
-        ls.read_json()
+        self.ls = LinearStage(json_path="linear_stage.json")
+        self.ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
         serial_port = "/dev/" + port_name
-        ls.start_serial(serial_port)
+        self.ls.start_serial(serial_port)
         # time.sleep(2)
         while True:
             try:
-                data_dict = ls.serial_read()
+                data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
                 continue
@@ -31,10 +31,18 @@ class WorkerThread(QThread):
             #t_now = datetime.now()
             #self.motor_signals.emit(float(t_now.hour), float(t_now.minute), int(t_now.second))
 
-    def check_inputs(self, val, unit):
-        print(val.toPlainText())
+    def set_spd(self, val, unit):
+        print("spd", val.toPlainText())
         print(unit.currentText())
+        self.ls.set_speed(val, unit)
 
+    def move_dis(self, val, unit):
+        print("dis", val.toPlainText())
+        print(unit.currentText())
+        #self.ls.
+
+    def set_dir(self, val):
+        print("direction", val)
 
     def stop(self):
         #self.ser.close()
@@ -111,17 +119,16 @@ class App(QWidget):
         self.comboBoxSpdFb.setGeometry(QRect(x_coords[4], y_coords[5], 88, 34))
 
 
-        self.pushButtonPos = QPushButton('Send', self)
+        self.pushButtonPos = QPushButton('Move', self)
         self.pushButtonPos.setGeometry(QRect(x_coords[2], y_coords[1], 88, 34))
-        #self.pushButtonPos.clicked.connect(functools.partial(self.check_inputs, 1))
 
-        self.pushButtonDis = QPushButton('Send', self)
+        self.pushButtonDis = QPushButton('Move', self)
         self.pushButtonDis.setGeometry(QRect(x_coords[2], y_coords[3], 88, 34))
 
-        self.pushButtonSpd = QPushButton('Send', self)
+        self.pushButtonSpd = QPushButton('Set', self)
         self.pushButtonSpd.setGeometry(QRect(x_coords[2], y_coords[5], 88, 34))
 
-        self.pushButtonDir = QPushButton('Send', self)
+        self.pushButtonDir = QPushButton('Set', self)
         self.pushButtonDir.setGeometry(QRect(x_coords[2], y_coords[7], 88, 34))
 
         self.pushButtonP = QPushButton('Pause', self)
@@ -149,7 +156,9 @@ class App(QWidget):
         self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
-        self.pushButtonDis.clicked.connect(functools.partial(self.wt.check_inputs, self.textEditDis, self.comboBoxDis))
+        self.pushButtonSpd.clicked.connect(functools.partial(self.wt.set_spd, self.textEditSpd, self.comboBoxSpd))
+        self.pushButtonDir.clicked.connect(functools.partial(self.wt.set_dir, self.textEditDir))
+        self.pushButtonDis.clicked.connect(functools.partial(self.wt.move_dis, self.textEditDis, self.comboBoxDis))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 

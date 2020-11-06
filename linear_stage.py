@@ -101,27 +101,41 @@ class LinearStage():
 
 #--------------------------------- Conversions ---------------------------------
 
+    # Functions for distance
     def stp_to_mm(self, stp):
         return int((self.thread_pitch*stp)/self.stp_per_rev)
-
-    def stp_to_rev(self, stp):
-        return int(stp/self.stp_per_rev)
 
     def mm_to_stp(self, mm):
         return int((mm * self.stp_per_rev)/self.thread_pitch)
 
+    def stp_to_rev(self, stp):
+        return int(stp/self.stp_per_rev)
+
+    def rev_to_stp(self, rev):
+        return int(rev*self.stp_per_rev)
+
+    # Functions for speed
     def us_stp_to_mm_s(self, us_stp):
         return self.us_stp_to_rev_s(us_stp)*self.thread_pitch
 
+    def mm_s_to_us_stp(self, mm_s):
+        return 1e6/((mm_s*self.stp_per_rev)/self.thread_pitch)
+
     def us_stp_to_stp_s(self, us_stp):
-        return 1/(us_stp*10**(-6))
+        return 1/(us_stp*1e-6)
+
+    def stp_s_to_us_stp(self, stp_s):
+        return 1e6/stp_s
 
     def us_stp_to_rev_s(self, us_stp):
         return self.us_stp_to_stp_s(us_stp)/self.stp_per_rev
 
+    def rev_s_to_us_stp(self, rev_s):
+        return 1e6/(self.thread_pitch*self.stp_per_rev)
+
 #--------------------------------- Set & Get -----------------------------------
 
-    def set_velocity_mm(self, velocity_mm):
+    """def set_velocity_mm(self, velocity_mm):
         velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
         self.send_cmd("V", str(velocity_delay_micros))
         return
@@ -134,17 +148,40 @@ class LinearStage():
 
 
     def set_velocity_delay_micros(self, velocity_delay_micros):
-        velocity_delay_micros = velocity_delay_micros
         self.send_cmd("V", str(velocity_delay_micros))
+        return"""
+
+    def set_speed(self, spd, unit):
+        if unit == "us/step":
+            print("V", str(spd))
+        elif unit == "step/s":
+            print("V", str(stp_s_to_us_stp(spd)))
+        elif unit == "mm/s":
+            print("V", str(mm_s_to_us_stp(spd)))
+        elif unit == "rev/s":
+            print("V", str(rev_s_to_us_stp(spd)))
+
+    def move_dis(self, dis, unit):
+        if unit == "stp":
+            self.sent_pos_stp = dis
+            self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
+            self.send_cmd("S", abs(self.sent_pos_stp))
+        elif unit == "mm":
+            self.sent_pos_mm = dis
+            stp = self.mm_to_stp(dis)
+            self.sent_pos_stp = stp
+            self.send_cmd("S", abs(self.sent_pos_stp))
+        elif unit == "rev":
+            self.sent_pos_stp = rev_to_stp(dis)
+            self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
+            self.send_cmd("S", abs(self.sent_pos_stp))
+
+    def set_direction(self, direction):
+        self.send_cmd("D", str(direction))
         return
 
 
     def get_velocity(self):
-        return
-
-
-    def set_direction(self, direction):
-        self.send_cmd("D", str(direction))
         return
 
 
@@ -156,7 +193,7 @@ class LinearStage():
         return
 
 
-    def move_mm(self, pos_mm):
+    """def move_mm(self, pos_mm):
         self.sent_pos_mm = pos_mm
         stp = self.mm_to_stp(pos_mm)
         self.sent_pos_stp = stp
@@ -168,7 +205,7 @@ class LinearStage():
         self.sent_pos_stp = stp
         self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
         self.send_cmd("S", abs(self.sent_pos_stp))
-        return
+        return"""
 
 
     def reset_position(self):
