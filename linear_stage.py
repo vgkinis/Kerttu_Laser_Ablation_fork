@@ -16,7 +16,6 @@ class LinearStage():
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
         self.json_path = json_path
-        self.velocity_delay_micros = None
         self.ser = serial.Serial()
         self.loop_time = None
 
@@ -29,7 +28,6 @@ class LinearStage():
         self.last_abs_pos_stp = 0
         self.last_abs_pos_mm = 0
 
-        self.direction = 1
         return
 
 
@@ -65,13 +63,13 @@ class LinearStage():
             if ";" in line:
                 data = line.split(";")
                 if len(data) == 5:
-                    self.loop_time, self.abs_pos_stp, steps_to_do, self.velocity_delay_micros, dir = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4])
+                    self.loop_time, self.abs_pos_stp, steps_to_do, velocity_delay_micros, direction = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4])
                     self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
-                    #data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(self.velocity_delay_micros), "us"
+                    #data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(velocity_delay_micros), "us"
                     return data
         except UnicodeDecodeError:
             print("Couldn't decode the serial input.")
-        return line
+            return None
 
     def send_cmd(self, cat, parameter):
         """ Sends a command for one of the following categories: S - steps,
@@ -98,20 +96,20 @@ class LinearStage():
 #--------------------------------- Set & Get -----------------------------------
 
     def set_velocity_mm(self, velocity_mm):
-        self.velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
-        self.send_cmd("V", str(self.velocity_delay_micros))
+        velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
+        self.send_cmd("V", str(velocity_delay_micros))
         return
 
 
     def set_velocity_stp(self, velocity_stp):
-        self.velocity_delay_micros = 1e6/velocity_stp
-        self.send_cmd("V", str(self.velocity_delay_micros))
+        velocity_delay_micros = 1e6/velocity_stp
+        self.send_cmd("V", str(velocity_delay_micros))
         return
 
 
     def set_velocity_delay_micros(self, velocity_delay_micros):
-        self.velocity_delay_micros = velocity_delay_micros
-        self.send_cmd("V", str(self.velocity_delay_micros))
+        velocity_delay_micros = velocity_delay_micros
+        self.send_cmd("V", str(velocity_delay_micros))
         return
 
 

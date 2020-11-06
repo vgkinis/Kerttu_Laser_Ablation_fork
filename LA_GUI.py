@@ -9,7 +9,7 @@ from linear_stage import LinearStage
 from serial.tools import list_ports
 
 class WorkerThread(QThread):
-    motor_signals = pyqtSignal(float, float, int, name='motor_signals')
+    motor_signals = pyqtSignal(float, float, float, int, name='motor_signals')
     def __init__(self, parent=None):
         QThread.__init__(self)
 
@@ -22,9 +22,14 @@ class WorkerThread(QThread):
         ls.start_serial(serial_port)
         # time.sleep(2)
         while True:
-            print(ls.serial_read())
-            t_now = datetime.now()
-            self.motor_signals.emit(float(t_now.hour), float(t_now.minute), int(t_now.second))
+            try:
+                loop_time, abs_pos_stp, steps_to_do, velocity_delay_micros, direction = ls.serial_read()
+                self.motor_signals.emit(float(abs_pos_stp), float(steps_to_do), float(velocity_delay_micros), int(direction))
+            except:
+                continue
+
+            #t_now = datetime.now()
+            #self.motor_signals.emit(float(t_now.hour), float(t_now.minute), int(t_now.second))
 
     def check_inputs(self, val, unit):
         print(val.toPlainText())
@@ -44,13 +49,13 @@ class App(QWidget):
         self.title='Motor control'
         self.left=10
         self.top=10
-        self.width=640
+        self.width=700
         self.height=600
         self.initUI()
 
 
     def initUI(self):
-        x_coords = [40, 160, 280, 420]
+        x_coords = [40, 160, 280, 420, 550]
         y_coords = [30, 70, 130, 170, 230, 270, 340, 380, 450, 490]
 
         self.setWindowTitle(self.title)
@@ -82,24 +87,28 @@ class App(QWidget):
 
 
         self.comboBoxPos = QComboBox(self)
-        self.comboBoxPos.addItem("mm")
-        self.comboBoxPos.addItem("steps")
-        self.comboBoxPos.addItem("rev")
+        self.comboBoxPos.addItems(["mm", "steps", "rev"])
         self.comboBoxPos.setGeometry(QRect(x_coords[1], y_coords[1], 88, 34))
 
         self.comboBoxDis = QComboBox(self)
-        self.comboBoxDis.addItem("mm")
-        self.comboBoxDis.addItem("steps")
-        self.comboBoxDis.addItem("rev")
+        self.comboBoxDis.addItems(["mm", "steps", "rev"])
         self.comboBoxDis.setGeometry(QRect(x_coords[1], y_coords[3], 88, 34))
 
-
         self.comboBoxSpd = QComboBox(self)
-        self.comboBoxSpd.addItem("mm/s")
-        self.comboBoxSpd.addItem("steps/s")
-        self.comboBoxSpd.addItem("rev/s")
-        self.comboBoxSpd.addItem("us/rev")
+        self.comboBoxSpd.addItems(["mm/s", "steps/s", "rev/s", "us/rev"])
         self.comboBoxSpd.setGeometry(QRect(x_coords[1], y_coords[5], 88, 34))
+
+        self.comboBoxPosFb = QComboBox(self)
+        self.comboBoxPosFb.addItems(["mm", "steps", "rev"])
+        self.comboBoxPosFb.setGeometry(QRect(x_coords[4], y_coords[1], 88, 34))
+
+        self.comboBoxDisFb = QComboBox(self)
+        self.comboBoxDisFb.addItems(["mm", "steps", "rev"])
+        self.comboBoxDisFb.setGeometry(QRect(x_coords[4], y_coords[3], 88, 34))
+
+        self.comboBoxSpdFb = QComboBox(self)
+        self.comboBoxSpdFb.addItems(["mm/s", "steps/s", "rev/s", "us/rev"])
+        self.comboBoxSpdFb.setGeometry(QRect(x_coords[4], y_coords[5], 88, 34))
 
 
         self.pushButtonPos = QPushButton('Send', self)
@@ -145,9 +154,10 @@ class App(QWidget):
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
 
-    def slot_method(self, pos, speed, direction):
+    def slot_method(self, pos, dis, spd, direction):
         self.lcdNumberPos.display(pos)
-        self.lcdNumberSpd.display(speed)
+        self.lcdNumberDis.display(dis)
+        self.lcdNumberSpd.display(spd)
         self.lcdNumberDir.display(direction)
 
 
