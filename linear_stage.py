@@ -85,9 +85,10 @@ class LinearStage():
             print("Couldn't decode the serial input.")
             return "Error"
 
-    def send_cmd(self, cat, parameter):
+    def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
-        V - velocity, P - position, D - direction, R - reset, H - halt"""
+        V - velocity (speed), P - position, D - direction, R - reset,
+        H - halt (pause)"""
         if cat not in ["S", "V", "P", "D", "R", "H"]:
             print("Unkown command category: %s" %cat)
         else:
@@ -183,7 +184,6 @@ class LinearStage():
 
     def set_dir(self, direction):
         self.send_cmd("D", str(direction))
-        return
 
 
     def get_velocity(self):
@@ -198,10 +198,13 @@ class LinearStage():
         return
 
 
-    def reset_position(self):
-        return
+    def reset_sys(self):
+        self.send_cmd("R")
 
-    def check_if_ready(self):
+    def pause_system(self):
+        self.send_cmd("H")
+
+    """def check_if_ready(self):
         if self.sent_pos_mm == None and self.sent_pos_stp == None:
             print("Ready! No positions have been sent.")
             return True
@@ -214,7 +217,7 @@ class LinearStage():
             print("Ready! Position reached.")
             return True
         else:
-            return False
+            return False"""
 
 
 #--------------------------------- if __main__ ---------------------------------

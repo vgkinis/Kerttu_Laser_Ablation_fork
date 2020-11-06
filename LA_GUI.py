@@ -41,6 +41,12 @@ class WorkerThread(QThread):
     def set_dir(self, val):
         self.ls.set_dir(val.toPlainText())
 
+    def reset_sys(self):
+        self.ls.reset_sys()
+
+    def pause_sys(self):
+        self.ls.pause_sys()
+
     def stop(self):
         #self.ser.close()
         print("stop")
@@ -128,11 +134,11 @@ class App(QWidget):
         self.pushButtonDir = QPushButton('Set', self)
         self.pushButtonDir.setGeometry(QRect(x_coords[2], y_coords[7], 88, 34))
 
-        self.pushButtonP = QPushButton('Pause', self)
-        self.pushButtonP.setGeometry(QRect(x_coords[0], y_coords[9], 88, 34))
+        #self.pushButtonP = QPushButton('Pause', self)
+        #self.pushButtonP.setGeometry(QRect(x_coords[0], y_coords[9], 88, 34))
 
         self.pushButtonR = QPushButton('Reset', self)
-        self.pushButtonR.setGeometry(QRect(x_coords[1], y_coords[9], 88, 34))
+        self.pushButtonR.setGeometry(QRect(x_coords[4], y_coords[9], 88, 34))
 
         self.lcdNumberPos = QLCDNumber(self)
         self.lcdNumberPos.setGeometry(QRect(x_coords[3], y_coords[1],  100, 34))
@@ -157,6 +163,8 @@ class App(QWidget):
         self.pushButtonSpd.clicked.connect(functools.partial(self.wt.set_spd, self.textEditSpd, self.comboBoxSpd))
         self.pushButtonDir.clicked.connect(functools.partial(self.wt.set_dir, self.textEditDir))
         self.pushButtonDis.clicked.connect(functools.partial(self.wt.move_dis, self.textEditDis, self.comboBoxDis))
+        self.pushButtonR.clicked.connect(functools.partial(self.wt.reset_sys))
+        #self.pushButtonP.clicked.connect(functools.partial(self.wt.pause_sys))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
