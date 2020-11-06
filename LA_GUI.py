@@ -9,7 +9,7 @@ from linear_stage import LinearStage
 from serial.tools import list_ports
 
 class WorkerThread(QThread):
-    motor_signals = pyqtSignal(float, float, float, int, name='motor_signals')
+    motor_signals = pyqtSignal(dict, name='motor_signals')
     def __init__(self, parent=None):
         QThread.__init__(self)
 
@@ -23,8 +23,8 @@ class WorkerThread(QThread):
         # time.sleep(2)
         while True:
             try:
-                loop_time, abs_pos_stp, steps_to_do, velocity_delay_micros, direction = ls.serial_read()
-                self.motor_signals.emit(float(abs_pos_stp), float(steps_to_do), float(velocity_delay_micros), int(direction))
+                data_dict = ls.serial_read()
+                self.motor_signals.emit(data_dict)
             except:
                 continue
 
@@ -95,7 +95,7 @@ class App(QWidget):
         self.comboBoxDis.setGeometry(QRect(x_coords[1], y_coords[3], 88, 34))
 
         self.comboBoxSpd = QComboBox(self)
-        self.comboBoxSpd.addItems(["mm/s", "steps/s", "rev/s", "us/rev"])
+        self.comboBoxSpd.addItems(["mm/s", "step/s", "rev/s", "us/step"])
         self.comboBoxSpd.setGeometry(QRect(x_coords[1], y_coords[5], 88, 34))
 
         self.comboBoxPosFb = QComboBox(self)
@@ -107,7 +107,7 @@ class App(QWidget):
         self.comboBoxDisFb.setGeometry(QRect(x_coords[4], y_coords[3], 88, 34))
 
         self.comboBoxSpdFb = QComboBox(self)
-        self.comboBoxSpdFb.addItems(["mm/s", "steps/s", "rev/s", "us/rev"])
+        self.comboBoxSpdFb.addItems(["mm/s", "step/s", "rev/s", "us/step"])
         self.comboBoxSpdFb.setGeometry(QRect(x_coords[4], y_coords[5], 88, 34))
 
 
@@ -154,11 +154,11 @@ class App(QWidget):
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
 
-    def slot_method(self, pos, dis, spd, direction):
-        self.lcdNumberPos.display(pos)
-        self.lcdNumberDis.display(dis)
-        self.lcdNumberSpd.display(spd)
-        self.lcdNumberDir.display(direction)
+    def slot_method(self, data_dict):
+        self.lcdNumberPos.display(data_dict["pos_" + self.comboBoxPosFb.currentText()])
+        self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
+        self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
+        self.lcdNumberDir.display(data_dict["direction"])
 
 
 
