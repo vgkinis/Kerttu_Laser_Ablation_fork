@@ -71,7 +71,7 @@ void categorize_cmd(String serial_string){
     pause_system();
   }
   else if (serial_string.startsWith("D")){
-    int serial_direction = serial_string.substring(1, index_r).toInt();
+    long serial_direction = serial_string.substring(1, index_r).toInt();
     set_direction(serial_direction);
   }
   else if (serial_string.startsWith("V")){
@@ -132,7 +132,7 @@ void n_steps() {
         step_time = micros();
         single_step();
         steps_to_do--;
-        abs_pos += abs_pos*direction;
+        abs_pos += direction;
       }
     }
   }

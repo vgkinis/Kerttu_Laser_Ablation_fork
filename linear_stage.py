@@ -135,33 +135,19 @@ class LinearStage():
 
 #--------------------------------- Set & Get -----------------------------------
 
-    """def set_velocity_mm(self, velocity_mm):
-        velocity_delay_micros = 1e6/((velocity_mm*self.stp_per_rev)/self.thread_pitch)
-        self.send_cmd("V", str(velocity_delay_micros))
-        return
-
-
-    def set_velocity_stp(self, velocity_stp):
-        velocity_delay_micros = 1e6/velocity_stp
-        self.send_cmd("V", str(velocity_delay_micros))
-        return
-
-
-    def set_velocity_delay_micros(self, velocity_delay_micros):
-        self.send_cmd("V", str(velocity_delay_micros))
-        return"""
-
     def set_speed(self, spd, unit):
+        spd = float(spd)
         if unit == "us/step":
-            print("V", str(spd))
+            self.send_cmd("V", str(spd))
         elif unit == "step/s":
-            print("V", str(stp_s_to_us_stp(spd)))
+            self.send_cmd("V", str(self.stp_s_to_us_stp(spd)))
         elif unit == "mm/s":
-            print("V", str(mm_s_to_us_stp(spd)))
+            self.send_cmd("V", str(self.mm_s_to_us_stp(spd)))
         elif unit == "rev/s":
-            print("V", str(rev_s_to_us_stp(spd)))
+            self.send_cmd("V", str(self.rev_s_to_us_stp(spd)))
 
     def move_dis(self, dis, unit):
+        dis = float(dis)
         if unit == "stp":
             self.sent_pos_stp = dis
             self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
@@ -176,7 +162,7 @@ class LinearStage():
             self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
             self.send_cmd("S", abs(self.sent_pos_stp))
 
-    def set_direction(self, direction):
+    def set_dir(self, direction):
         self.send_cmd("D", str(direction))
         return
 
@@ -191,21 +177,6 @@ class LinearStage():
 
     def get_current_position(self):
         return
-
-
-    """def move_mm(self, pos_mm):
-        self.sent_pos_mm = pos_mm
-        stp = self.mm_to_stp(pos_mm)
-        self.sent_pos_stp = stp
-        self.send_cmd("S", abs(self.sent_pos_stp))
-        return
-
-
-    def move_stp(self, stp):
-        self.sent_pos_stp = stp
-        self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
-        self.send_cmd("S", abs(self.sent_pos_stp))
-        return"""
 
 
     def reset_position(self):

@@ -28,21 +28,15 @@ class WorkerThread(QThread):
             except:
                 continue
 
-            #t_now = datetime.now()
-            #self.motor_signals.emit(float(t_now.hour), float(t_now.minute), int(t_now.second))
 
     def set_spd(self, val, unit):
-        print("spd", val.toPlainText())
-        print(unit.currentText())
-        self.ls.set_speed(val, unit)
+        self.ls.set_speed(val.toPlainText(), unit.currentText())
 
     def move_dis(self, val, unit):
-        print("dis", val.toPlainText())
-        print(unit.currentText())
-        #self.ls.
+        self.ls.move_dis(val.toPlainText(), unit.currentText())
 
     def set_dir(self, val):
-        print("direction", val)
+        self.ls.set_dir(val.toPlainText())
 
     def stop(self):
         #self.ser.close()
