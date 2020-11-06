@@ -5,22 +5,36 @@ import functools
 import sys
 from general_functions import *
 from datetime import datetime
+from linear_stage import LinearStage
+from serial.tools import list_ports
 
 class WorkerThread(QThread):
     motor_signals = pyqtSignal(float, float, int, name='motor_signals')
     def __init__(self, parent=None):
         QThread.__init__(self)
-        
+
     def run(self):
+        """ls = LinearStage(json_path="linear_stage.json")
+        ls.read_json()
+        ports = (list(list_ports.comports()))
+        port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
+        serial_port = "/dev/" + port_name
+        ls.start_serial(serial_port)"""
+        # time.sleep(2)
         while True:
+            #print(ls.serial_read())
             t_now = datetime.now()
             self.motor_signals.emit(float(t_now.hour), float(t_now.minute), int(t_now.second))
-            
-        
+
+    def check_inputs(self, val, unit):
+        print(val.toPlainText())
+        print(unit.currentText())
+
+
     def stop(self):
         #self.ser.close()
         print("stop")
-        self.terminate()    
+        self.terminate()
 
 
 
@@ -33,96 +47,110 @@ class App(QWidget):
         self.width=640
         self.height=600
         self.initUI()
-        
-        
+
+
     def initUI(self):
         x_coords = [40, 160, 280, 420]
         y_coords = [30, 70, 130, 170, 230, 270, 340, 380, 450, 490]
-        
+
         self.setWindowTitle(self.title)
         self.setGeometry(self.left,self.top,self.width,self.height)
-        
-        self.label1 = QLabel('Absolute position', self)
-        self.label1.setGeometry(QRect(x_coords[0], y_coords[0], 111, 34))
-        
-        self.label2 = QLabel('Speed', self)
-        self.label2.setGeometry(QRect(x_coords[0], y_coords[2], 111, 34))
-        
-        self.label3 = QLabel('Direction', self)
-        self.label3.setGeometry(QRect(x_coords[0], y_coords[4], 111, 34))
-        
-        self.textEdit1 = QTextEdit(self)
-        self.textEdit1.setGeometry(QRect(x_coords[0], y_coords[1], 88, 34))
-        
-        self.textEdit2 = QTextEdit(self)
-        self.textEdit2.setGeometry(QRect(x_coords[0], y_coords[3], 88, 34))
-        
-        self.textEdit3 = QTextEdit(self)
-        self.textEdit3.setGeometry(QRect(x_coords[0], y_coords[5], 88, 34))
-        
-        
-        self.comboBox1 = QComboBox(self)
-        self.comboBox1.addItem("mm")
-        self.comboBox1.addItem("steps")
-        self.comboBox1.addItem("rev")
-        self.comboBox1.setGeometry(QRect(x_coords[1], y_coords[1], 88, 34))
-        
-        
-        self.comboBox2 = QComboBox(self)
-        self.comboBox2.addItem("mm/s")
-        self.comboBox2.addItem("steps/s")
-        self.comboBox2.addItem("rev/s")
-        self.comboBox2.setGeometry(QRect(x_coords[1], y_coords[3], 88, 34))
-        
-        
-        self.pushButton_1 = QPushButton('Send', self)
-        self.pushButton_1.setGeometry(QRect(x_coords[2], y_coords[1], 88, 34))
-        #self.pushButton_1.clicked.connect(functools.partial(self.check_inputs, 1))
-        
-        self.pushButton_2 = QPushButton('Send', self)
-        self.pushButton_2.setGeometry(QRect(x_coords[2], y_coords[3], 88, 34))
-        #self.pushButton_2.clicked.connect(functools.partial(self.check_inputs, 2))
-        
-        self.pushButton_3 = QPushButton('Send', self)
-        self.pushButton_3.setGeometry(QRect(x_coords[2], y_coords[5], 88, 34))
-        #self.pushButton_3.clicked.connect(functools.partial(self.check_inputs, 3))
-        
-        self.pushButton_4 = QPushButton('Pause', self)
-        self.pushButton_4.setGeometry(QRect(x_coords[0], y_coords[9], 88, 34))
-        
-        self.pushButton_5 = QPushButton('Reset', self)
-        self.pushButton_5.setGeometry(QRect(x_coords[1], y_coords[9], 88, 34))
-        
-        self.lcdNumber1 = QLCDNumber(self)
-        self.lcdNumber1.setGeometry(QRect(x_coords[3], y_coords[1],  100, 34))
-        set_lcd_style(self.lcdNumber1)
-        
-        self.lcdNumber2 = QLCDNumber(self)
-        self.lcdNumber2.setGeometry(QRect(x_coords[3], y_coords[3],  100, 34))
-        set_lcd_style(self.lcdNumber2)
-        
-        self.lcdNumber3 = QLCDNumber(self)
-        self.lcdNumber3.setGeometry(QRect(x_coords[3], y_coords[5],  100, 34))
-        set_lcd_style(self.lcdNumber3)
-      
+
+        self.labelPos = QLabel('Absolute position', self)
+        self.labelPos.setGeometry(QRect(x_coords[0], y_coords[0], 111, 34))
+
+        self.labelDis = QLabel('Distance', self)
+        self.labelDis.setGeometry(QRect(x_coords[0], y_coords[2], 111, 34))
+
+        self.labelSpd = QLabel('Speed', self)
+        self.labelSpd.setGeometry(QRect(x_coords[0], y_coords[4], 111, 34))
+
+        self.labelDir = QLabel('Direction', self)
+        self.labelDir.setGeometry(QRect(x_coords[0], y_coords[6], 111, 34))
+
+        self.textEditPos = QTextEdit(self)
+        self.textEditPos.setGeometry(QRect(x_coords[0], y_coords[1], 88, 34))
+
+        self.textEditDis = QTextEdit(self)
+        self.textEditDis.setGeometry(QRect(x_coords[0], y_coords[3], 88, 34))
+
+        self.textEditSpd = QTextEdit(self)
+        self.textEditSpd.setGeometry(QRect(x_coords[0], y_coords[5], 88, 34))
+
+        self.textEditDir = QTextEdit(self)
+        self.textEditDir.setGeometry(QRect(x_coords[0], y_coords[7], 88, 34))
+
+
+        self.comboBoxPos = QComboBox(self)
+        self.comboBoxPos.addItem("mm")
+        self.comboBoxPos.addItem("steps")
+        self.comboBoxPos.addItem("rev")
+        self.comboBoxPos.setGeometry(QRect(x_coords[1], y_coords[1], 88, 34))
+
+        self.comboBoxDis = QComboBox(self)
+        self.comboBoxDis.addItem("mm")
+        self.comboBoxDis.addItem("steps")
+        self.comboBoxDis.addItem("rev")
+        self.comboBoxDis.setGeometry(QRect(x_coords[1], y_coords[3], 88, 34))
+
+
+        self.comboBoxSpd = QComboBox(self)
+        self.comboBoxSpd.addItem("mm/s")
+        self.comboBoxSpd.addItem("steps/s")
+        self.comboBoxSpd.addItem("rev/s")
+        self.comboBoxSpd.setGeometry(QRect(x_coords[1], y_coords[5], 88, 34))
+
+
+        self.pushButtonPos = QPushButton('Send', self)
+        self.pushButtonPos.setGeometry(QRect(x_coords[2], y_coords[1], 88, 34))
+        #self.pushButtonPos.clicked.connect(functools.partial(self.check_inputs, 1))
+
+        self.pushButtonDis = QPushButton('Send', self)
+        self.pushButtonDis.setGeometry(QRect(x_coords[2], y_coords[3], 88, 34))
+
+        self.pushButtonSpd = QPushButton('Send', self)
+        self.pushButtonSpd.setGeometry(QRect(x_coords[2], y_coords[5], 88, 34))
+
+        self.pushButtonDir = QPushButton('Send', self)
+        self.pushButtonDir.setGeometry(QRect(x_coords[2], y_coords[7], 88, 34))
+
+        self.pushButtonP = QPushButton('Pause', self)
+        self.pushButtonP.setGeometry(QRect(x_coords[0], y_coords[9], 88, 34))
+
+        self.pushButtonR = QPushButton('Reset', self)
+        self.pushButtonR.setGeometry(QRect(x_coords[1], y_coords[9], 88, 34))
+
+        self.lcdNumberPos = QLCDNumber(self)
+        self.lcdNumberPos.setGeometry(QRect(x_coords[3], y_coords[1],  100, 34))
+        set_lcd_style(self.lcdNumberPos)
+
+        self.lcdNumberDis = QLCDNumber(self)
+        self.lcdNumberDis.setGeometry(QRect(x_coords[3], y_coords[3],  100, 34))
+        set_lcd_style(self.lcdNumberDis)
+
+        self.lcdNumberSpd = QLCDNumber(self)
+        self.lcdNumberSpd.setGeometry(QRect(x_coords[3], y_coords[5],  100, 34))
+        set_lcd_style(self.lcdNumberSpd)
+
+        self.lcdNumberDir = QLCDNumber(self)
+        self.lcdNumberDir.setGeometry(QRect(x_coords[3], y_coords[7],  100, 34))
+        set_lcd_style(self.lcdNumberDir)
+
         self.wt=WorkerThread() # This is the thread object
         self.wt.start()
-        self.wt.motor_signals.connect(self.slot_method) 
+        self.wt.motor_signals.connect(self.slot_method)
+        self.pushButtonDis.clicked.connect(functools.partial(self.wt.check_inputs, self.textEditDis, self.comboBoxDis))
+
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
-        
-        
-    def check_inputs(self, nr):
-        print(nr)
-        self.lcdNumber1.display(self.textEdit1.toPlainText())
-        
-        
+
+
     def slot_method(self, pos, speed, direction):
-        self.lcdNumber1.display(pos)
-        self.lcdNumber2.display(speed)
-        self.lcdNumber3.display(direction)
-        
-        
-        
+        self.lcdNumberPos.display(pos)
+        self.lcdNumberSpd.display(speed)
+        self.lcdNumberDir.display(direction)
+
+
+
 if __name__=='__main__':
     app=QApplication(sys.argv)
     ex=App()
