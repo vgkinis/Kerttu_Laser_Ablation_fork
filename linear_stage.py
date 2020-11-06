@@ -149,7 +149,7 @@ class LinearStage():
 
     def move_dis(self, dis, unit):
         dis = float(dis)
-        if unit == "stp":
+        if unit == "steps":
             self.sent_pos_stp = dis
             self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
             self.send_cmd("S", abs(self.sent_pos_stp))
@@ -165,7 +165,7 @@ class LinearStage():
 
     def move_pos(self, pos, unit):
         pos = float(pos)
-        if unit == "stp":
+        if unit == "steps":
             pos_stp = pos
         elif unit == "mm":
             pos_stp = self.mm_to_stp(pos)
@@ -179,7 +179,7 @@ class LinearStage():
             else:
                 self.set_dir(str(1))
             time.sleep(2)
-            self.move_dis(dis, "stp")
+            self.move_dis(dis, "steps")
 
 
     def set_dir(self, direction):

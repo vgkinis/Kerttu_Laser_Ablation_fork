@@ -153,5 +153,5 @@ void single_step() {
 void reset_pins()
 {
   digitalWrite(stp, LOW);
-  digitalWrite(dir, LOW);
+  digitalWrite(dir, HIGH);
 }
