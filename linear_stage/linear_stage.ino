@@ -27,7 +27,7 @@ void loop() {
   loop_time = millis();
   serial_read();
   n_steps();
-  serial_write();  
+  serial_write();
 }
 
 
@@ -37,16 +37,7 @@ void serial_read(){
     serial_read_time = loop_time;
     if (Serial.available() > 0){
       serial_string = Serial.readString();
-      if (serial_string == "STOP"){
-        stop_system();
-      }
-      else if (serial_string == "START") {
-        start_system();
-      }
-      else if (serial_string == "RESET"){
-        reset_system();
-      }
-      else if (serial_string.endsWith("r")) {
+      if (serial_string.endsWith("r")) {
         categorize_cmd(serial_string);
       }
     }
@@ -68,8 +59,14 @@ void serial_write(){
 
 void categorize_cmd(String serial_string){
   int index_r = serial_string.indexOf("r\n");
-  
-  if (serial_string.startsWith("D")){
+
+  if (serial_string.startsWith("R")){
+    reset_system();
+  }
+  else if (serial_string.startsWith("H")){
+    pause_system();
+  }
+  else if (serial_string.startsWith("D")){
     int serial_direction = serial_string.substring(1, index_r).toInt();
     set_direction(serial_direction);
   }
@@ -110,7 +107,7 @@ void set_steps_to_do(long serial_steps){
   steps_to_do = serial_steps;
 }
 
-void stop_system(){
+void pause_system(){
   system_available = false;
 }
 

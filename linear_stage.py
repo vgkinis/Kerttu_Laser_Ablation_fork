@@ -73,8 +73,10 @@ class LinearStage():
             print("Couldn't decode the serial input.")
         return line
 
-    def send_motor_cmd(self, cat, parameter):
-        if cat not in ["S", "V", "P", "D", "R"]:
+    def send_cmd(self, cat, parameter):
+        """ Sends a command for one of the following categories: S - steps,
+        V - velocity, P - position, D - direction, R - reset, H - halt"""
+        if cat not in ["S", "V", "P", "D", "R", "H"]:
             print("Unkown command category: %s" %cat)
         else:
             serial_cmd = cat + str(parameter) + "r"
@@ -85,10 +87,6 @@ class LinearStage():
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
 
-    def send_sys_cmd(self,cmd):
-        self.ser.write(str.encode(cmd))
-        print("Sending command: ", cmd)
-        return
 #--------------------------------- Conversions ---------------------------------
 
     def stp_to_mm(self, stp):
@@ -173,30 +171,8 @@ if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
     ports = (list(list_ports.comports()))
-    port_name = list(map(lambda p : p["ttyACM" in p.device], ports)) [0]
+    port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
     serial_port = "/dev/" + port_name
     ls.start_serial(serial_port)
     # time.sleep(2)
     ls.serial_read()
-
-    #ls.set_velocity_delay_micros(1000)
-    # time.sleep(2)
-    # while True:
-    #     if ls.check_if_ready():
-    #         usr_pos_mm = int(input("Enter the distance in mm:"))
-    #         if usr_pos_mm > 0:
-    #             if ls.direction != 1:
-    #                 ls.set_direction(1)
-    #                 ls.direction = 1
-    #                 time.sleep(2)
-    #         else:
-    #             if ls.direction != 0:
-    #                 ls.set_direction(0)
-    #                 ls.direction = 0
-    #                 time.sleep(2)
-    #         ls.sent_pos_mm = usr_pos_mm
-    #         ls.sent_pos_stp = ls.mm_to_stp(ls.sent_pos_mm)
-    #         ls.ser.flushInput()
-    #         ls.move_stp(ls.sent_pos_stp)
-    #     serial_data = ls.serial_read()
-    #     if serial_data: print(serial_data)
