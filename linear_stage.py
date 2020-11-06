@@ -162,6 +162,25 @@ class LinearStage():
             self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
             self.send_cmd("S", abs(self.sent_pos_stp))
 
+    def move_pos(self, pos, unit):
+        pos = float(pos)
+        if unit == "stp":
+            pos_stp = pos
+        elif unit == "mm":
+            pos_stp = self.mm_to_stp(pos)
+        elif unit == "rev":
+            pos_stp = self.rev_to_stp(pos)
+
+        if self.abs_pos_stp != pos_stp:
+            dis = abs(self.abs_pos_stp - pos_stp)
+            if pos_stp < self.abs_pos_stp:
+                self.set_dir(str(-1))
+            else:
+                self.set_dir(str(1))
+            time.sleep(2)
+            self.move_dis(dis, "stp")
+
+
     def set_dir(self, direction):
         self.send_cmd("D", str(direction))
         return

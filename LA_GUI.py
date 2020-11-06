@@ -35,6 +35,9 @@ class WorkerThread(QThread):
     def move_dis(self, val, unit):
         self.ls.move_dis(val.toPlainText(), unit.currentText())
 
+    def move_pos(self, val, unit):
+        self.ls.move_pos(val.toPlainText(), unit.currentText())
+
     def set_dir(self, val):
         self.ls.set_dir(val.toPlainText())
 
@@ -150,6 +153,7 @@ class App(QWidget):
         self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
+        self.pushButtonPos.clicked.connect(functools.partial(self.wt.move_pos, self.textEditPos, self.comboBoxPos))
         self.pushButtonSpd.clicked.connect(functools.partial(self.wt.set_spd, self.textEditSpd, self.comboBoxSpd))
         self.pushButtonDir.clicked.connect(functools.partial(self.wt.set_dir, self.textEditDir))
         self.pushButtonDis.clicked.connect(functools.partial(self.wt.move_dis, self.textEditDis, self.comboBoxDis))
