@@ -77,6 +77,9 @@ void categorize_cmd(String serial_string){
   else if (serial_string.startsWith("H")){
     pause_system();
   }
+  else if (serial_string.startsWith("C")){
+    calibrate_system();
+  }
   else if (serial_string.startsWith("D")){
     long serial_direction = serial_string.substring(1, index_r).toInt();
     set_direction(serial_direction);
@@ -119,7 +122,11 @@ void set_steps_to_do(long serial_steps){
   steps_to_do = serial_steps;
 }
 
-// ---------------- Reset/Pause/Start ----------------
+// ---------------- Calibrate/Reset/Pause/Start ----------------
+
+void calibrate_system(){
+  
+}
 
 void pause_system(){
   system_available = false;

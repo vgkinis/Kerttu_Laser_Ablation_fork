@@ -88,8 +88,8 @@ class LinearStage():
     def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
         V - velocity (speed), P - position, D - direction, R - reset,
-        H - halt (pause)"""
-        if cat not in ["S", "V", "P", "D", "R", "H"]:
+        H - halt (pause), C - calibrate"""
+        if cat not in ["S", "V", "P", "D", "R", "H", "C"]:
             print("Unkown command category: %s" %cat)
         else:
             serial_cmd = cat + str(parameter) + "r"
@@ -196,6 +196,10 @@ class LinearStage():
 
     def get_current_position(self):
         return
+
+
+    def calibrate_sys(self):
+        self.send_cmd("C")
 
 
     def reset_sys(self):
