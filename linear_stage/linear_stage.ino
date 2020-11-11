@@ -78,19 +78,28 @@ void categorize_cmd(String serial_string){
     pause_system();
   }
   else if (serial_string.startsWith("C")){
-    calibrate_system();
+    // Can't calibrate while motor is moving.
+    if (steps_to_do == 0){
+      calibrate_system();
+    }
   }
   else if (serial_string.startsWith("D")){
-    long serial_direction = serial_string.substring(1, index_r).toInt();
-    set_direction(serial_direction);
+    // Direction can't be changed while motor is moving.
+    if (steps_to_do == 0){
+      long serial_direction = serial_string.substring(1, index_r).toInt();
+      set_direction(serial_direction);
+    }
   }
   else if (serial_string.startsWith("V")){
     int serial_velocity = serial_string.substring(1, index_r).toInt();
     set_velocity(serial_velocity);
   }
   else if (serial_string.startsWith("S")){
-    long serial_steps = atol(serial_string.substring(1, index_r).c_str());
-    set_steps_to_do(serial_steps);
+    // Variable steps_to_do can't be changed while motor is moving.
+    if (steps_to_do == 0) {
+      long serial_steps = atol(serial_string.substring(1, index_r).c_str());
+      set_steps_to_do(serial_steps);
+    }
   }
 }
 
