@@ -16,7 +16,8 @@ bool calib_endstop_reached = false;
 long range_of_motion_stp = 0;
 
 unsigned long step_time = micros();
-unsigned long velocity_delay_micros = 1000;
+unsigned long velocity1 = 1000;
+unsigned long velocity_delay_micros = velocity1;
 int direction = 1;
 long abs_pos = 0;
 long steps_to_do = 0;
@@ -37,11 +38,10 @@ void loop() {
   serial_read();
   n_steps();
   serial_write();
+  
   if (calib_endstop_reached == true){
     if (steps_to_do == 0){
-      abs_pos = 0;
-      calibrating = false; 
-      calib_endstop_reached = false;
+      end_calibration();
     }
   }
 }
@@ -151,6 +151,14 @@ void start_calibration(){
   set_steps_to_do(range_of_motion_stp);
 }
 
+void end_calibration(){
+  abs_pos = 0;
+  set_velocity(velocity1);
+  set_direction(1);
+  calibrating = false; 
+  calib_endstop_reached = false;
+}
+
 void reset_system(){
   system_available = true;
   set_steps_to_do(0);
@@ -204,7 +212,7 @@ void detect_endstop2() {
     if (calibrating == true && range_of_motion_stp != 0){
       set_steps_to_do(0);
       set_direction(-1);
-      steps_to_do = int(range_of_motion_stp/2);
+      steps_to_do = long(range_of_motion_stp/2);
       calib_endstop_reached = true;
     }
     else {

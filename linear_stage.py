@@ -201,7 +201,6 @@ class LinearStage():
 
 
     def calibrate_sys(self):
-        print(self.mm_to_stp(self.range_of_motion))
         self.send_cmd("C", self.mm_to_stp(self.range_of_motion))
 
 
