@@ -11,6 +11,9 @@ unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();
 bool system_available = true;
+bool calibrating = false;
+bool calib_endstop_reached = false;
+long range_of_motion_stp = 0;
 
 unsigned long step_time = micros();
 unsigned long velocity_delay_micros = 1000;
@@ -25,8 +28,8 @@ void setup() {
   pinMode(dir, OUTPUT);
   Serial.begin(9600);
   reset_pins();
-  attachInterrupt(digitalPinToInterrupt(end1), detect1, RISING);
-  attachInterrupt(digitalPinToInterrupt(end2), detect2, RISING);
+  attachInterrupt(digitalPinToInterrupt(end1), detect_endstop1, RISING);
+  attachInterrupt(digitalPinToInterrupt(end2), detect_endstop2, RISING);
 }
 
 void loop() {
@@ -34,6 +37,13 @@ void loop() {
   serial_read();
   n_steps();
   serial_write();
+  if (calib_endstop_reached == true){
+    if (steps_to_do == 0){
+      abs_pos = 0;
+      calibrating = false; 
+      calib_endstop_reached = false;
+    }
+  }
 }
 
 // ---------------- Serial Functions ----------------
@@ -78,15 +88,16 @@ void categorize_cmd(String serial_string){
     pause_system();
   }
   else if (serial_string.startsWith("C")){
-    // Can't calibrate while motor is moving.
+    // Can't start calibrating while motor is moving.
     if (steps_to_do == 0){
-      calibrate_system();
+      range_of_motion_stp = atol(serial_string.substring(1, index_r).c_str());
+      start_calibration();
     }
   }
   else if (serial_string.startsWith("D")){
     // Direction can't be changed while motor is moving.
     if (steps_to_do == 0){
-      long serial_direction = serial_string.substring(1, index_r).toInt();
+      int serial_direction = serial_string.substring(1, index_r).toInt();
       set_direction(serial_direction);
     }
   }
@@ -105,17 +116,17 @@ void categorize_cmd(String serial_string){
 
 // ---------------- Set Parameters ----------------
 
-void set_direction(int serial_direction){
+void set_direction(int new_direction){
   if (system_available == true){
-    if (serial_direction == 1){
-      direction = serial_direction;
+    if (new_direction == 1){
+      direction = new_direction;
       digitalWrite(dir, HIGH);
-      Serial.println("Direction was changed to 1");
+      //Serial.println("Direction was changed to 1");
     }
-    else if (serial_direction == -1){
-      direction = serial_direction;
+    else if (new_direction == -1){
+      direction = new_direction;
       digitalWrite(dir, LOW);
-      Serial.println("Direction was changed to -1");
+      //Serial.println("Direction was changed to -1");
     }
   }
   else {
@@ -123,18 +134,26 @@ void set_direction(int serial_direction){
   }
 }
 
-void set_velocity(int serial_velocity){
-  velocity_delay_micros = serial_velocity;
+void set_velocity(int new_velocity){
+  velocity_delay_micros = new_velocity;
 }
 
-void set_steps_to_do(long serial_steps){
-  steps_to_do = serial_steps;
+void set_steps_to_do(long new_steps){
+  steps_to_do = new_steps;
 }
 
 // ---------------- Calibrate/Reset/Pause/Start ----------------
 
-void calibrate_system(){
-  
+void start_calibration(){
+  set_direction(1);
+  set_velocity(250);
+  calibrating = true;
+  set_steps_to_do(range_of_motion_stp);
+}
+
+void reset_system(){
+  system_available = true;
+  set_steps_to_do(0);
 }
 
 void pause_system(){
@@ -143,11 +162,6 @@ void pause_system(){
 
 void start_system(){
   system_available = true;
-}
-
-void reset_system(){
-  system_available = true;
-  steps_to_do = 0;
 }
 
 // ---------------- Step Functions ----------------
@@ -178,16 +192,24 @@ void single_step() {
 
 // ---------------- Endstop Functions ----------------
 
-void detect1() {
+void detect_endstop1() {
   if (digitalRead(end1) == LOW) {
     reset_system();
   }
 }
 
 
-void detect2() {
+void detect_endstop2() {
   if (digitalRead(end2) == LOW) {
-    reset_system();
+    if (calibrating == true && range_of_motion_stp != 0){
+      set_steps_to_do(0);
+      set_direction(-1);
+      steps_to_do = int(range_of_motion_stp/2);
+      calib_endstop_reached = true;
+    }
+    else {
+      reset_system();
+    }
   }
 }
 

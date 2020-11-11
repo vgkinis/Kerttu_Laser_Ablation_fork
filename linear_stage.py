@@ -12,9 +12,10 @@ class LinearStage():
     """
 
 #--------------------------------- Initializing --------------------------------
-    def __init__(self, thread_pitch = None, stp_per_rev = None, json_path = None):
+    def __init__(self, thread_pitch = None, stp_per_rev = None, range_of_motion = None, json_path = None):
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
+        self.range_of_motion = range_of_motion
         self.json_path = json_path
         self.ser = serial.Serial()
         self.loop_time = None
@@ -38,6 +39,7 @@ class LinearStage():
                 json_dict = json.loads(json_str)
                 self.thread_pitch = json_dict["thread_pitch"]
                 self.stp_per_rev = json_dict["stp_per_rev"]
+                self.range_of_motion = json_dict["range_of_motion"]
         return
 
 
@@ -199,14 +201,17 @@ class LinearStage():
 
 
     def calibrate_sys(self):
-        self.send_cmd("C")
+        print(self.mm_to_stp(self.range_of_motion))
+        self.send_cmd("C", self.mm_to_stp(self.range_of_motion))
 
 
     def reset_sys(self):
         self.send_cmd("R")
 
+
     def pause_system(self):
         self.send_cmd("H")
+
 
     """def check_if_ready(self):
         if self.sent_pos_mm == None and self.sent_pos_stp == None:
