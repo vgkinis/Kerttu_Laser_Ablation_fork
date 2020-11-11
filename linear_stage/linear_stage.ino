@@ -1,5 +1,9 @@
+// Digital pins 5 and 6 are used for step and direction.
 # define stp 5
 # define dir 6
+// Digital pins 2 and 3 are Arduino Uno attachInterrupt pins and are used for the two endstops.
+#define end1 2
+#define end2 3
 
 float serial_read_delay = 1200;
 float serial_write_delay = 1000;
@@ -21,6 +25,8 @@ void setup() {
   pinMode(dir, OUTPUT);
   Serial.begin(9600);
   reset_pins();
+  attachInterrupt(digitalPinToInterrupt(end1), detect1, RISING);
+  attachInterrupt(digitalPinToInterrupt(end2), detect2, RISING);
 }
 
 void loop() {
@@ -30,6 +36,7 @@ void loop() {
   serial_write();
 }
 
+// ---------------- Serial Functions ----------------
 
 void serial_read(){
   String serial_string;
@@ -84,6 +91,7 @@ void categorize_cmd(String serial_string){
   }
 }
 
+// ---------------- Set Parameters ----------------
 
 void set_direction(int serial_direction){
   if (system_available == true){
@@ -111,6 +119,8 @@ void set_steps_to_do(long serial_steps){
   steps_to_do = serial_steps;
 }
 
+// ---------------- Reset/Pause/Start ----------------
+
 void pause_system(){
   system_available = false;
 }
@@ -124,6 +134,7 @@ void reset_system(){
   steps_to_do = 0;
 }
 
+// ---------------- Step Functions ----------------
 
 void n_steps() {
   if (steps_to_do > 0){
@@ -149,6 +160,22 @@ void single_step() {
   }
 }
 
+// ---------------- Endstop Functions ----------------
+
+void detect1() {
+  if (digitalRead(end1) == LOW) {
+    reset_system();
+  }
+}
+
+
+void detect2() {
+  if (digitalRead(end2) == LOW) {
+    reset_system();
+  }
+}
+
+// ---------------- Reset Pins Function ----------------
 
 void reset_pins()
 {
