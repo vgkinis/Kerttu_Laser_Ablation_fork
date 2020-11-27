@@ -1,8 +1,11 @@
-from PyQt5.QtWidgets import QApplication,QWidget,QPushButton, QTextEdit, QComboBox, QLCDNumber, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QTextEdit, QComboBox, QLCDNumber, QLabel
 from PyQt5.QtCore import pyqtSlot, QRect, QThread, pyqtSignal
 from PyQt5.QtGui import QColor
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 import functools
 import sys
+
 from general_functions import *
 from datetime import datetime
 from linear_stage import LinearStage
@@ -74,6 +77,7 @@ class App(QWidget):
 
         self.setWindowTitle(self.title)
         self.setGeometry(self.left,self.top,self.width,self.height)
+
 
         self.labelPos = QLabel('Absolute position', self)
         self.labelPos.setGeometry(QRect(x_coords[0], y_coords[0], 111, 34))
@@ -162,6 +166,8 @@ class App(QWidget):
         self.lcdNumberDir.setGeometry(QRect(x_coords[3], y_coords[7],  100, 34))
         set_lcd_style(self.lcdNumberDir)
 
+        # --------------------------------------------------
+
         self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
@@ -181,7 +187,6 @@ class App(QWidget):
         self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
         self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
         self.lcdNumberDir.display(data_dict["direction"])
-
 
 
 if __name__=='__main__':

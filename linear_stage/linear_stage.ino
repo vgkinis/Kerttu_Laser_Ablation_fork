@@ -30,7 +30,7 @@ void setup() {
   Serial.begin(9600);
   reset_pins();
   attachInterrupt(digitalPinToInterrupt(end1), detect_endstop1, RISING);
-  attachInterrupt(digitalPinToInterrupt(end2), detect_endstop2, RISING);
+  //attachInterrupt(digitalPinToInterrupt(end2), detect_endstop2, RISING);
 }
 
 void loop() {
@@ -160,7 +160,7 @@ void end_calibration(){
 }
 
 void reset_system(){
-  system_available = true;
+  //system_available = true;
   set_steps_to_do(0);
 }
 
@@ -201,9 +201,10 @@ void single_step() {
 // ---------------- Endstop Functions ----------------
 
 void detect_endstop1() {
-  if (digitalRead(end1) == LOW) {
-    reset_system();
-  }
+  reset_system();
+  //if (digitalRead(end1) == LOW) {
+  //  reset_system();
+  //}
 }
 
 
