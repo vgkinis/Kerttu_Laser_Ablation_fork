@@ -29,8 +29,8 @@ void setup() {
   pinMode(dir, OUTPUT);
   Serial.begin(9600);
   reset_pins();
-  attachInterrupt(digitalPinToInterrupt(end1), detect_endstop1, RISING);
-  //attachInterrupt(digitalPinToInterrupt(end2), detect_endstop2, RISING);
+  attachInterrupt(digitalPinToInterrupt(end1), detect_endstop1, FALLING);
+  attachInterrupt(digitalPinToInterrupt(end2), detect_endstop2, FALLING);
 }
 
 void loop() {
@@ -38,7 +38,7 @@ void loop() {
   serial_read();
   n_steps();
   serial_write();
-  
+
   if (calib_endstop_reached == true){
     if (steps_to_do == 0){
       end_calibration();
@@ -155,7 +155,7 @@ void end_calibration(){
   abs_pos = 0;
   set_velocity(velocity1);
   set_direction(1);
-  calibrating = false; 
+  calibrating = false;
   calib_endstop_reached = false;
 }
 
@@ -202,23 +202,18 @@ void single_step() {
 
 void detect_endstop1() {
   reset_system();
-  //if (digitalRead(end1) == LOW) {
-  //  reset_system();
-  //}
 }
 
 
 void detect_endstop2() {
-  if (digitalRead(end2) == LOW) {
-    if (calibrating == true && range_of_motion_stp != 0){
-      set_steps_to_do(0);
-      set_direction(-1);
-      steps_to_do = long(range_of_motion_stp/2);
-      calib_endstop_reached = true;
-    }
-    else {
-      reset_system();
-    }
+  if (calibrating == true && range_of_motion_stp != 0){
+    set_steps_to_do(0);
+    set_direction(-1);
+    steps_to_do = long(range_of_motion_stp/2);
+    calib_endstop_reached = true;
+  }
+  else {
+    reset_system();
   }
 }
 
