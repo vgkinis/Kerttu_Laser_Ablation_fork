@@ -38,7 +38,7 @@ void loop() {
   serial_read();
   n_steps();
   serial_write();
-
+  
   if (calib_endstop_reached == true){
     if (steps_to_do == 0){
       end_calibration();
@@ -155,7 +155,7 @@ void end_calibration(){
   abs_pos = 0;
   set_velocity(velocity1);
   set_direction(1);
-  calibrating = false;
+  calibrating = false; 
   calib_endstop_reached = false;
 }
 
