@@ -26,9 +26,6 @@ class LinearStage():
         self.abs_pos_stp = 0
         self.abs_pos_mm = 0
 
-        self.last_abs_pos_stp = 0
-        self.last_abs_pos_mm = 0
-
         return
 
 
@@ -200,7 +197,16 @@ class LinearStage():
 
 
     def calibrate_sys(self):
+        self.set_dir(1)
         self.move_dis(stage_length, "mm")
+        # Until endstop
+        self.set_dir(-1)
+        # Start counting steps
+        self.move_dis(stage_length, "mm")
+        # Until endstop
+        # Rember remember steps
+        self.set_dir(1)
+        # Move half the distance
         return
 
 
