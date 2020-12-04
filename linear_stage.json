@@ -3,6 +3,6 @@
   "stp_per_rev": 800,
   "thread_pitch": 4,
   "_thread_pitch_units": "mm",
-  "range_of_motion": 650,
-  "_range_of_motion_unitrs": "mm"
+  "stage_length": 1200,
+  "_stage_length_units": "mm"
 }

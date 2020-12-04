@@ -12,10 +12,10 @@ class LinearStage():
     """
 
 #--------------------------------- Initializing --------------------------------
-    def __init__(self, thread_pitch = None, stp_per_rev = None, range_of_motion = None, json_path = None):
+    def __init__(self, thread_pitch = None, stp_per_rev = None, stage_length = None, json_path = None):
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
-        self.range_of_motion = range_of_motion
+        self.stage_length = stage_length
         self.json_path = json_path
         self.ser = serial.Serial()
         self.loop_time = None
@@ -39,7 +39,7 @@ class LinearStage():
                 json_dict = json.loads(json_str)
                 self.thread_pitch = json_dict["thread_pitch"]
                 self.stp_per_rev = json_dict["stp_per_rev"]
-                self.range_of_motion = json_dict["range_of_motion"]
+                self.stage_length = json_dict["stage_length"]
         return
 
 
@@ -89,9 +89,8 @@ class LinearStage():
 
     def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
-        V - velocity (speed), P - position, D - direction, R - reset,
-        H - halt (pause), C - calibrate"""
-        if cat not in ["S", "V", "P", "D", "R", "H", "C"]:
+        V - velocity (speed), P - position, D - direction, R - reset"""
+        if cat not in ["S", "V", "P", "D", "R"]:
             print("Unkown command category: %s" %cat)
         else:
             serial_cmd = cat + str(parameter) + "r"
@@ -201,31 +200,12 @@ class LinearStage():
 
 
     def calibrate_sys(self):
-        self.send_cmd("C", self.mm_to_stp(self.range_of_motion))
+        self.move_dis(stage_length, "mm")
+        return
 
 
     def reset_sys(self):
         self.send_cmd("R")
-
-
-    def pause_system(self):
-        self.send_cmd("H")
-
-
-    """def check_if_ready(self):
-        if self.sent_pos_mm == None and self.sent_pos_stp == None:
-            print("Ready! No positions have been sent.")
-            return True
-        elif (self.abs_pos_stp-self.last_abs_pos_stp) == self.sent_pos_stp:
-            self.last_abs_pos_mm = self.abs_pos_mm
-            self.last_abs_pos_stp = self.abs_pos_stp
-
-            self.sent_pos_stp = None
-            self.sent_pos_mm = None
-            print("Ready! Position reached.")
-            return True
-        else:
-            return False"""
 
 
 #--------------------------------- if __main__ ---------------------------------

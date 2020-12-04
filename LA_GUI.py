@@ -50,9 +50,6 @@ class WorkerThread(QThread):
     def calibrate_sys(self):
         self.ls.calibrate_sys()
 
-    def pause_sys(self):
-        self.ls.pause_sys()
-
     def stop(self):
         #self.ser.close()
         print("stop")
@@ -141,9 +138,6 @@ class App(QWidget):
         self.pushButtonDir = QPushButton('Set', self)
         self.pushButtonDir.setGeometry(QRect(x_coords[2], y_coords[7], 88, 34))
 
-        #self.pushButtonP = QPushButton('Pause', self)
-        #self.pushButtonP.setGeometry(QRect(x_coords[0], y_coords[9], 88, 34))
-
         self.pushButtonC = QPushButton('Calibrate', self)
         self.pushButtonC.setGeometry(QRect(x_coords[3], y_coords[9], 100, 34))
 
@@ -177,7 +171,6 @@ class App(QWidget):
         self.pushButtonDis.clicked.connect(functools.partial(self.wt.move_dis, self.textEditDis, self.comboBoxDis))
         self.pushButtonR.clicked.connect(functools.partial(self.wt.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.wt.calibrate_sys))
-        #self.pushButtonP.clicked.connect(functools.partial(self.wt.pause_sys))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
