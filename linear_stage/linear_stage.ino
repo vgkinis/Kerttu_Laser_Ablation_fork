@@ -10,10 +10,9 @@ float serial_write_delay = 1000;
 unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();
-bool system_available = true;
-bool calibrating = false;
-bool calib_endstop_reached = false;
-long range_of_motion_stp = 0;
+
+bool endstop1 = false;
+bool endstop2 = false;
 
 unsigned long step_time = micros();
 unsigned long velocity1 = 1000;
@@ -38,12 +37,6 @@ void loop() {
   serial_read();
   n_steps();
   serial_write();
-  
-  if (calib_endstop_reached == true){
-    if (steps_to_do == 0){
-      end_calibration();
-    }
-  }
 }
 
 // ---------------- Serial Functions ----------------
@@ -74,6 +67,10 @@ void serial_write(){
     Serial.print(velocity_delay_micros);
     Serial.print(";");
     Serial.print(direction);
+    Serial.print(";");
+    Serial.print(endstop1);
+    Serial.print(";");
+    Serial.print(endstop2);
   }
 }
 
@@ -82,17 +79,12 @@ void categorize_cmd(String serial_string){
   int index_r = serial_string.indexOf("r\n");
 
   if (serial_string.startsWith("R")){
-    reset_system();
+    reset_steps();
   }
-  else if (serial_string.startsWith("H")){
-    pause_system();
-  }
-  else if (serial_string.startsWith("C")){
-    // Can't start calibrating while motor is moving.
-    if (steps_to_do == 0){
-      range_of_motion_stp = atol(serial_string.substring(1, index_r).c_str());
-      start_calibration();
-    }
+  else if (serial_string.startsWith("E")){
+    // Reset endstop variables
+    endstop1 = false;
+    endstop2 = false;
   }
   else if (serial_string.startsWith("D")){
     // Direction can't be changed while motor is moving.
@@ -117,20 +109,15 @@ void categorize_cmd(String serial_string){
 // ---------------- Set Parameters ----------------
 
 void set_direction(int new_direction){
-  if (system_available == true){
-    if (new_direction == 1){
-      direction = new_direction;
-      digitalWrite(dir, HIGH);
-      //Serial.println("Direction was changed to 1");
-    }
-    else if (new_direction == -1){
-      direction = new_direction;
-      digitalWrite(dir, LOW);
-      //Serial.println("Direction was changed to -1");
-    }
+  if (new_direction == 1){
+    direction = new_direction;
+    digitalWrite(dir, HIGH);
+    //Serial.println("Direction was changed to 1");
   }
-  else {
-    Serial.println("System not available");
+  else if (new_direction == -1){
+    direction = new_direction;
+    digitalWrite(dir, LOW);
+    //Serial.println("Direction was changed to -1");
   }
 }
 
@@ -142,85 +129,48 @@ void set_steps_to_do(long new_steps){
   steps_to_do = new_steps;
 }
 
-// ---------------- Calibrate/Reset/Pause/Start ----------------
-
-void start_calibration(){
-  set_direction(1);
-  set_velocity(250);
-  calibrating = true;
-  set_steps_to_do(range_of_motion_stp);
-}
-
-void end_calibration(){
-  abs_pos = 0;
-  set_velocity(velocity1);
-  set_direction(1);
-  calibrating = false; 
-  calib_endstop_reached = false;
-}
-
-void reset_system(){
-  //system_available = true;
-  set_steps_to_do(0);
-}
-
-void pause_system(){
-  system_available = false;
-}
-
-void start_system(){
-  system_available = true;
-}
 
 // ---------------- Step Functions ----------------
 
 void n_steps() {
   if (steps_to_do > 0){
     if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
-      if (system_available == true){
-        step_time = micros();
-        single_step();
-        steps_to_do--;
-        abs_pos += direction;
-      }
+      step_time = micros();
+      single_step();
+      steps_to_do--;
+      abs_pos += direction;
     }
   }
 }
 
 void single_step() {
-  if (system_available == true){
-    digitalWrite(stp, HIGH);
-    delayMicroseconds(3);
-    digitalWrite(stp, LOW);
-  }
-  else {
-    Serial.println("System not available");
-  }
+  digitalWrite(stp, HIGH);
+  delayMicroseconds(3);
+  digitalWrite(stp, LOW);
 }
 
 // ---------------- Endstop Functions ----------------
 
 void detect_endstop1() {
-  reset_system();
+  reset_steps();
+  endstop1 = true;
 }
 
 
 void detect_endstop2() {
-  if (calibrating == true && range_of_motion_stp != 0){
-    set_steps_to_do(0);
-    set_direction(-1);
-    steps_to_do = long(range_of_motion_stp/2);
-    calib_endstop_reached = true;
-  }
-  else {
-    reset_system();
-  }
+  reset_steps();
+  endstop2 = true;
 }
 
-// ---------------- Reset Pins Function ----------------
+// ---------------------- Reset -----------------------
 
 void reset_pins()
 {
   digitalWrite(stp, LOW);
   digitalWrite(dir, HIGH);
+}
+
+
+void reset_steps(){
+  set_steps_to_do(0);
 }
