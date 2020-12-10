@@ -19,14 +19,30 @@ class WorkerThread(QThread):
     def run(self):
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
-        ports = (list(list_ports.comports()))
-        port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
-        serial_port = "/dev/" + port_name
-        self.ls.start_serial(serial_port)
+        #ports = (list(list_ports.comports()))
+        #port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
+        #serial_port = "/dev/" + port_name
+        #self.ls.start_serial(serial_port)
         # time.sleep(2)
         while True:
             try:
-                data_dict = self.ls.serial_read()
+                data_dict = dict()
+                a = datetime.now()
+                data_dict.update({"loop_time": a.year,
+                                "pos_steps": a.hour,
+                                "pos_rev": a.hour,
+                                "pos_mm": a.hour,
+                                "dis_steps": a.minute,
+                                "dis_mm": a.minute,
+                                "dis_rev": a.minute,
+                                "spd_us/step": a.second,
+                                "spd_step/s": a.second,
+                                "spd_rev/s": a.second,
+                                "spd_mm/s": a.second,
+                                "direction": a.year,
+                                "event_code":a.year,
+                                })
+                #data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
                 continue

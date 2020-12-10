@@ -27,6 +27,10 @@ class LinearStage():
         self.abs_pos_stp = 0
         self.abs_pos_mm = 0
 
+        self.event_code = None
+
+        self.count_range_start = None
+
         return
 
 
@@ -64,7 +68,7 @@ class LinearStage():
                 data = line.split(";")
                 if len(data) == 5:
                     data_dict = dict()
-                    self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), data[5]
+                    self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), data[5]
                     self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
                     data_dict.update({"loop_time": self.loop_time,
                                     "pos_steps": self.abs_pos_stp,
@@ -78,7 +82,7 @@ class LinearStage():
                                     "spd_rev/s": self.us_stp_to_rev_s(spd_us),
                                     "spd_mm/s": self.us_stp_to_mm_s(spd_us),
                                     "direction": direction,
-                                    "event_code": event_code,
+                                    "event_code": self.event_code,
                                     })
                     #data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(velocity_delay_micros), "us"
                     return data_dict
@@ -89,8 +93,8 @@ class LinearStage():
     def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
         V - velocity (speed), P - position, D - direction, R - reset,
-        E - reset endstop variables"""
-        if cat not in ["S", "V", "P", "D", "R", "E"]:
+        E - event code, A - absolute position"""
+        if cat not in ["S", "V", "P", "D", "R", "E", "A"]:
             print("Unkown command category: %s" %cat)
         else:
             serial_cmd = cat + str(parameter) + "r"
@@ -187,6 +191,10 @@ class LinearStage():
         self.send_cmd("D", str(direction))
 
 
+    def set_event_code(self, code):
+        self.send_cmd("E", str(code))
+
+
     def get_velocity(self):
         return
 
@@ -200,16 +208,19 @@ class LinearStage():
 
 
     def calibrate_sys(self):
-        self.set_dir(1)
-        self.move_dis(stage_length, "mm")
-        # Until endstop
-        self.set_dir(-1)
-        # Start counting steps
-        self.move_dis(stage_length, "mm")
-        # Until endstop
-        # Rember remember steps
-        self.set_dir(1)
-        # Move half the distance
+        if self.event_code == 0:
+            self.set_dir(1)
+            self.move_dis(stage_length, "mm")
+        elif self.event_code == 2:
+            self.set_dir(-1)
+            self.count_range_start = self.abs_pos_stp
+            self.move_dis(stage_length, "mm")
+        elif self.event_code == 1 and count_range_start != None:
+            half_ls_range = abs(self.abs_pos_stp - self.count_range_start)/2
+            self.set_dir(1)
+            count_range_start = None
+            self.move_dis(half_ls_range, "stp")
+            self.set_event_code("E", 0)
         return
 
 
