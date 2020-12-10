@@ -11,8 +11,7 @@ unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();
 
-bool endstop1 = false;
-bool endstop2 = false;
+int event_code = 0;
 
 unsigned long step_time = micros();
 unsigned long velocity1 = 1000;
@@ -68,9 +67,7 @@ void serial_write(){
     Serial.print(";");
     Serial.print(direction);
     Serial.print(";");
-    Serial.print(endstop1);
-    Serial.print(";");
-    Serial.print(endstop2);
+    Serial.print("E" + String(event_code));
   }
 }
 
@@ -82,9 +79,9 @@ void categorize_cmd(String serial_string){
     reset_steps();
   }
   else if (serial_string.startsWith("E")){
-    // Reset endstop variables
-    endstop1 = false;
-    endstop2 = false;
+    // Set event_code
+    int serial_event = serial_string.substring(1, index_r).toInt();
+    event_code = serial_event;
   }
   else if (serial_string.startsWith("D")){
     // Direction can't be changed while motor is moving.
@@ -103,6 +100,11 @@ void categorize_cmd(String serial_string){
       long serial_steps = atol(serial_string.substring(1, index_r).c_str());
       set_steps_to_do(serial_steps);
     }
+  }
+  else if (serial_string.startsWith("A")){
+    // Set absolute position
+    long serial_abs_pos = atol(serial_string.substring(1, index_r).c_str());
+    set_abs_pos(serial_abs_pos);
   }
 }
 
@@ -129,6 +131,10 @@ void set_steps_to_do(long new_steps){
   steps_to_do = new_steps;
 }
 
+void set_abs_pos(long new_abs_pos){
+  abs_pos = new_abs_pos;
+}
+
 
 // ---------------- Step Functions ----------------
 
@@ -153,13 +159,13 @@ void single_step() {
 
 void detect_endstop1() {
   reset_steps();
-  endstop1 = true;
+  event_code = 1;
 }
 
 
 void detect_endstop2() {
   reset_steps();
-  endstop2 = true;
+  event_code = 2;
 }
 
 // ---------------------- Reset -----------------------
