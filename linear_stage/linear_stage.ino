@@ -67,7 +67,7 @@ void serial_write(){
     Serial.print(";");
     Serial.print(direction);
     Serial.print(";");
-    Serial.print("E" + String(event_code));
+    Serial.print(event_code);
   }
 }
 

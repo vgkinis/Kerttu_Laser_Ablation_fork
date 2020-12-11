@@ -66,9 +66,9 @@ class LinearStage():
             line = line.decode("utf-8")
             if ";" in line:
                 data = line.split(";")
-                if len(data) == 5:
+                if len(data) == 6:
                     data_dict = dict()
-                    self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), data[5]
+                    self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
                     self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
                     data_dict.update({"loop_time": self.loop_time,
                                     "pos_steps": self.abs_pos_stp,

@@ -5,6 +5,7 @@ from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 import functools
 import sys
+import time
 
 from general_functions import *
 from datetime import datetime
@@ -19,14 +20,14 @@ class WorkerThread(QThread):
     def run(self):
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
-        #ports = (list(list_ports.comports()))
-        #port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
-        #serial_port = "/dev/" + port_name
-        #self.ls.start_serial(serial_port)
-        # time.sleep(2)
+        ports = (list(list_ports.comports()))
+        port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
+        serial_port = "/dev/" + port_name
+        self.ls.start_serial(serial_port)
+        time.sleep(2)
         while True:
             try:
-                data_dict = dict()
+                """data_dict = dict()
                 a = datetime.now()
                 data_dict.update({"loop_time": a.year,
                                 "pos_steps": a.hour,
@@ -41,8 +42,8 @@ class WorkerThread(QThread):
                                 "spd_mm/s": a.second,
                                 "direction": a.year,
                                 "event_code":a.year,
-                                })
-                #data_dict = self.ls.serial_read()
+                                })"""
+                data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
                 continue
@@ -154,8 +155,8 @@ class App(QWidget):
         self.pushButtonDir = QPushButton('Set', self)
         self.pushButtonDir.setGeometry(QRect(x_coords[2], y_coords[7], 88, 34))
 
-        self.pushButtonC = QPushButton('Calibrate', self)
-        self.pushButtonC.setGeometry(QRect(x_coords[3], y_coords[9], 100, 34))
+        #self.pushButtonC = QPushButton('Calibrate', self)
+        #self.pushButtonC.setGeometry(QRect(x_coords[3], y_coords[9], 100, 34))
 
         self.pushButtonR = QPushButton('Reset', self)
         self.pushButtonR.setGeometry(QRect(x_coords[4], y_coords[9], 88, 34))
@@ -186,7 +187,7 @@ class App(QWidget):
         self.pushButtonDir.clicked.connect(functools.partial(self.wt.set_dir, self.textEditDir))
         self.pushButtonDis.clicked.connect(functools.partial(self.wt.move_dis, self.textEditDis, self.comboBoxDis))
         self.pushButtonR.clicked.connect(functools.partial(self.wt.reset_sys))
-        self.pushButtonC.clicked.connect(functools.partial(self.wt.calibrate_sys))
+        #self.pushButtonC.clicked.connect(functools.partial(self.wt.calibrate_sys))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
