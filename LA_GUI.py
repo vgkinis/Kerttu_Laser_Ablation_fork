@@ -232,7 +232,7 @@ class App(QWidget):
     def set_spd(self):
         val = float(self.textEditSpd.toPlainText())
         if self.calibrating == False and val > 0.0:
-            self.wt,set_spd(val, self.comboBoxSpd)
+            self.wt.set_spd(val, self.comboBoxSpd)
             self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
         else:
             self.ledSpd.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
@@ -252,7 +252,6 @@ class App(QWidget):
             self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
         else:
             self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
-
 
     def calibrate_sys(self):
         self.calibrating = True
