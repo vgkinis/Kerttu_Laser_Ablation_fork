@@ -21,9 +21,9 @@ class WorkerThread(QThread):
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
         ports = (list(list_ports.comports()))
-        #port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
-        #serial_port = "/dev/" + port_name
-        #self.ls.start_serial(serial_port)
+        port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
+        serial_port = "/dev/" + port_name
+        self.ls.start_serial(serial_port)
         time.sleep(2)
         while True:
             try:

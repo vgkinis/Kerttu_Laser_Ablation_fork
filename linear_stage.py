@@ -194,6 +194,9 @@ class LinearStage():
     def set_event_code(self, code):
         self.send_cmd("E", str(code))
 
+    def set_abs_pos_stp(self, val):
+        self.send_cmd("A", str(val))
+
 
     def get_velocity(self):
         return
@@ -209,18 +212,28 @@ class LinearStage():
 
     def calibrate_sys(self):
         if self.event_code == 0:
+            self.set_event_code(4)
+            time.sleep(2)
             self.set_dir(1)
-            self.move_dis(stage_length, "mm")
+            time.sleep(2)
+            self.move_dis(self.stage_length, "mm")
         elif self.event_code == 2:
+            self.set_event_code(4)
+            time.sleep(2)
             self.set_dir(-1)
+            time.sleep(2)
             self.count_range_start = self.abs_pos_stp
-            self.move_dis(stage_length, "mm")
-        elif self.event_code == 1 and count_range_start != None:
+            self.move_dis(self.stage_length, "mm")
+        elif self.event_code == 1 and self.count_range_start != None:
             half_ls_range = abs(self.abs_pos_stp - self.count_range_start)/2
             self.set_dir(1)
-            count_range_start = None
-            self.move_dis(half_ls_range, "stp")
-            self.set_event_code("E", 0)
+            time.sleep(2)
+            self.count_range_start = None
+            self.set_abs_pos_stp(-half_ls_range)
+            time.sleep(2)
+            self.move_pos(0, "stp")
+            time.sleep(2)
+            self.set_event_code(0)
         return
 
 
