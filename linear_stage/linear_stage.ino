@@ -141,6 +141,7 @@ void set_abs_pos(long new_abs_pos){
 void n_steps() {
   if (steps_to_do > 0){
     if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
+      event_code = 0;
       step_time = micros();
       single_step();
       steps_to_do--;
