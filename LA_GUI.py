@@ -27,22 +27,6 @@ class WorkerThread(QThread):
         time.sleep(2)
         while True:
             try:
-                """data_dict = dict()
-                a = datetime.now()
-                data_dict.update({"loop_time": a.year,
-                                "pos_steps": a.hour,
-                                "pos_rev": a.hour,
-                                "pos_mm": a.hour,
-                                "dis_steps": a.minute,
-                                "dis_mm": a.minute,
-                                "dis_rev": a.minute,
-                                "spd_us/step": a.second,
-                                "spd_step/s": a.second,
-                                "spd_rev/s": a.second,
-                                "spd_mm/s": a.second,
-                                "direction": a.year,
-                                "event_code":a.year,
-                                })"""
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
