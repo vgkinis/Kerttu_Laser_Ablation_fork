@@ -84,7 +84,6 @@ class LinearStage():
                                     "direction": direction,
                                     "event_code": self.event_code,
                                     })
-                    #data_str = "Loop_time", "{:11.4f}".format(self.loop_time), "Absolute position stp", "{:6.0f}".format(self.abs_pos_stp), "Absolute position mm", "{:4.0f}".format(self.abs_pos_mm), "Velocity delay", "{:7.1f}".format(velocity_delay_micros), "us"
                     return data_dict
         except UnicodeDecodeError:
             print("Couldn't decode the serial input.")
