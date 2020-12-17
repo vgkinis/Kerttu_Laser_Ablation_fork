@@ -230,13 +230,15 @@ class LinearStage():
             self.count_range_start = None
             self.set_abs_pos_stp(-half_ls_range)
             time.sleep(2)
-            self.move_pos(0, "stp")
+            self.move_pos(0, "steps")
             time.sleep(2)
             self.set_event_code(0)
         return
 
 
     def reset_sys(self):
+        self.set_event_code(0)
+        time.sleep(2)
         self.send_cmd("R")
 
 
