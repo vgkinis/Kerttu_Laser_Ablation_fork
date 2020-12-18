@@ -103,7 +103,8 @@ class LinearStage():
             serial_cmd = cat + str(parameter) + "r"
             try:
                 self.ser.write(str.encode(serial_cmd))
-                print("Sending command: ", serial_cmd)
+                if "W" not in serial_cmd:
+                    print("Sending command: ", serial_cmd)
             except:
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
@@ -186,7 +187,6 @@ class LinearStage():
                 self.set_dir(str(-1))
             else:
                 self.set_dir(str(1))
-            time.sleep(2)
             self.move_dis(dis, "steps")
 
 
@@ -199,6 +199,9 @@ class LinearStage():
 
     def set_abs_pos_stp(self, val):
         self.send_cmd("A", str(val))
+
+    def ping_arduino(self):
+        self.send_cmd("W")
 
 
     def get_velocity(self):

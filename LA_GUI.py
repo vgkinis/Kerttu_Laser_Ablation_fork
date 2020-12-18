@@ -27,11 +27,11 @@ class WorkerThread(QThread):
         time.sleep(2)
         while True:
             try:
+                self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
                 continue
-
 
     def set_spd(self, val, unit):
         self.ls.set_speed(val, unit.currentText())
