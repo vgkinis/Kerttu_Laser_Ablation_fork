@@ -254,6 +254,8 @@ if __name__ == "__main__":
         ls.send_cmd("W")
         line = ls.serial_read()
         print(line)
+        ls.send_cmd("S", 10)
+
         time.sleep(0.25)
         # print(ls.serial_read())
 
