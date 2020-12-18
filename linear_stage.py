@@ -230,9 +230,9 @@ class LinearStage():
             self.count_range_start = None
             self.set_abs_pos_stp(-half_ls_range)
             time.sleep(2)
-            self.move_pos(0, "steps")
-            time.sleep(2)
             self.set_event_code(0)
+            time.sleep(2)
+            self.move_pos(0, "steps")
         return
 
 
@@ -250,5 +250,11 @@ if __name__ == "__main__":
     port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
     serial_port = "/dev/" + port_name
     ls.start_serial(serial_port)
-    # time.sleep(2)
+
+    # Test sequence
     ls.serial_read()
+    ls.set_dir(-1)
+    ls.set_spd(7, "mm/s")
+    ls.move_dis(100, "mm")
+    ls.reset_sys()
+    ls.move_pos(0, "mm")
