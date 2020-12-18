@@ -227,7 +227,10 @@ class LinearStage():
             self.count_range_start = self.abs_pos_stp
             self.move_dis(self.stage_length, "mm")
         elif self.event_code == 1 and self.count_range_start != None:
-            half_ls_range = abs(self.abs_pos_stp - self.count_range_start)/2
+            full_ls_range = abs(self.abs_pos_stp - self.count_range_start)
+            half_ls_range = abs(full_ls_range)/2
+            print("full_ls_range", full_ls_range)
+            print("half_ls_range", half_ls_range)
             self.set_dir(1)
             self.count_range_start = None
             self.set_abs_pos_stp(-half_ls_range)
@@ -251,19 +254,16 @@ if __name__ == "__main__":
     serial_port = "/dev/" + port_name
     ls.start_serial(serial_port)
     time.sleep(2)
-    for i in range(10):
-        ls.send_cmd("W")
-        line = ls.serial_read()
-        print(line)
-        if i%2==0:
-            ls.set_dir(-1)
-        else:
-            ls.set_dir(1)
 
-
-        time.sleep(0.25)
-        # print(ls.serial_read())
-
+    ls.send_cmd("S", str(5000))
+    ls.send_cmd("W")
+    print(ls.serial_read())
+    ls.send_cmd("D", str(-1))
+    ls.send_cmd("W")
+    print(ls.serial_read())
+    ls.send_cmd("S", str(1000))
+    ls.send_cmd("W")
+    print(ls.serial_read())
     # for i in range(2):
     #     # Test sequence
     #     print(ls.serial_read())
