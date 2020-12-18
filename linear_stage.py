@@ -64,9 +64,12 @@ class LinearStage():
         line = self.ser.readline()
         try:
             line = line.decode("utf-8")
-            if ";" in line:
-                data = line.split(";")
-                if len(data) == 6:
+            if "s" in line and "r" in line:
+                idx_s = line.index("s")
+                idx_r = line.index("r")
+                if idx_s < idx_r:
+                    line = line[idx_s+1 : idx_r]
+                    data = line.split(";")
                     data_dict = dict()
                     self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
                     self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
@@ -251,10 +254,24 @@ if __name__ == "__main__":
     serial_port = "/dev/" + port_name
     ls.start_serial(serial_port)
 
-    # Test sequence
-    ls.serial_read()
-    ls.set_dir(-1)
-    ls.set_spd(7, "mm/s")
-    ls.move_dis(100, "mm")
-    ls.reset_sys()
-    ls.move_pos(0, "mm")
+    while(True):
+        # Test sequence
+        print(ls.serial_read())
+        ls.set_dir(-1)
+        print()
+
+        print(ls.serial_read())
+        ls.set_speed(7, "mm/s")
+        print()
+
+        print(ls.serial_read())
+        ls.move_dis(100, "mm")
+        print()
+
+        print(ls.serial_read())
+        ls.reset_sys()
+        print()
+
+        print(ls.serial_read())
+        ls.move_pos(0, "mm")
+        print()

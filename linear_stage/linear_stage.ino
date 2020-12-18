@@ -5,7 +5,7 @@
 #define end1 2
 #define end2 3
 
-float serial_read_delay = 500;
+float serial_read_delay = 200;
 float serial_write_delay = 1000;
 unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
@@ -57,6 +57,7 @@ void serial_read(){
 void serial_write(){
   if ((unsigned long)(loop_time - serial_write_time) >= serial_write_delay){
     serial_write_time = loop_time;
+    Serial.print("s");
     Serial.print(loop_time);
     Serial.print(";");
     Serial.print(abs_pos);
@@ -68,6 +69,7 @@ void serial_write(){
     Serial.print(direction);
     Serial.print(";");
     Serial.print(event_code);
+    Serial.print("r");
   }
 }
 
