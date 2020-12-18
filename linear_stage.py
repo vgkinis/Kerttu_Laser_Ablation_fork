@@ -87,6 +87,10 @@ class LinearStage():
                                 "event_code": self.event_code,
                                 }
                 return data_dict
+            else:
+                return "failed 2 if", line
+        else:
+            return "failed 1 if", line
 
 
     def send_cmd(self, cat, parameter=""):
@@ -212,26 +216,19 @@ class LinearStage():
     def calibrate_sys(self):
         if self.event_code == 0:
             self.set_event_code(4)
-            time.sleep(2)
             self.set_dir(1)
-            time.sleep(2)
             self.move_dis(self.stage_length, "mm")
         elif self.event_code == 2:
             self.set_event_code(4)
-            time.sleep(2)
             self.set_dir(-1)
-            time.sleep(2)
             self.count_range_start = self.abs_pos_stp
             self.move_dis(self.stage_length, "mm")
         elif self.event_code == 1 and self.count_range_start != None:
             half_ls_range = abs(self.abs_pos_stp - self.count_range_start)/2
             self.set_dir(1)
-            time.sleep(2)
             self.count_range_start = None
             self.set_abs_pos_stp(-half_ls_range)
-            time.sleep(2)
             self.set_event_code(0)
-            time.sleep(2)
             self.move_pos(0, "steps")
         return
 
@@ -250,11 +247,16 @@ if __name__ == "__main__":
     port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
     serial_port = "/dev/" + port_name
     ls.start_serial(serial_port)
+    time.sleep(2)
     for i in range(10):
         ls.send_cmd("W")
         line = ls.serial_read()
         print(line)
-        ls.send_cmd("S", 10)
+        if i%2==0:
+            ls.set_dir(-1)
+        else:
+            ls.set_dir(1)
+
 
         time.sleep(0.25)
         # print(ls.serial_read())

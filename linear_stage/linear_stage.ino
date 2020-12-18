@@ -78,30 +78,30 @@ void categorize_cmd(String serial_string){
   }
   else if (serial_string.startsWith("E")){
     // Set event_code
-    int serial_event = serial_string.toInt();
+    int serial_event = serial_string.substring(1,-1).toInt();
     event_code = serial_event;
   }
   else if (serial_string.startsWith("D")){
     // Direction can't be changed while motor is moving.
     if (steps_to_do == 0){
-      int serial_direction = serial_string.toInt();
+      int serial_direction = serial_string.substring(1,-1).toInt();
       set_direction(serial_direction);
     }
   }
   else if (serial_string.startsWith("V")){
-    int serial_velocity = serial_string.toInt();
+    int serial_velocity = serial_string.substring(1,-1).toInt();
     set_velocity(serial_velocity);
   }
   else if (serial_string.startsWith("S")){
     // Variable steps_to_do can't be changed while motor is moving.
     if (steps_to_do == 0) {
-      long serial_steps = atol(serial_string.c_str());
+      long serial_steps = atol(serial_string.substring(1,-1).c_str());
       set_steps_to_do(serial_steps);
     }
   }
   else if (serial_string.startsWith("A")){
     // Set absolute position
-    long serial_abs_pos = atol(serial_string.c_str());
+    long serial_abs_pos = atol(serial_string.substring(1,-1).c_str());
     set_abs_pos(serial_abs_pos);
   }
   else if (serial_string.startsWith("W")){
