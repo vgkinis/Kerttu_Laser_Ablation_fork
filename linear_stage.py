@@ -62,41 +62,38 @@ class LinearStage():
 
     def serial_read(self):
         line = self.ser.readline()
-        try:
-            line = line.decode("utf-8")
-            if "s" in line and "r" in line:
-                idx_s = line.index("s")
-                idx_r = line.index("r")
-                if idx_s < idx_r:
-                    line = line[idx_s+1 : idx_r]
-                    data = line.split(";")
-                    data_dict = dict()
-                    self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
-                    self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
-                    data_dict.update({"loop_time": self.loop_time,
-                                    "pos_steps": self.abs_pos_stp,
-                                    "pos_rev": self.stp_to_rev(self.abs_pos_stp),
-                                    "pos_mm": self.abs_pos_mm,
-                                    "dis_steps": dis_stp,
-                                    "dis_mm": self.stp_to_mm(dis_stp),
-                                    "dis_rev": self.stp_to_rev(dis_stp),
-                                    "spd_us/step": spd_us,
-                                    "spd_step/s": self.us_stp_to_stp_s(spd_us),
-                                    "spd_rev/s": self.us_stp_to_rev_s(spd_us),
-                                    "spd_mm/s": self.us_stp_to_mm_s(spd_us),
-                                    "direction": direction,
-                                    "event_code": self.event_code,
-                                    })
-                    return data_dict
-        except UnicodeDecodeError:
-            print("Couldn't decode the serial input.")
-            return "Error"
+        line = line.decode("utf-8")
+
+        if "s" in line and "r" in line:
+            idx_s = line.index("s")
+            idx_r = line.index("r")
+            if idx_s < idx_r:
+                line = line[idx_s+1 : idx_r]
+                data = line.split(";")
+                self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
+                self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
+                data_dict = {"loop_time": self.loop_time,
+                                "pos_steps": self.abs_pos_stp,
+                                "pos_rev": self.stp_to_rev(self.abs_pos_stp),
+                                "pos_mm": self.abs_pos_mm,
+                                "dis_steps": dis_stp,
+                                "dis_mm": self.stp_to_mm(dis_stp),
+                                "dis_rev": self.stp_to_rev(dis_stp),
+                                "spd_us/step": spd_us,
+                                "spd_step/s": self.us_stp_to_stp_s(spd_us),
+                                "spd_rev/s": self.us_stp_to_rev_s(spd_us),
+                                "spd_mm/s": self.us_stp_to_mm_s(spd_us),
+                                "direction": direction,
+                                "event_code": self.event_code,
+                                }
+                return data_dict
+
 
     def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
         V - velocity (speed), P - position, D - direction, R - reset,
-        E - event code, A - absolute position"""
-        if cat not in ["S", "V", "P", "D", "R", "E", "A"]:
+        E - event code, A - absolute position, "W" - write from Arduino"""
+        if cat not in ["S", "V", "P", "D", "R", "E", "A", "W"]:
             print("Unkown command category: %s" %cat)
         else:
             serial_cmd = cat + str(parameter) + "r"
@@ -253,25 +250,31 @@ if __name__ == "__main__":
     port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
     serial_port = "/dev/" + port_name
     ls.start_serial(serial_port)
+    for i in range(10):
+        ls.send_cmd("W")
+        line = ls.serial_read()
+        print(line)
+        time.sleep(0.25)
+        # print(ls.serial_read())
 
-    while(True):
-        # Test sequence
-        print(ls.serial_read())
-        ls.set_dir(-1)
-        print()
-
-        print(ls.serial_read())
-        ls.set_speed(7, "mm/s")
-        print()
-
-        print(ls.serial_read())
-        ls.move_dis(100, "mm")
-        print()
-
-        print(ls.serial_read())
-        ls.reset_sys()
-        print()
-
-        print(ls.serial_read())
-        ls.move_pos(0, "mm")
-        print()
+    # for i in range(2):
+    #     # Test sequence
+    #     print(ls.serial_read())
+    #     ls.set_dir(-1)
+    #     print()
+    #
+    #     print(ls.serial_read())
+    #     ls.set_speed(7, "mm/s")
+    #     print()
+    #
+    #     print(ls.serial_read())
+    #     ls.move_dis(100, "mm")
+    #     print()
+    #
+    #     print(ls.serial_read())
+    #     ls.reset_sys()
+    #     print()
+    #
+    #     print(ls.serial_read())
+    #     ls.move_pos(0, "mm")
+    #     print()
