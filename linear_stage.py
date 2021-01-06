@@ -229,13 +229,17 @@ class LinearStage():
         elif self.event_code == 1 and self.count_range_start != None:
             full_ls_range = abs(self.abs_pos_stp - self.count_range_start)
             half_ls_range = abs(full_ls_range)/2
+            print()
             print("full_ls_range", full_ls_range)
             print("half_ls_range", half_ls_range)
+            print()
             self.set_dir(1)
             self.count_range_start = None
-            self.set_abs_pos_stp(-half_ls_range)
+            new_abs_pos = -half_ls_range
+            self.set_abs_pos_stp(new_abs_pos)
             self.set_event_code(0)
-            self.move_pos(0, "steps")
+            dis = abs(new_abs_pos - 0)
+            self.move_dis(dis, "steps")
         return
 
 
