@@ -6,7 +6,6 @@
 #define end2 3
 
 float serial_read_delay = 20;
-//float serial_write_delay = 1000;
 unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();
@@ -35,23 +34,7 @@ void loop() {
   loop_time = millis();
   serial_read();
   n_steps();
-//  serial_write();
 }
-
-// ---------------- Serial Functions ----------------
-//
-//void serial_read(){
-//  String serial_string;
-//  if ((unsigned long)(loop_time - serial_read_time) >= serial_read_delay){
-//    serial_read_time = loop_time;
-//    if (Serial.available() > 0){
-//      serial_string = Serial.readString();
-//      if (serial_string.endsWith("r")) {
-//        categorize_cmd(serial_string);
-//      }
-//    }
-//  }
-//}
 
 // ---------------- Serial Functions ----------------
 
@@ -70,8 +53,6 @@ void serial_read(){
 
 
 void categorize_cmd(String serial_string){
-  //int index_r = serial_string.indexOf("r");
-  //serial_string = serial_string.substring(1, index_r);
 
   if (serial_string.startsWith("R")){
     reset_steps();
