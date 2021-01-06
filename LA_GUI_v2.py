@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QTextEdit, QGridLayout, QComb
                              QLabel, QMainWindow, qApp, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import pyqtSlot, QRect, Qt, QThread, pyqtSignal
 from PyQt5 import QtCore
+from PyQt5.QtGui import QColor, QPalette
 
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
@@ -18,13 +19,23 @@ from linear_stage import LinearStage
 from serial.tools import list_ports
 import functools
 
+class Color(QWidget):
+
+    def __init__(self, color, *args, **kwargs):
+        super(Color, self).__init__(*args, **kwargs)
+        self.setAutoFillBackground(True)
+
+        palette = self.palette()
+        palette.setColor(QPalette.Window, QColor(color))
+        self.setPalette(palette)
+
 class WorkerThread(QThread):
     motor_signals = pyqtSignal(dict, name='motor_signals')
     def __init__(self, parent=None):
         QThread.__init__(self)
 
     def run(self):
-        self.ls = LinearStage(json_path="linear_stage.json")
+        """self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
@@ -37,7 +48,7 @@ class WorkerThread(QThread):
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
-                continue
+                continue"""
 
     def set_spd(self, val, unit):
         self.ls.set_speed(val, unit.currentText())
@@ -69,7 +80,7 @@ class App(QWidget):
         self.title='Motor control'
         self.left=10
         self.top=10
-        self.width=700
+        self.width=720
         self.height=600
         self.initUI()
 
@@ -85,7 +96,9 @@ class App(QWidget):
         horizontalSpacer1 = QSpacerItem(88, 34, QSizePolicy.Minimum, QSizePolicy.Expanding)
         horizontalSpacer2 = QSpacerItem(30, 34, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        verticalSpacer1 = QSpacerItem(0, 200, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        verticalSpacer1 = QSpacerItem(0, 150, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        verticalSpacer2 = QSpacerItem(0, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
 
 # ---------------------------------- Position ----------------------------------
@@ -275,20 +288,31 @@ class App(QWidget):
 
 # --------------------------------- Varia --------------------------------------
 
-        variaLayout = QHBoxLayout()
+        variaLayout = QGridLayout()
+        variaLayout.addWidget(Color('red'), 1,1)
         mainLayout.addLayout(variaLayout, 8, 0)
         variaLayout.setAlignment(Qt.AlignLeft)
-        variaLayout.addItem(verticalSpacer1)
-        variaLayout.addItem(horizontalSpacer2)
+        variaLayout.addItem(horizontalSpacer2, 0, 0)
 
         self.pushButtonC = QPushButton('Calibrate', self)
         self.pushButtonC.setFixedSize(88, 34)
-        variaLayout.addWidget(self.pushButtonC)
-        variaLayout.addItem(horizontalSpacer2)
+        variaLayout.addWidget(self.pushButtonC, 1, 1)
+        variaLayout.addItem(horizontalSpacer2, 1, 2)
 
         self.pushButtonR = QPushButton('Reset', self)
         self.pushButtonR.setFixedSize(88, 34)
-        variaLayout.addWidget(self.pushButtonR)
+        variaLayout.addWidget(self.pushButtonR, 1, 3)
+
+        variaLayout.addItem(verticalSpacer2, 2, 0)
+
+        self.labelEvent = QLabel('Event Code', self)
+        self.labelEvent.setFixedSize(88, 34)
+        variaLayout.addWidget(self.labelEvent, 3, 1)
+
+        self.lcdNumberEvent = QLCDNumber(self)
+        self.lcdNumberEvent.setFixedSize(88, 34)
+        set_lcd_style(self.lcdNumberEvent)
+        variaLayout.addWidget(self.lcdNumberEvent, 3, 3)
 
 
         """graphLayout = QHBoxLayout()
@@ -303,7 +327,7 @@ class App(QWidget):
 
 
 # -----------------------------------------------------------------------------
-        self.wt=WorkerThread() # This is the thread object
+        """self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
         self.pushButtonPos.clicked.connect(functools.partial(self.move_pos))
@@ -313,7 +337,7 @@ class App(QWidget):
         self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
 
-        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
+        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI"""
 
 
     def slot_method(self, data_dict):
