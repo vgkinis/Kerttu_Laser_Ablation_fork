@@ -13,21 +13,13 @@ import matplotlib.pyplot as plt
 
 from general_functions import *
 import sys
+import time
 from general_functions import *
 from datetime import datetime
 from linear_stage import LinearStage
 from serial.tools import list_ports
 import functools
 
-class Color(QWidget):
-
-    def __init__(self, color, *args, **kwargs):
-        super(Color, self).__init__(*args, **kwargs)
-        self.setAutoFillBackground(True)
-
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor(color))
-        self.setPalette(palette)
 
 class WorkerThread(QThread):
     motor_signals = pyqtSignal(dict, name='motor_signals')
@@ -35,7 +27,7 @@ class WorkerThread(QThread):
         QThread.__init__(self)
 
     def run(self):
-        """self.ls = LinearStage(json_path="linear_stage.json")
+        self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
@@ -48,7 +40,7 @@ class WorkerThread(QThread):
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
-                continue"""
+                continue
 
     def set_spd(self, val, unit):
         self.ls.set_speed(val, unit.currentText())
@@ -85,6 +77,8 @@ class App(QWidget):
         self.initUI()
 
     def initUI(self):
+
+        self.calibrating = False
 
         central = QWidget(self)
 
@@ -288,31 +282,33 @@ class App(QWidget):
 
 # --------------------------------- Varia --------------------------------------
 
-        variaLayout = QGridLayout()
-        variaLayout.addWidget(Color('red'), 1,1)
+        variaLayout = QHBoxLayout()
+
         mainLayout.addLayout(variaLayout, 8, 0)
         variaLayout.setAlignment(Qt.AlignLeft)
-        variaLayout.addItem(horizontalSpacer2, 0, 0)
+        variaLayout.addItem(verticalSpacer1)
+        variaLayout.addItem(horizontalSpacer2)
 
         self.pushButtonC = QPushButton('Calibrate', self)
         self.pushButtonC.setFixedSize(88, 34)
-        variaLayout.addWidget(self.pushButtonC, 1, 1)
-        variaLayout.addItem(horizontalSpacer2, 1, 2)
+        variaLayout.addWidget(self.pushButtonC)
+        variaLayout.addItem(horizontalSpacer2)
 
         self.pushButtonR = QPushButton('Reset', self)
         self.pushButtonR.setFixedSize(88, 34)
-        variaLayout.addWidget(self.pushButtonR, 1, 3)
-
-        variaLayout.addItem(verticalSpacer2, 2, 0)
+        variaLayout.addWidget(self.pushButtonR)
+        variaLayout.addItem(verticalSpacer2)
 
         self.labelEvent = QLabel('Event Code', self)
         self.labelEvent.setFixedSize(88, 34)
-        variaLayout.addWidget(self.labelEvent, 3, 1)
+        variaLayout.addWidget(self.labelEvent)
+        variaLayout.addItem(verticalSpacer2)
 
         self.lcdNumberEvent = QLCDNumber(self)
         self.lcdNumberEvent.setFixedSize(88, 34)
         set_lcd_style(self.lcdNumberEvent)
-        variaLayout.addWidget(self.lcdNumberEvent, 3, 3)
+        variaLayout.addWidget(self.lcdNumberEvent)
+        variaLayout.addItem(verticalSpacer2)
 
 
         """graphLayout = QHBoxLayout()
@@ -327,7 +323,7 @@ class App(QWidget):
 
 
 # -----------------------------------------------------------------------------
-        """self.wt=WorkerThread() # This is the thread object
+        self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
         self.pushButtonPos.clicked.connect(functools.partial(self.move_pos))
@@ -337,7 +333,7 @@ class App(QWidget):
         self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
 
-        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI"""
+        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
 
     def slot_method(self, data_dict):
