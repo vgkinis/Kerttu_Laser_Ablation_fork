@@ -65,13 +65,13 @@ class App(QWidget):
         self.left=10
         self.top=10
         self.width=720
-        self.height=600
+        self.height=700
         self.initUI()
 
 
     def initUI(self):
         x_coords = [40, 160, 280, 400, 470, 600]
-        y_coords = [30, 70, 130, 170, 230, 270, 340, 380, 450, 490]
+        y_coords = [30, 70, 130, 170, 230, 270, 340, 380, 450, 490, 560]
         y_coords2 = [385]
 
         self.setWindowTitle(self.title)
@@ -105,19 +105,18 @@ class App(QWidget):
         self.textEditDir.setGeometry(QRect(x_coords[0], y_coords[7], 88, 34))
 
         self.ledPos = QLabel(self)
-        self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
-        self.ledPos.move(x_coords[3], 75)
+        self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
         self.ledDis = QLabel(self)
-        self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+        self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         self.ledDis.move(x_coords[3], 175)
 
         self.ledSpd = QLabel(self)
-        self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+        self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         self.ledSpd.move(x_coords[3], 275)
 
         self.ledDir = QLabel(self)
-        self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+        self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         self.ledDir.move(x_coords[3], 385)
 
         self.comboBoxPos = QComboBox(self)
@@ -179,6 +178,13 @@ class App(QWidget):
         self.lcdNumberDir.setGeometry(QRect(x_coords[4], y_coords[7],  100, 34))
         set_lcd_style(self.lcdNumberDir)
 
+        self.labelEvent = QLabel('Event Code', self)
+        self.labelEvent.setGeometry(QRect(x_coords[4], y_coords[10], 100, 34))
+
+        self.lcdNumberEvent = QLCDNumber(self)
+        self.lcdNumberEvent.setGeometry(QRect(x_coords[5], y_coords[10], 88, 34))
+        set_lcd_style(self.lcdNumberEvent)
+
         # --------------------------------------------------
 
         self.wt=WorkerThread() # This is the thread object
@@ -199,6 +205,7 @@ class App(QWidget):
         self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
         self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
         self.lcdNumberDir.display(data_dict["direction"])
+        self.lcdNumberEvent.display(data_dict["event_code"])
 
         if self.calibrating == True:
             self.wt.calibrate_sys()
@@ -209,33 +216,33 @@ class App(QWidget):
         val = float(self.textEditPos.toPlainText())
         if self.calibrating == False:
             self.wt.move_pos(val, self.comboBoxPos)
-            self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
-            self.ledPos.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledPos.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def set_spd(self):
         val = float(self.textEditSpd.toPlainText())
         if self.calibrating == False and val > 0.0:
             self.wt.set_spd(val, self.comboBoxSpd)
-            self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
-            self.ledSpd.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledSpd.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def move_dis(self):
         val = float(self.textEditDis.toPlainText())
         if self.calibrating == False and val > 0.0:
             self.wt.move_dis(val, self.comboBoxDis)
-            self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
-            self.ledDis.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledDis.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def set_dir(self):
         val = float(self.textEditDir.toPlainText())
         if self.calibrating == False and val in [1,-1]:
             self.wt.set_dir(val)
-            self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
-            self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 17px; min-width: 17px}")
+            self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def calibrate_sys(self):
         self.calibrating = True

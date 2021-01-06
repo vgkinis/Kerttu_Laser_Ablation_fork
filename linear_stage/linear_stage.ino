@@ -5,7 +5,7 @@
 #define end1 2
 #define end2 3
 
-float serial_read_delay = 20;
+float serial_read_delay = 10;
 unsigned long serial_read_time = millis();
 unsigned long serial_write_time = millis();
 unsigned long loop_time = millis();

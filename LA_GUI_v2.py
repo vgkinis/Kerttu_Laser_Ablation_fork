@@ -18,7 +18,49 @@ from linear_stage import LinearStage
 from serial.tools import list_ports
 import functools
 
+class WorkerThread(QThread):
+    motor_signals = pyqtSignal(dict, name='motor_signals')
+    def __init__(self, parent=None):
+        QThread.__init__(self)
 
+    def run(self):
+        self.ls = LinearStage(json_path="linear_stage.json")
+        self.ls.read_json()
+        ports = (list(list_ports.comports()))
+        port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
+        serial_port = "/dev/" + port_name
+        self.ls.start_serial(serial_port)
+        time.sleep(2)
+        while True:
+            try:
+                self.ls.ping_arduino()
+                data_dict = self.ls.serial_read()
+                self.motor_signals.emit(data_dict)
+            except:
+                continue
+
+    def set_spd(self, val, unit):
+        self.ls.set_speed(val, unit.currentText())
+
+    def move_dis(self, val, unit):
+        self.ls.move_dis(val, unit.currentText())
+
+    def move_pos(self, val, unit):
+        self.ls.move_pos(val, unit.currentText())
+
+    def set_dir(self, val):
+        self.ls.set_dir(val)
+
+    def reset_sys(self):
+        self.ls.reset_sys()
+
+    def calibrate_sys(self):
+        self.ls.calibrate_sys()
+
+    def stop(self):
+        #self.ser.close()
+        print("stop")
+        self.terminate()
 
 class App(QWidget):
 
@@ -77,6 +119,11 @@ class App(QWidget):
         posLayout.addWidget(self.pushButtonPos)
         posLayout.addItem(horizontalSpacer2)
 
+        self.ledPos = QLabel(self)
+        self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        posLayout.addWidget(self.ledPos)
+        posLayout.addItem(horizontalSpacer2)
+
         self.lcdNumberPos = QLCDNumber(self)
         self.lcdNumberPos.setFixedSize(100, 34)
         set_lcd_style(self.lcdNumberPos)
@@ -118,6 +165,11 @@ class App(QWidget):
         self.pushButtonDis = QPushButton('Move', self)
         self.pushButtonDis.setFixedSize(88, 34)
         disLayout.addWidget(self.pushButtonDis)
+        disLayout.addItem(horizontalSpacer2)
+
+        self.ledDis = QLabel(self)
+        self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        disLayout.addWidget(self.ledDis)
         disLayout.addItem(horizontalSpacer2)
 
         self.lcdNumberDis = QLCDNumber(self)
@@ -163,6 +215,11 @@ class App(QWidget):
         spdLayout.addWidget(self.pushButtonSpd)
         spdLayout.addItem(horizontalSpacer2)
 
+        self.ledSpd = QLabel(self)
+        self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        spdLayout.addWidget(self.ledSpd)
+        spdLayout.addItem(horizontalSpacer2)
+
         self.lcdNumberSpd = QLCDNumber(self)
         self.lcdNumberSpd.setFixedSize(100, 34)
         set_lcd_style(self.lcdNumberSpd)
@@ -202,6 +259,11 @@ class App(QWidget):
         dirLayout.addWidget(self.pushButtonDir)
         dirLayout.addItem(horizontalSpacer2)
 
+        self.ledDir = QLabel(self)
+        self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        dirLayout.addWidget(self.ledDir)
+        dirLayout.addItem(horizontalSpacer2)
+
         self.lcdNumberDir = QLCDNumber(self)
         self.lcdNumberDir.setFixedSize(100, 34)
         set_lcd_style(self.lcdNumberDir)
@@ -229,8 +291,6 @@ class App(QWidget):
         variaLayout.addWidget(self.pushButtonR)
 
 
-# --------------------------------- Graph --------------------------------------
-
         """graphLayout = QHBoxLayout()
         mainLayout.addLayout(graphLayout, 9, 0)
 
@@ -242,6 +302,74 @@ class App(QWidget):
         self.update_graph()"""
 
 
+# -----------------------------------------------------------------------------
+        self.wt=WorkerThread() # This is the thread object
+        self.wt.start()
+        self.wt.motor_signals.connect(self.slot_method)
+        self.pushButtonPos.clicked.connect(functools.partial(self.move_pos))
+        self.pushButtonSpd.clicked.connect(functools.partial(self.set_spd))
+        self.pushButtonDir.clicked.connect(functools.partial(self.set_dir))
+        self.pushButtonDis.clicked.connect(functools.partial(self.move_dis))
+        self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
+        self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
+
+        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
+
+
+    def slot_method(self, data_dict):
+        self.lcdNumberPos.display(data_dict["pos_" + self.comboBoxPosFb.currentText()])
+        self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
+        self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
+        self.lcdNumberDir.display(data_dict["direction"])
+        self.lcdNumberEvent.display(data_dict["event_code"])
+
+        if self.calibrating == True:
+            self.wt.calibrate_sys()
+            if data_dict["event_code"] == 1:
+                self.calibrating = False
+
+    def move_pos(self):
+        val = float(self.textEditPos.toPlainText())
+        if self.calibrating == False:
+            self.wt.move_pos(val, self.comboBoxPos)
+            self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        else:
+            self.ledPos.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+    def set_spd(self):
+        val = float(self.textEditSpd.toPlainText())
+        if self.calibrating == False and val > 0.0:
+            self.wt.set_spd(val, self.comboBoxSpd)
+            self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        else:
+            self.ledSpd.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+    def move_dis(self):
+        val = float(self.textEditDis.toPlainText())
+        if self.calibrating == False and val > 0.0:
+            self.wt.move_dis(val, self.comboBoxDis)
+            self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        else:
+            self.ledDis.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+    def set_dir(self):
+        val = float(self.textEditDir.toPlainText())
+        if self.calibrating == False and val in [1,-1]:
+            self.wt.set_dir(val)
+            self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        else:
+            self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+    def calibrate_sys(self):
+        self.calibrating = True
+
+    def reset_sys(self):
+        self.calibrating = False
+        self.wt.reset_sys()
+
+
+# --------------------------------- Graph --------------------------------------
+
 
     def update_graph(self):
 
@@ -251,13 +379,10 @@ class App(QWidget):
         self.canvas_ls.draw()
 
 
-if __name__ == '__main__':
-    #app = QApplication([])
-    #dialog = QMainWindow()
-    #foo = MyMainWindow(dialog)
-    #foo.show()
-    #sys.exit(app.exec_())
 
+
+
+if __name__ == '__main__':
     app=QApplication(sys.argv)
     ex=App()
     ex.show()
