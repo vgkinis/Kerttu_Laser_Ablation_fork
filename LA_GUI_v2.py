@@ -81,6 +81,7 @@ class App(QWidget):
 
         self.calibrating = False
         self.calibrated = False
+        self.discrete_sampling = False
 
         central = QWidget(self)
 
@@ -92,7 +93,7 @@ class App(QWidget):
         horizontalSpacer1 = QSpacerItem(88, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
         horizontalSpacer2 = QSpacerItem(30, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        verticalSpacer1 = QSpacerItem(0, 150, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        verticalSpacer1 = QSpacerItem(0, 120, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         verticalSpacer2 = QSpacerItem(0, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -335,7 +336,7 @@ class App(QWidget):
 
         discreteLabelLayout = QHBoxLayout()
         mainLayout.addLayout(discreteLabelLayout, 10, 0)
-        discreteLabelLayout.setAlignment(Qt.AlignLeft)
+        discreteLabelLayout.setAlignment(Qt.AlignCenter)
         discreteLabelLayout.addItem(horizontalSpacer2)
 
         self.labelDiscrete = QLabel('Discrete Movement', self)
@@ -343,41 +344,56 @@ class App(QWidget):
         self.labelDiscrete.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         discreteLabelLayout.addWidget(self.labelDiscrete)
 
+        discreteTxtLayout = QHBoxLayout()
+        mainLayout.addLayout(discreteTxtLayout, 11, 0)
+        discreteTxtLayout.setAlignment(Qt.AlignLeft)
+        discreteTxtLayout.addItem(horizontalSpacer2)
+
+        self.labelDiscrete1 = QLabel('Distance Interval', self)
+        self.labelDiscrete1.setFixedSize(150, 34)
+        discreteTxtLayout.addWidget(self.labelDiscrete1)
+        discreteTxtLayout.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelDiscrete2 = QLabel('Time Interval', self)
+        self.labelDiscrete2.setFixedSize(120, 34)
+        discreteTxtLayout.addWidget(self.labelDiscrete2)
+        discreteTxtLayout.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelDiscrete3 = QLabel('Total Distance', self)
+        self.labelDiscrete3.setFixedSize(120, 34)
+        discreteTxtLayout.addWidget(self.labelDiscrete3)
+        discreteTxtLayout.addItem(QSpacerItem(120, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
         discreteLayout = QHBoxLayout()
-        mainLayout.addLayout(discreteLayout, 11, 0)
+        mainLayout.addLayout(discreteLayout, 12, 0)
         discreteLayout.setAlignment(Qt.AlignLeft)
         discreteLayout.addItem(horizontalSpacer2)
 
         self.textEditDiscreteDis = QTextEdit(self)
         self.textEditDiscreteDis.setFixedSize(88, 34)
         discreteLayout.addWidget(self.textEditDiscreteDis)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.comboBoxDiscrete = QComboBox(self)
         self.comboBoxDiscrete.addItems(["mm", "steps", "rev"])
         self.comboBoxDiscrete.setFixedSize(88, 34)
         discreteLayout.addWidget(self.comboBoxDiscrete)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
-
-        self.labelDiscrete1 = QLabel('every', self)
-        self.labelDiscrete1.setFixedSize(35, 34)
-        discreteLayout.addWidget(self.labelDiscrete1)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.textEditDiscreteTime = QTextEdit(self)
         self.textEditDiscreteTime.setFixedSize(88, 34)
         discreteLayout.addWidget(self.textEditDiscreteTime)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.labelDiscrete1 = QLabel('seconds', self)
-        self.labelDiscrete1.setFixedSize(58, 34)
-        discreteLayout.addWidget(self.labelDiscrete1)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.textEditDiscreteTotal= QTextEdit(self)
+        self.textEditDiscreteTotal.setFixedSize(88, 34)
+        discreteLayout.addWidget(self.textEditDiscreteTotal)
+        discreteLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.pushButtonDiscrete = QPushButton('Start', self)
         self.pushButtonDiscrete.setFixedSize(88, 34)
         discreteLayout.addWidget(self.pushButtonDiscrete)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.ledDiscrete = QLabel(self)
         self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
@@ -387,7 +403,7 @@ class App(QWidget):
 
 
 # -----------------------------------------------------------------------------
-        """self.wt=WorkerThread() # This is the thread object
+        self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
         self.pushButtonPos.clicked.connect(functools.partial(self.move_pos))
@@ -396,8 +412,9 @@ class App(QWidget):
         self.pushButtonDis.clicked.connect(functools.partial(self.move_dis))
         self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
+        self.pushButtonDiscrete.clicked.connect(functools.partial(self.discrete_meas))
 
-        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI"""
+        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
 
     def slot_method(self, data_dict):
@@ -455,6 +472,12 @@ class App(QWidget):
     def reset_sys(self):
         self.calibrating = False
         self.wt.reset_sys()
+
+    def discrete_meas(self):
+        val_dis = float(self.textEditDiscreteDis.toPlainText())
+        val_time = float(self.textEditDiscreteTime.toPlainText())
+        if self.calibrating == False and val_dis > 0.0 and val_time > 0.0:
+            self.discrete_sampling = True
 
 
 # --------------------------------- Graph --------------------------------------
