@@ -80,6 +80,7 @@ class App(QWidget):
     def initUI(self):
 
         self.calibrating = False
+        self.calibrated = False
 
         central = QWidget(self)
 
@@ -327,8 +328,6 @@ class App(QWidget):
 
         graphLayout.addWidget(self.canvas_ls)
 
-        self.update_graph()
-
         variaLayout.addItem(QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
 
@@ -412,6 +411,11 @@ class App(QWidget):
             self.wt.calibrate_sys()
             if data_dict["event_code"] == 1:
                 self.calibrating = False
+                self.calibrated = True
+
+        abs_pos_mm = data_dict["pos_mm"]
+
+        self.update_graph(abs_pos_mm)
 
     def move_pos(self):
         val = float(self.textEditPos.toPlainText())
@@ -456,15 +460,17 @@ class App(QWidget):
 # --------------------------------- Graph --------------------------------------
 
 
-    def update_graph(self):
-        calibrated = False
+    def update_graph(self, abs_pos_mm):
+        # TODO : to not hard-coded value in the future
+        stage_len_mm = 1200
         self.figure_ls.clear()
         plt.figure(num=1)
         ax = plt.axes(xlim=(0, 1200), ylim=(0, 30))
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-        if calibrated == True:
-            rectangle = plt.Rectangle((0, 0), 550, 30, fc='lightblue')
+
+        if self.calibrated == True:
+            rectangle = plt.Rectangle((stage_len_mm/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
             plt.gca().add_patch(rectangle)
         else:
             plt.text(0.5,0.5,'Calibrate the stage to see the absolute position',horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
