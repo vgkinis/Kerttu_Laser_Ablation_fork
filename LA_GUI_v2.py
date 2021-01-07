@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QTextEdit, QGridLayout, QComb
                              QLabel, QMainWindow, qApp, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import pyqtSlot, QRect, Qt, QThread, pyqtSignal
 from PyQt5 import QtCore
-from PyQt5.QtGui import QColor, QPalette
+from PyQt5.QtGui import QColor, QPalette, QPainter, QBrush, QPen
 
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
@@ -28,7 +28,7 @@ class WorkerThread(QThread):
 
     def run(self):
         self.ls = LinearStage(json_path="linear_stage.json")
-        self.ls.read_json()
+        """self.ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
         serial_port = "/dev/" + port_name
@@ -40,7 +40,7 @@ class WorkerThread(QThread):
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
-                continue
+                continue"""
 
     def set_spd(self, val, unit):
         self.ls.set_speed(val, unit.currentText())
@@ -73,7 +73,8 @@ class App(QWidget):
         self.left=10
         self.top=10
         self.width=720
-        self.height=600
+        self.height=720
+        self.setMinimumSize(720, 720)
         self.initUI()
 
     def initUI(self):
@@ -87,8 +88,8 @@ class App(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left,self.top,self.width,self.height)
 
-        horizontalSpacer1 = QSpacerItem(88, 34, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        horizontalSpacer2 = QSpacerItem(30, 34, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        horizontalSpacer1 = QSpacerItem(88, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        horizontalSpacer2 = QSpacerItem(30, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         verticalSpacer1 = QSpacerItem(0, 150, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -102,8 +103,8 @@ class App(QWidget):
         posLabelLayout.setAlignment(Qt.AlignLeft)
         posLabelLayout.addItem(horizontalSpacer2)
 
-        self.labelPos = QLabel('Absolute position', self)
-        self.labelPos.setFixedSize(111, 34)
+        self.labelPos = QLabel('Absolute Position', self)
+        self.labelPos.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         posLabelLayout.addWidget(self.labelPos)
 
         posLayout = QHBoxLayout()
@@ -151,6 +152,7 @@ class App(QWidget):
         disLabelLayout.addItem(horizontalSpacer2)
 
         self.labelDis = QLabel('Distance', self)
+        self.labelDis.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         self.labelDis.setFixedSize(88, 34)
         disLabelLayout.addWidget(self.labelDis)
 
@@ -199,6 +201,7 @@ class App(QWidget):
         spdLabelLayout.addItem(horizontalSpacer2)
 
         self.labelSpd = QLabel('Speed', self)
+        self.labelSpd.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         self.labelSpd.setFixedSize(88, 34)
         spdLabelLayout.addWidget(self.labelSpd)
 
@@ -247,6 +250,7 @@ class App(QWidget):
         dirLabelLayout.addItem(horizontalSpacer2)
 
         self.labelDir = QLabel('Direction', self)
+        self.labelDir.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         self.labelDir.setFixedSize(111, 34)
         dirLabelLayout.addWidget(self.labelDir)
 
@@ -297,33 +301,94 @@ class App(QWidget):
         self.pushButtonR = QPushButton('Reset', self)
         self.pushButtonR.setFixedSize(88, 34)
         variaLayout.addWidget(self.pushButtonR)
-        variaLayout.addItem(verticalSpacer2)
+        variaLayout.addItem(QSpacerItem(128, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelEvent = QLabel('Event Code', self)
-        self.labelEvent.setFixedSize(88, 34)
+        #self.labelEvent.setStyleSheet("QLabel {font: Times New Roman; font-size: 12px}")
         variaLayout.addWidget(self.labelEvent)
-        variaLayout.addItem(verticalSpacer2)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.lcdNumberEvent = QLCDNumber(self)
-        self.lcdNumberEvent.setFixedSize(88, 34)
+        self.lcdNumberEvent.setFixedSize(100, 34)
         set_lcd_style(self.lcdNumberEvent)
         variaLayout.addWidget(self.lcdNumberEvent)
-        variaLayout.addItem(verticalSpacer2)
 
+        variaLayout.addItem(QSpacerItem(0, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        """graphLayout = QHBoxLayout()
+# --------------------------------- Graph --------------------------------------
+
+        graphLayout = QHBoxLayout()
         mainLayout.addLayout(graphLayout, 9, 0)
 
         self.figure_ls = plt.figure()
-        self.figure_ls.set_figheight(1.5)
+        self.figure_ls.set_figheight(0.5)
         self.figure_ls.set_figwidth(5)
         self.canvas_ls = FigureCanvas(self.figure_ls)
+
         graphLayout.addWidget(self.canvas_ls)
-        self.update_graph()"""
+
+        self.update_graph()
+
+        variaLayout.addItem(QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+
+# --------------------------- Discrete movement --------------------------------
+
+        discreteLabelLayout = QHBoxLayout()
+        mainLayout.addLayout(discreteLabelLayout, 10, 0)
+        discreteLabelLayout.setAlignment(Qt.AlignLeft)
+        discreteLabelLayout.addItem(horizontalSpacer2)
+
+        self.labelDiscrete = QLabel('Discrete Movement', self)
+        self.labelDiscrete.setFixedSize(200, 34)
+        self.labelDiscrete.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        discreteLabelLayout.addWidget(self.labelDiscrete)
+
+        discreteLayout = QHBoxLayout()
+        mainLayout.addLayout(discreteLayout, 11, 0)
+        discreteLayout.setAlignment(Qt.AlignLeft)
+        discreteLayout.addItem(horizontalSpacer2)
+
+        self.textEditDiscreteDis = QTextEdit(self)
+        self.textEditDiscreteDis.setFixedSize(88, 34)
+        discreteLayout.addWidget(self.textEditDiscreteDis)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.comboBoxDiscrete = QComboBox(self)
+        self.comboBoxDiscrete.addItems(["mm", "steps", "rev"])
+        self.comboBoxDiscrete.setFixedSize(88, 34)
+        discreteLayout.addWidget(self.comboBoxDiscrete)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelDiscrete1 = QLabel('every', self)
+        self.labelDiscrete1.setFixedSize(35, 34)
+        discreteLayout.addWidget(self.labelDiscrete1)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.textEditDiscreteTime = QTextEdit(self)
+        self.textEditDiscreteTime.setFixedSize(88, 34)
+        discreteLayout.addWidget(self.textEditDiscreteTime)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelDiscrete1 = QLabel('seconds', self)
+        self.labelDiscrete1.setFixedSize(58, 34)
+        discreteLayout.addWidget(self.labelDiscrete1)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.pushButtonDiscrete = QPushButton('Start', self)
+        self.pushButtonDiscrete.setFixedSize(88, 34)
+        discreteLayout.addWidget(self.pushButtonDiscrete)
+        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.ledDiscrete = QLabel(self)
+        self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        discreteLayout.addWidget(self.ledDiscrete)
+        discreteLayout.addItem(horizontalSpacer2)
+        discreteLayout.addItem(QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
 
 # -----------------------------------------------------------------------------
-        self.wt=WorkerThread() # This is the thread object
+        """self.wt=WorkerThread() # This is the thread object
         self.wt.start()
         self.wt.motor_signals.connect(self.slot_method)
         self.pushButtonPos.clicked.connect(functools.partial(self.move_pos))
@@ -333,7 +398,7 @@ class App(QWidget):
         self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
 
-        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
+        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI"""
 
 
     def slot_method(self, data_dict):
@@ -392,12 +457,18 @@ class App(QWidget):
 
 
     def update_graph(self):
-
+        calibrated = False
         self.figure_ls.clear()
         plt.figure(num=1)
-        plt.plot([1,2,3], [1,2,1], alpha=0.5)
+        ax = plt.axes(xlim=(0, 1200), ylim=(0, 30))
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+        if calibrated == True:
+            rectangle = plt.Rectangle((0, 0), 550, 30, fc='lightblue')
+            plt.gca().add_patch(rectangle)
+        else:
+            plt.text(0.5,0.5,'Calibrate the stage to see the absolute position',horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
         self.canvas_ls.draw()
-
 
 
 
