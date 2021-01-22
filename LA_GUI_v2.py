@@ -28,7 +28,7 @@ class WorkerThread(QThread):
 
     def run(self):
         self.ls = LinearStage(json_path="linear_stage.json")
-        """self.ls.read_json()
+        self.ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
         serial_port = "/dev/" + port_name
@@ -40,7 +40,7 @@ class WorkerThread(QThread):
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
             except:
-                continue"""
+                continue
 
     def set_spd(self, val, unit):
         self.ls.set_speed(val, unit.currentText())
@@ -504,7 +504,7 @@ class App(QWidget):
         ax.get_yaxis().set_visible(False)
 
         if self.calibrated == True:
-            rectangle = plt.Rectangle((stage_len_mm/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
+            rectangle = plt.Rectangle((-stage_len_mm/2 + 550/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
             plt.gca().add_patch(rectangle)
         else:
             plt.text(0.5,0.5,'Calibrate the stage to see the absolute position',horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)

@@ -95,13 +95,13 @@ void categorize_cmd(String serial_string){
 void set_direction(int new_direction){
   if (new_direction == 1){
     direction = new_direction;
-    digitalWrite(dir, HIGH);
-    //Serial.println("Direction was changed to 1");
+    digitalWrite(dir, LOW);
+    //Serial.println("Direction was changed to -1");
   }
   else if (new_direction == -1){
     direction = new_direction;
-    digitalWrite(dir, LOW);
-    //Serial.println("Direction was changed to -1");
+    digitalWrite(dir, HIGH);
+    //Serial.println("Direction was changed to 1");
   }
 }
 
