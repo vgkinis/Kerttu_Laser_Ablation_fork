@@ -19,6 +19,7 @@ from datetime import datetime
 from linear_stage import LinearStage
 from serial.tools import list_ports
 import functools
+import schedule
 
 
 class WorkerThread(QThread):
@@ -36,6 +37,10 @@ class WorkerThread(QThread):
         time.sleep(2)
         while True:
             try:
+                if self.discrete_sampling == True:
+                    if self.discrete_total > 0:
+                        schedule.every(self.discrete_time).seconds.do(self.discrete_move)
+                        self.discrete_total -= self.discrete_dis
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
@@ -64,6 +69,17 @@ class WorkerThread(QThread):
         #self.ser.close()
         print("stop")
         self.terminate()
+
+    def discrete_meas(self, dis_interval, dis_interval_unit, time_interval, total_dis, total_dis_unit):
+        self.discrete_sampling = True
+        self.discrete_dis = dis_interval
+        self.discrete_dis_unit = dis_interval_unit
+        self.discrete_time = time_interval
+        self.discrete_total = total_dis
+        self.discrete_total_unit = total_dis_unit
+
+    def discrete_move(self):
+        self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
 
 class App(QWidget):
 
@@ -447,7 +463,7 @@ class App(QWidget):
 
     def move_pos(self):
         val = float(self.textEditPos.toPlainText())
-        if self.calibrating == False:
+        if self.calibrating == False and self.discrete_sampling == False:
             self.wt.move_pos(val, self.comboBoxPos)
             self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
@@ -455,7 +471,7 @@ class App(QWidget):
 
     def set_spd(self):
         val = float(self.textEditSpd.toPlainText())
-        if self.calibrating == False and val > 0.0:
+        if self.calibrating == False and val > 0.0 and self.discrete_sampling == False:
             self.wt.set_spd(val, self.comboBoxSpd)
             self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
@@ -463,7 +479,7 @@ class App(QWidget):
 
     def move_dis(self):
         val = float(self.textEditDis.toPlainText())
-        if self.calibrating == False and val > 0.0:
+        if self.calibrating == False and val > 0.0 and self.discrete_sampling == False:
             self.wt.move_dis(val, self.comboBoxDis)
             self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
@@ -471,14 +487,15 @@ class App(QWidget):
 
     def set_dir(self):
         val = float(self.textEditDir.toPlainText())
-        if self.calibrating == False and val in [1,-1]:
+        if self.calibrating == False and val in [1,-1] and self.discrete_sampling == False:
             self.wt.set_dir(val)
             self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def calibrate_sys(self):
-        self.calibrating = True
+        if self.discrete_sampling == False:
+            self.calibrating = True
 
     def reset_sys(self):
         self.calibrating = False
@@ -486,9 +503,13 @@ class App(QWidget):
 
     def discrete_meas(self):
         val_dis = float(self.textEditDiscreteDis.toPlainText())
+        val_dis_unit = self.comboBoxDiscrete
         val_time = float(self.textEditDiscreteTime.toPlainText())
-        if self.calibrating == False and val_dis > 0.0 and val_time > 0.0:
+        val_total_dis = float(self.textEditDiscreteTotal.toPlainText())
+        val_total_dis_unit = self.comboBoxDiscreteTotal
+        if self.calibrating == False and val_dis > 0.0 and val_time > 0.0 and val_total_dis > 0.0:
             self.discrete_sampling = True
+            self.wt.discrete_meas(val_dis, val_dis_unit, val_time, val_total_dis, val_total_dis_unit)
 
 
 # --------------------------------- Graph --------------------------------------
@@ -504,7 +525,7 @@ class App(QWidget):
         ax.get_yaxis().set_visible(False)
 
         if self.calibrated == True:
-            rectangle = plt.Rectangle((-stage_len_mm/2 + 550/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
+            rectangle = plt.Rectangle((stage_len_mm/2 - 550/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
             plt.gca().add_patch(rectangle)
         else:
             plt.text(0.5,0.5,'Calibrate the stage to see the absolute position',horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
