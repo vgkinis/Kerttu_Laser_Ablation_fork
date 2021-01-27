@@ -38,10 +38,6 @@ class WorkerThread(QThread):
         time.sleep(2)
         while True:
             schedule.run_pending()
-            if self.discrete_sampling == True:
-                schedule.every(self.discrete_time).seconds.do(self.discrete_move)
-            else:
-                schedule.cancel_job(self.discrete_move)
             try:
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
@@ -79,15 +75,18 @@ class WorkerThread(QThread):
         self.discrete_time = time_interval
         self.discrete_total = total_dis
         self.discrete_total_unit = total_dis_unit
-        print("discrete meas")
+        self.ls.set_event_code(4)
+        schedule.every(self.discrete_time).seconds.do(self.discrete_move).tag("discrete")
+
 
     def discrete_move(self):
-        print("discrete move")
-        self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
-        self.discrete_total -= self.discrete_dis
-        if self.discrete_total <= 0:
-            self.discrete_sampling = False
-            self.ls.set_event_code(0)
+        if self.discrete_sampling == True:
+            self.move_dis(self.discrete_dis, self.discrete_dis_unit)
+            self.discrete_total -= self.discrete_dis
+            if self.discrete_total <= 0:
+                self.discrete_sampling = False
+                self.ls.set_event_code(0)
+                schedule.clear("discrete")
 
 class App(QWidget):
 

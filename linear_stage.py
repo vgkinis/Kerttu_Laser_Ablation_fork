@@ -268,24 +268,3 @@ if __name__ == "__main__":
     ls.send_cmd("S", str(1000))
     ls.send_cmd("W")
     print(ls.serial_read())
-    # for i in range(2):
-    #     # Test sequence
-    #     print(ls.serial_read())
-    #     ls.set_dir(-1)
-    #     print()
-    #
-    #     print(ls.serial_read())
-    #     ls.set_speed(7, "mm/s")
-    #     print()
-    #
-    #     print(ls.serial_read())
-    #     ls.move_dis(100, "mm")
-    #     print()
-    #
-    #     print(ls.serial_read())
-    #     ls.reset_sys()
-    #     print()
-    #
-    #     print(ls.serial_read())
-    #     ls.move_pos(0, "mm")
-    #     print()
