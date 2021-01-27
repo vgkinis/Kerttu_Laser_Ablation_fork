@@ -34,13 +34,15 @@ class WorkerThread(QThread):
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
         serial_port = "/dev/" + port_name
         self.ls.start_serial(serial_port)
+        self.discrete_sampling = False
         time.sleep(2)
         while True:
+            schedule.run_pending()
+            if self.discrete_sampling == True:
+                schedule.every(self.discrete_time).seconds.do(self.discrete_move)
+            else:
+                schedule.cancel_job(self.discrete_move)
             try:
-                if self.discrete_sampling == True:
-                    if self.discrete_total > 0:
-                        schedule.every(self.discrete_time).seconds.do(self.discrete_move)
-                        self.discrete_total -= self.discrete_dis
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
@@ -77,9 +79,15 @@ class WorkerThread(QThread):
         self.discrete_time = time_interval
         self.discrete_total = total_dis
         self.discrete_total_unit = total_dis_unit
+        print("discrete meas")
 
     def discrete_move(self):
+        print("discrete move")
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
+        self.discrete_total -= self.discrete_dis
+        if self.discrete_total <= 0:
+            self.discrete_sampling = False
+            self.ls.set_event_code(0)
 
 class App(QWidget):
 
@@ -456,6 +464,10 @@ class App(QWidget):
             if data_dict["event_code"] == 1:
                 self.calibrating = False
                 self.calibrated = True
+
+        if self.discrete_sampling == True:
+            if data_dict["event_code"] == 0:
+                self.discrete_sampling = False
 
         abs_pos_mm = data_dict["pos_mm"]
 

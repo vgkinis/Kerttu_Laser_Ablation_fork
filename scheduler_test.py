@@ -16,8 +16,9 @@ if discrete_sampling == True:
 
     #schedule.every(1).to(2).minutes.do(job)
     #schedule.every().minute.at(":17").do(job2)
-    schedule.every(1.2).seconds.do(job3)
+    schedule.every(3).seconds.do(job3)
 
 while True:
     schedule.run_pending()
-    time.sleep(1)
+    time.sleep(3)
+    discrete_sampling = False
