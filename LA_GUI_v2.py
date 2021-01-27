@@ -76,10 +76,12 @@ class WorkerThread(QThread):
         self.discrete_total = total_dis
         self.discrete_total_unit = total_dis_unit
         self.ls.set_event_code(4)
-        schedule.every(self.discrete_time).seconds.do(self.discrete_move).tag("discrete")
+        self.discrete_move(True)
 
 
-    def discrete_move(self):
+    def discrete_move(self, first_execution):
+        if first_execution == True:
+            schedule.every(self.discrete_time).seconds.do(self.discrete_move, first_execution = False).tag("discrete")
         if self.discrete_sampling == True:
             self.move_dis(self.discrete_dis, self.discrete_dis_unit)
             self.discrete_total -= self.discrete_dis
@@ -105,6 +107,7 @@ class App(QWidget):
         self.calibrating = False
         self.calibrated = False
         self.discrete_sampling = False
+        self.spd_mm_s = 5
 
         central = QWidget(self)
 
@@ -458,6 +461,8 @@ class App(QWidget):
         self.lcdNumberDir.display(data_dict["direction"])
         self.lcdNumberEvent.display(data_dict["event_code"])
 
+        self.spd_mm_s = data_dict["spd_mm/s"]
+
         if self.calibrating == True:
             self.wt.calibrate_sys()
             if data_dict["event_code"] == 1:
@@ -513,14 +518,16 @@ class App(QWidget):
         self.wt.reset_sys()
 
     def discrete_meas(self):
-        val_dis = float(self.textEditDiscreteDis.toPlainText())
-        val_dis_unit = self.comboBoxDiscrete
-        val_time = float(self.textEditDiscreteTime.toPlainText())
-        val_total_dis = float(self.textEditDiscreteTotal.toPlainText())
-        val_total_dis_unit = self.comboBoxDiscreteTotal
-        if self.calibrating == False and val_dis > 0.0 and val_time > 0.0 and val_total_dis > 0.0:
-            self.discrete_sampling = True
-            self.wt.discrete_meas(val_dis, val_dis_unit, val_time, val_total_dis, val_total_dis_unit)
+        if self.calibrating == False:
+            val_dis = float(self.textEditDiscreteDis.toPlainText())
+            val_dis_unit = self.comboBoxDiscrete
+            moving_time = val_dis/self.spd_mm_s
+            val_time = float(self.textEditDiscreteTime.toPlainText()) + moving_time
+            val_total_dis = float(self.textEditDiscreteTotal.toPlainText())
+            val_total_dis_unit = self.comboBoxDiscreteTotal
+            if self.calibrating == False and val_dis > 0.0 and val_time > 0.0 and val_total_dis > 0.0:
+                self.discrete_sampling = True
+                self.wt.discrete_meas(val_dis, val_dis_unit, val_time, val_total_dis, val_total_dis_unit)
 
 
 # --------------------------------- Graph --------------------------------------
