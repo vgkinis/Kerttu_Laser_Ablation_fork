@@ -1,4 +1,3 @@
-//Declare pin functions on RedBoard
 #define stp 5
 #define dir 6 // LOW -> step forward, HIGH -> step in reverse
 

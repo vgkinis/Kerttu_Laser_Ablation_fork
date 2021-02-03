@@ -11,15 +11,15 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
-from general_functions import *
 import sys
 import time
-from general_functions import *
 from datetime import datetime
-from linear_stage import LinearStage
 from serial.tools import list_ports
 import functools
 import schedule
+
+from general_functions import *
+from linear_stage import LinearStage
 
 
 class WorkerThread(QThread):
