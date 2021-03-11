@@ -33,7 +33,8 @@ void setup() {
 void loop() {
   loop_time = millis();
   serial_read();
-  n_steps();
+  set_event_code();
+  steps();
 }
 
 // ---------------- Serial Functions ----------------
@@ -57,11 +58,11 @@ void categorize_cmd(String serial_string){
   if (serial_string.startsWith("R")){
     reset_steps();
   }
-  else if (serial_string.startsWith("E")){
+  //else if (serial_string.startsWith("E")){
     // Set event_code
-    int serial_event = serial_string.substring(1,-1).toInt();
-    event_code = serial_event;
-  }
+    //int serial_event = serial_string.substring(1,-1).toInt();
+    //event_code = serial_event;
+  //}
   else if (serial_string.startsWith("D")){
     // Direction can't be changed while motor is moving.
     if (steps_to_do == 0){
@@ -117,6 +118,14 @@ void set_abs_pos(long new_abs_pos){
   abs_pos = new_abs_pos;
 }
 
+void set_event_code(){
+  if (steps_to_do == 0){
+    event_code = 0
+  }
+  else {
+    event_code = 4
+  }
+}
 
 // ---------------- Step Functions ----------------
 

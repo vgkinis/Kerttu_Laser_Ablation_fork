@@ -218,11 +218,11 @@ class LinearStage():
 
     def calibrate_sys(self):
         if self.event_code == 0:
-            self.set_event_code(4)
+            #self.set_event_code(4)
             self.set_dir(-1)
             self.move_dis(self.stage_length, "mm")
         elif self.event_code == 2:
-            self.set_event_code(4)
+            #self.set_event_code(4)
             self.set_dir(1)
             self.count_range_start = self.abs_pos_stp
             self.move_dis(self.stage_length, "mm")
@@ -237,16 +237,28 @@ class LinearStage():
             self.count_range_start = None
             new_abs_pos = half_ls_range
             self.set_abs_pos_stp(new_abs_pos)
-            self.set_event_code(0)
+            #self.set_event_code(0)
             dis = abs(new_abs_pos - 0)
             self.move_dis(dis, "steps")
         return
 
 
     def reset_sys(self):
-        self.set_event_code(0)
+        #self.set_event_code(0)
         time.sleep(2)
         self.send_cmd("R")
+
+    def discrete_meas(self, n, delta_x_mm, pause_t):
+        self.send_cmd("W")
+        data_dict = self.serial_read()
+        move_t = delta_x_mm/data_dict["spd_mm/s"]
+        delta_t = move_t + pause_t
+
+        for i in range(n):
+            self.move_dis(delta_x_mm, "mm")
+            time.sleep(delta_t)
+
+
 
 
 #--------------------------------- if __main__ ---------------------------------
@@ -259,12 +271,7 @@ if __name__ == "__main__":
     ls.start_serial(serial_port)
     time.sleep(2)
 
-    ls.send_cmd("S", str(5000))
-    ls.send_cmd("W")
-    print(ls.serial_read())
-    ls.send_cmd("D", str(-1))
-    ls.send_cmd("W")
-    print(ls.serial_read())
-    ls.send_cmd("S", str(1000))
-    ls.send_cmd("W")
-    print(ls.serial_read())
+    #ls.send_cmd("S", str(5000))
+    #ls.send_cmd("W")
+    #print(ls.serial_read())
+    ls.discrete_meas(3, 40, 5)
