@@ -218,11 +218,11 @@ class LinearStage():
 
     def calibrate_sys(self):
         if self.event_code == 0:
-            #self.set_event_code(4)
+            self.set_event_code(4)
             self.set_dir(-1)
             self.move_dis(self.stage_length, "mm")
         elif self.event_code == 2:
-            #self.set_event_code(4)
+            self.set_event_code(4)
             self.set_dir(1)
             self.count_range_start = self.abs_pos_stp
             self.move_dis(self.stage_length, "mm")
@@ -237,14 +237,14 @@ class LinearStage():
             self.count_range_start = None
             new_abs_pos = half_ls_range
             self.set_abs_pos_stp(new_abs_pos)
-            #self.set_event_code(0)
+            self.set_event_code(0)
             dis = abs(new_abs_pos - 0)
             self.move_dis(dis, "steps")
         return
 
 
     def reset_sys(self):
-        #self.set_event_code(0)
+        self.set_event_code(0)
         time.sleep(2)
         self.send_cmd("R")
 
