@@ -70,27 +70,28 @@ class LinearStage():
             if idx_s < idx_r:
                 line = line[idx_s+1 : idx_r]
                 data = line.split(";")
-                self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
+                self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
                 self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
-                data_dict = {"loop_time": self.loop_time,
+                self.data_dict = {"loop_time": self.loop_time,
                                 "pos_steps": self.abs_pos_stp,
                                 "pos_rev": self.stp_to_rev(self.abs_pos_stp),
                                 "pos_mm": self.abs_pos_mm,
-                                "dis_steps": dis_stp,
-                                "dis_mm": self.stp_to_mm(dis_stp),
-                                "dis_rev": self.stp_to_rev(dis_stp),
-                                "spd_us/step": spd_us,
-                                "spd_step/s": self.us_stp_to_stp_s(spd_us),
-                                "spd_rev/s": self.us_stp_to_rev_s(spd_us),
-                                "spd_mm/s": self.us_stp_to_mm_s(spd_us),
-                                "direction": direction,
+                                "dis_steps": self.dis_stp,
+                                "dis_mm": self.stp_to_mm(self.dis_stp),
+                                "dis_rev": self.stp_to_rev(self.dis_stp),
+                                "spd_us/step": self.spd_us,
+                                "spd_step/s": self.us_stp_to_stp_s(self.spd_us),
+                                "spd_rev/s": self.us_stp_to_rev_s(self.spd_us),
+                                "spd_mm/s": self.us_stp_to_mm_s(self.spd_us),
+                                "direction": self.direction,
                                 "event_code": self.event_code,
                                 }
-                return data_dict
+                return self.data_dict
             else:
                 return "failed 2 if", line
         else:
             return "failed 1 if", line
+        return
 
 
     def send_cmd(self, cat, parameter=""):
@@ -250,13 +251,14 @@ class LinearStage():
 
     def discrete_meas(self, n, delta_x_mm, pause_t):
         self.send_cmd("W")
-        data_dict = self.serial_read()
-        move_t = delta_x_mm/data_dict["spd_mm/s"]
+        self.serial_read()
+        move_t = delta_x_mm/self.data_dict["spd_mm/s"]
         delta_t = move_t + pause_t
 
         for i in range(n):
             self.move_dis(delta_x_mm, "mm")
             time.sleep(delta_t)
+        return
 
 
 
