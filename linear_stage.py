@@ -14,6 +14,7 @@ class LinearStage():
 
 #--------------------------------- Initializing --------------------------------
     def __init__(self, thread_pitch = None, stp_per_rev = None, stage_length = None, json_path = None):
+        self.available = True
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
         self.stage_length = stage_length
