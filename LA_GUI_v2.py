@@ -383,7 +383,7 @@ class App(QWidget):
         discreteTxtLayout.addWidget(self.labelDiscrete2)
         discreteTxtLayout.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.labelDiscrete3 = QLabel('Total Distance', self)
+        self.labelDiscrete3 = QLabel('Number of Repetitions', self)
         self.labelDiscrete3.setFixedSize(120, 34)
         discreteTxtLayout.addWidget(self.labelDiscrete3)
 
