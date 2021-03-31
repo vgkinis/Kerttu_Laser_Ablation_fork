@@ -16,7 +16,7 @@ import time
 from datetime import datetime
 from serial.tools import list_ports
 import functools
-import schedule
+import threading
 
 from general_functions import *
 from linear_stage import LinearStage
@@ -35,13 +35,14 @@ class WorkerThread(QThread):
         serial_port = "/dev/" + port_name
         self.ls.start_serial(serial_port)
         self.discrete_sampling = False
+        self.discrete_timer = None
         time.sleep(2)
         while True:
-            schedule.run_pending()
             try:
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
+
             except:
                 continue
 
@@ -68,27 +69,39 @@ class WorkerThread(QThread):
         print("stop")
         self.terminate()
 
-    def discrete_meas(self, dis_interval, dis_interval_unit, time_interval, total_dis, total_dis_unit):
+    def discrete_startup(self, dis_interval, dis_interval_unit, time_interval, nr):
         self.discrete_sampling = True
         self.discrete_dis = dis_interval
         self.discrete_dis_unit = dis_interval_unit
         self.discrete_time = time_interval
-        self.discrete_total = total_dis
-        self.discrete_total_unit = total_dis_unit
         self.ls.set_event_code(4)
-        self.discrete_move(True)
+        self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
+        self.discrete_nr = nr-1
 
-
-    def discrete_move(self, first_execution):
-        if first_execution == True:
-            schedule.every(self.discrete_time).seconds.do(self.discrete_move, first_execution = False).tag("discrete")
+    def discrete_meas(self):
         if self.discrete_sampling == True:
-            self.move_dis(self.discrete_dis, self.discrete_dis_unit)
-            self.discrete_total -= self.discrete_dis
-            if self.discrete_total <= 0:
-                self.discrete_sampling = False
-                self.ls.set_event_code(0)
-                schedule.clear("discrete")
+            # Check if motor is moving
+            if self.ls.dis_stp == 0:
+                # Check if there are repetitons to do
+                if self.discrete_nr > 0:
+                    # Start the timer
+                    if self.discrete_timer == None:
+                        self.discrete_timer = time.time()
+                    # Move the next distance interval if waiting time is over
+                    if self.discrete_timer + self.discrete_time <= time.time():
+                        self.discrete_move()
+                # Reset the event code
+                else:
+                    self.ls.set_event_code(0)
+                    self.discrete_sampling = False
+
+
+    def discrete_move_one_interval(self):
+        self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
+        self.discrete_nr -= 1
+        self.discrete_timer = None
+
+
 
 class App(QWidget):
 
@@ -376,15 +389,15 @@ class App(QWidget):
         self.labelDiscrete1 = QLabel('Distance Interval', self)
         self.labelDiscrete1.setFixedSize(150, 34)
         discreteTxtLayout.addWidget(self.labelDiscrete1)
-        discreteTxtLayout.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteTxtLayout.addItem(QSpacerItem(90, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelDiscrete2 = QLabel('Time Interval', self)
         self.labelDiscrete2.setFixedSize(120, 34)
         discreteTxtLayout.addWidget(self.labelDiscrete2)
-        discreteTxtLayout.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteTxtLayout.addItem(QSpacerItem(90, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelDiscrete3 = QLabel('Number of Repetitions', self)
-        self.labelDiscrete3.setFixedSize(120, 34)
+        self.labelDiscrete3.setFixedSize(150, 34)
         discreteTxtLayout.addWidget(self.labelDiscrete3)
 
         discreteLayout = QHBoxLayout()
@@ -400,7 +413,7 @@ class App(QWidget):
         self.comboBoxDiscrete.addItems(["mm", "steps", "rev"])
         self.comboBoxDiscrete.setFixedSize(88, 34)
         discreteLayout.addWidget(self.comboBoxDiscrete)
-        discreteLayout.addItem(QSpacerItem(30, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout.addItem(QSpacerItem(50, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.textEditDiscreteTime = QTextEdit(self)
         self.textEditDiscreteTime.setFixedSize(88, 34)
@@ -410,17 +423,12 @@ class App(QWidget):
         self.labelDiscrete4 = QLabel('s', self)
         self.labelDiscrete4.setFixedSize(10, 34)
         discreteLayout.addWidget(self.labelDiscrete4)
-        discreteLayout.addItem(QSpacerItem(30, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout.addItem(QSpacerItem(50, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.textEditDiscreteTotal= QTextEdit(self)
-        self.textEditDiscreteTotal.setFixedSize(88, 34)
-        discreteLayout.addWidget(self.textEditDiscreteTotal)
+        self.textEditDiscreteNr = QTextEdit(self)
+        self.textEditDiscreteNr.setFixedSize(88, 34)
+        discreteLayout.addWidget(self.textEditDiscreteNr)
         discreteLayout.addItem(QSpacerItem(5, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
-
-        self.comboBoxDiscreteTotal = QComboBox(self)
-        self.comboBoxDiscreteTotal.addItems(["mm", "steps", "rev"])
-        self.comboBoxDiscreteTotal.setFixedSize(88, 34)
-        discreteLayout.addWidget(self.comboBoxDiscreteTotal)
 
         discreteStartLayout = QHBoxLayout()
         mainLayout.addLayout(discreteStartLayout, 13, 0)
@@ -520,14 +528,18 @@ class App(QWidget):
     def discrete_meas(self):
         if self.calibrating == False:
             val_dis = float(self.textEditDiscreteDis.toPlainText())
-            val_dis_unit = self.comboBoxDiscrete
-            moving_time = val_dis/self.spd_mm_s
-            val_time = float(self.textEditDiscreteTime.toPlainText()) + moving_time
-            val_total_dis = float(self.textEditDiscreteTotal.toPlainText())
-            val_total_dis_unit = self.comboBoxDiscreteTotal
-            if self.calibrating == False and val_dis > 0.0 and val_time > 0.0 and val_total_dis > 0.0:
+            val_dis_unit = self.comboBoxDiscrete.currentText()
+            val_time = float(self.textEditDiscreteTime.toPlainText())
+            val_nr = float(self.textEditDiscreteNr.toPlainText())
+            if self.calibrating == False and val_dis > 0.0 and val_time > 0.0 and val_nr > 0.0:
                 self.discrete_sampling = True
-                self.wt.discrete_meas(val_dis, val_dis_unit, val_time, val_total_dis, val_total_dis_unit)
+                self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+                self.wt.discrete_startup(val_dis, val_dis_unit, val_time, val_nr)
+            else:
+                self.ledDiscrete.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        else:
+            self.ledDiscrete.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
 
 
 # --------------------------------- Graph --------------------------------------

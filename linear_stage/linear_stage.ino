@@ -96,12 +96,10 @@ void set_direction(int new_direction){
   if (new_direction == 1){
     direction = new_direction;
     digitalWrite(dir, LOW);
-    //Serial.println("Direction was changed to -1");
   }
   else if (new_direction == -1){
     direction = new_direction;
     digitalWrite(dir, HIGH);
-    //Serial.println("Direction was changed to 1");
   }
 }
 
@@ -155,7 +153,7 @@ void detect_endstop2() {
 void reset_pins()
 {
   digitalWrite(stp, LOW);
-  digitalWrite(dir, HIGH);
+  digitalWrite(dir, LOW);
 }
 
 

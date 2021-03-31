@@ -71,7 +71,7 @@ class LinearStage():
             if idx_s < idx_r:
                 line = line[idx_s+1 : idx_r]
                 data = line.split(";")
-                self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
+                self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = float(data[0])*10**(-3), float(data[1]), int(data[2]), float(data[3]), int(data[4]), int(data[5])
                 self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
                 self.data_dict = {"loop_time": self.loop_time,
                                 "pos_steps": self.abs_pos_stp,
@@ -232,8 +232,8 @@ class LinearStage():
             full_ls_range = abs(self.abs_pos_stp - self.count_range_start)
             half_ls_range = abs(full_ls_range)/2
             print()
-            print("full_ls_range", full_ls_range)
-            print("half_ls_range", half_ls_range)
+            print("The full range of the linear stage is measured to be: {0} steps, {1} mm".format(full_ls_range, self.stp_to_mm(full_ls_range)))
+            print("The half range of the linear stage is measured to be: {0} steps, {1} mm".format(half_ls_range, self.stp_to_mm(half_ls_range)))
             print()
             self.set_dir(-1)
             self.count_range_start = None
@@ -250,16 +250,15 @@ class LinearStage():
         time.sleep(2)
         self.send_cmd("R")
 
-    def discrete_meas(self, n, delta_x_mm, pause_t):
-        self.send_cmd("W")
-        self.serial_read()
-        move_t = delta_x_mm/self.data_dict["spd_mm/s"]
-        delta_t = move_t + pause_t
-
-        for i in range(n):
-            self.move_dis(delta_x_mm, "mm")
-            time.sleep(delta_t)
-        return
+    #def discrete_meas(self, n, delta_x_mm, pause_t):
+    #    self.send_cmd("W")
+    #    self.serial_read()
+    #    move_t = delta_x_mm/self.data_dict["spd_mm/s"]
+    #    delta_t = move_t + pause_t
+    #    for i in range(n):
+    #        self.move_dis(delta_x_mm, "mm")
+    #        time.sleep(delta_t)
+    #    return
 
 
 
