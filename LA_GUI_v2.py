@@ -42,7 +42,7 @@ class WorkerThread(QThread):
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
-
+                self.discrete_meas()
             except:
                 continue
 
@@ -90,7 +90,7 @@ class WorkerThread(QThread):
                     # Move the next distance interval if waiting time is over
                     if self.discrete_timer + self.discrete_time <= time.time():
                         self.discrete_move()
-                # Reset the event code
+                # Reset the event code and finish discrete sampling.
                 else:
                     self.ls.set_event_code(0)
                     self.discrete_sampling = False
