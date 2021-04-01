@@ -36,34 +36,51 @@ class WorkerThread(QThread):
         self.ls.start_serial(serial_port)
         self.discrete_sampling = False
         self.discrete_timer = None
+        self.calibrating = False
+        self.calibrate_start_count = None
+        self.calibrated = False
         time.sleep(2)
         while True:
             try:
+                # Get feedback
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
 
-                self.discrete_meas()
+                # Calibrate or perform discrete movement if it has been chosen.
+                self.calibrate_sys()
+                self.discrete_movement()
             except:
                 continue
 
-    def set_spd(self, val, unit):
-        self.ls.set_speed(val, unit.currentText())
-
-    def move_dis(self, val, unit):
-        self.ls.move_dis(val, unit.currentText())
-
-    def move_pos(self, val, unit):
-        self.ls.move_pos(val, unit.currentText())
-
-    def set_dir(self, val):
-        self.ls.set_dir(val)
-
-    def reset_sys(self):
-        self.ls.reset_sys()
-
     def calibrate_sys(self):
-        self.ls.calibrate_sys()
+        if self.calibrating == True:
+            if self.ls.event_code == 0:
+                self.ls.set_event_code(4)
+                self.ls.set_dir(-1)
+                self.ls.move_dis(self.ls.stage_length, "mm")
+            elif self.ls.event_code == 2:
+                self.ls.set_event_code(4)
+                self.ls.set_dir(1)
+                self.calibrate_start_count = self.ls.abs_pos_stp
+                self.ls.move_dis(self.ls.stage_length, "mm")
+            elif self.ls.event_code == 1 and self.calibrate_start_count != None:
+                full_ls_range = abs(self.ls.abs_pos_stp - self.calibrate_start_count)
+                half_ls_range = abs(full_ls_range)/2
+                print()
+                print("The full range of the linear stage is measured to be: {0} steps, {1} mm".format(full_ls_range, self.ls.stp_to_mm(full_ls_range)))
+                print("The half range of the linear stage is measured to be: {0} steps, {1} mm".format(half_ls_range, self.ls.stp_to_mm(half_ls_range)))
+                print()
+                self.ls.set_dir(-1)
+                self.calibrate_start_count = None
+                new_abs_pos = half_ls_range
+                self.ls.set_abs_pos_stp(new_abs_pos)
+                self.ls.set_event_code(0)
+                dis = abs(new_abs_pos - 0)
+                self.ls.move_dis(dis, "steps")
+                self.calibrating = False
+                self.calibrated = True
+
 
     def stop(self):
         #self.ser.close()
@@ -79,7 +96,7 @@ class WorkerThread(QThread):
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
         self.discrete_nr = nr-1
 
-    def discrete_meas(self):
+    def discrete_movement(self):
         if self.discrete_sampling == True:
             # Check if motor is moving
             if self.ls.dis_stp == 0:
@@ -122,7 +139,6 @@ class App(QWidget):
         self.calibrating = False
         self.calibrated = False
         self.discrete_sampling = False
-        self.spd_mm_s = 5
 
         central = QWidget(self)
 
@@ -466,71 +482,57 @@ class App(QWidget):
         self.lcdNumberDir.display(data_dict["direction"])
         self.lcdNumberEvent.display(data_dict["event_code"])
 
-        self.spd_mm_s = data_dict["spd_mm/s"]
-
-        if self.calibrating == True:
-            if data_dict["event_code"] == 1:
-                self.calibrating = False
-                self.calibrated = True
-
-        if self.discrete_sampling == True:
-            if data_dict["event_code"] == 0:
-                self.discrete_sampling = False
-
         abs_pos_mm = data_dict["pos_mm"]
-
         self.update_graph(abs_pos_mm)
 
     def move_pos(self):
         val = float(self.textEditPos.toPlainText())
-        if self.calibrating == False and self.discrete_sampling == False:
-            self.wt.move_pos(val, self.comboBoxPos)
+        if self.wt.calibrating == False and self.wt.discrete_sampling == False:
+            self.wt.ls.move_pos(val, self.comboBoxPos.currentText())
             self.ledPos.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledPos.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def set_spd(self):
         val = float(self.textEditSpd.toPlainText())
-        if self.calibrating == False and val > 0.0 and self.discrete_sampling == False:
-            self.wt.set_spd(val, self.comboBoxSpd)
+        if self.wt.calibrating == False and val > 0.0 and self.wt.discrete_sampling == False:
+            self.wt.ls.set_spd(val, self.comboBoxSpd.currentText())
             self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledSpd.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def move_dis(self):
         val = float(self.textEditDis.toPlainText())
-        if self.calibrating == False and val > 0.0 and self.discrete_sampling == False:
-            self.wt.move_dis(val, self.comboBoxDis)
+        if self.wt.calibrating == False and val > 0.0 and self.wt.discrete_sampling == False:
+            self.wt.ls.move_dis(val, self.comboBoxDis.currentText())
             self.ledDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledDis.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def set_dir(self):
-        val = float(self.textEditDir.toPlainText())
-        if self.calibrating == False and val in [1,-1] and self.discrete_sampling == False:
-            self.wt.set_dir(val)
+        val = int(self.textEditDir.toPlainText())
+        if self.wt.calibrating == False and val in [1,-1] and self.wt.discrete_sampling == False:
+            self.wt.ls.set_dir(val)
             self.ledDir.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def calibrate_sys(self):
-        if self.discrete_sampling == False:
-            self.calibrating = True
-            self.wt.calibrate_sys()
+        if self.wt.discrete_sampling == False:
+            self.wt.calibrating = True
 
     def reset_sys(self):
-        self.calibrating = False
-        self.discrete_sampling = False
-        self.wt.reset_sys()
+        self.wt.calibrating = False
+        self.wt.discrete_sampling = False
+        self.wt.ls.reset_sys()
 
     def discrete_meas(self):
-        if self.calibrating == False:
+        if self.wt.calibrating == False:
             val_dis = float(self.textEditDiscreteDis.toPlainText())
             val_dis_unit = self.comboBoxDiscrete.currentText()
             val_time = float(self.textEditDiscreteTime.toPlainText())
             val_nr = float(self.textEditDiscreteNr.toPlainText())
-            if self.calibrating == False and val_dis > 0.0 and val_time > 0.0 and val_nr > 0.0:
-                self.discrete_sampling = True
+            if val_dis > 0.0 and val_time > 0.0 and val_nr > 0.0:
                 self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
                 self.wt.discrete_startup(val_dis, val_dis_unit, val_time, val_nr)
             else:
@@ -552,7 +554,7 @@ class App(QWidget):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
-        if self.calibrated == True:
+        if self.wt.calibrated == True:
             rectangle = plt.Rectangle((stage_len_mm/2 - 550/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
             plt.gca().add_patch(rectangle)
         else:
