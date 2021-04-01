@@ -469,7 +469,6 @@ class App(QWidget):
         self.spd_mm_s = data_dict["spd_mm/s"]
 
         if self.calibrating == True:
-            self.wt.calibrate_sys()
             if data_dict["event_code"] == 1:
                 self.calibrating = False
                 self.calibrated = True
@@ -517,9 +516,11 @@ class App(QWidget):
     def calibrate_sys(self):
         if self.discrete_sampling == False:
             self.calibrating = True
+            self.wt.calibrate_sys()
 
     def reset_sys(self):
         self.calibrating = False
+        self.discrete_sampling = False
         self.wt.reset_sys()
 
     def discrete_meas(self):

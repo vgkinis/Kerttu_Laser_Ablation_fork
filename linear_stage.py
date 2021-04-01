@@ -97,7 +97,7 @@ class LinearStage():
 
     def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
-        V - velocity (speed), P - position, D - direction, R - reset,
+        V - speed, P - position, D - direction, R - reset,
         E - event code, A - absolute position, "W" - write from Arduino"""
         if cat not in ["S", "V", "P", "D", "R", "E", "A", "W"]:
             print("Unkown command category: %s" %cat)
@@ -145,7 +145,7 @@ class LinearStage():
     def rev_s_to_us_stp(self, rev_s):
         return 1e6/(self.thread_pitch*self.stp_per_rev)
 
-#--------------------------------- Set & Get -----------------------------------
+#--------------------------------- Set -----------------------------------------
 
     def set_speed(self, spd, unit):
         spd = float(spd)
@@ -204,18 +204,6 @@ class LinearStage():
 
     def ping_arduino(self):
         self.send_cmd("W")
-
-
-    def get_velocity(self):
-        return
-
-
-    def get_direction(self):
-        return
-
-
-    def get_current_position(self):
-        return
 
 
     def calibrate_sys(self):

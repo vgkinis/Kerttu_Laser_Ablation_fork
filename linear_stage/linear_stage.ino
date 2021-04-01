@@ -13,8 +13,8 @@ unsigned long loop_time = millis();
 int event_code = 0;
 
 unsigned long step_time = micros();
-unsigned long velocity1 = 1000;
-unsigned long velocity_delay_micros = velocity1;
+unsigned long speed1 = 1000;
+unsigned long speed_delay_micros = speed1;
 int direction = 1;
 long abs_pos = 0;
 long steps_to_do = 0;
@@ -70,8 +70,9 @@ void categorize_cmd(String serial_string){
     }
   }
   else if (serial_string.startsWith("V")){
-    int serial_velocity = serial_string.substring(1,-1).toInt();
-    set_velocity(serial_velocity);
+    // Set speed
+    int serial_speed = serial_string.substring(1,-1).toInt();
+    set_speed(serial_speed);
   }
   else if (serial_string.startsWith("S")){
     // Variable steps_to_do can't be changed while motor is moving.
@@ -103,8 +104,8 @@ void set_direction(int new_direction){
   }
 }
 
-void set_velocity(int new_velocity){
-  velocity_delay_micros = new_velocity;
+void set_speed(int new_speed){
+  speed_delay_micros = new_speed;
 }
 
 void set_steps_to_do(long new_steps){
@@ -120,7 +121,7 @@ void set_abs_pos(long new_abs_pos){
 
 void n_steps() {
   if (steps_to_do > 0){
-    if ((unsigned long) (micros() - step_time) >= velocity_delay_micros){
+    if ((unsigned long) (micros() - step_time) >= speed_delay_micros){
       step_time = micros();
       single_step();
       steps_to_do--;
@@ -173,7 +174,7 @@ void serial_write(){
   Serial.print(";");
   Serial.print(steps_to_do);
   Serial.print(";");
-  Serial.print(velocity_delay_micros);
+  Serial.print(speed_delay_micros);
   Serial.print(";");
   Serial.print(direction);
   Serial.print(";");
