@@ -205,7 +205,6 @@ class LinearStage():
 
     def reset_sys(self):
         self.set_event_code(0)
-        #time.sleep(2)
         self.send_cmd("R")
 
 #--------------------------------- if __main__ ---------------------------------
