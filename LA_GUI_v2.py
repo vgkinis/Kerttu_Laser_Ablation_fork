@@ -133,12 +133,7 @@ class App(QWidget):
 
         horizontalSpacer1 = QSpacerItem(88, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
         horizontalSpacer2 = QSpacerItem(30, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        horizontalSpacer3 = QLabel('', self)
-        horizontalSpacer3.setFixedSize(80, 34)
-
-
         verticalSpacer1 = QSpacerItem(0, 120, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
         verticalSpacer2 = QSpacerItem(0, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
 
@@ -349,7 +344,6 @@ class App(QWidget):
         variaLayout.addItem(QSpacerItem(128, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelEvent = QLabel('Event Code', self)
-        #self.labelEvent.setStyleSheet("QLabel {font: Times New Roman; font-size: 12px}")
         variaLayout.addWidget(self.labelEvent)
         variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
@@ -417,9 +411,7 @@ class App(QWidget):
         self.comboBoxDiscrete.setFixedSize(65, 34)
         discrete1Layout.addWidget(self.comboBoxDiscrete)
 
-        horizontalSpacer4 = QLabel('', self)
-        horizontalSpacer4.setFixedSize(20, 34)
-        discrete1Layout.addWidget(horizontalSpacer4)
+        add_custom_spacer(20,34,discrete1Layout)
         discrete1Layout.addWidget(self.labelDiscrete2)
 
         self.textEditDiscreteTime = QTextEdit(self)
@@ -430,9 +422,7 @@ class App(QWidget):
         self.labelDiscrete5.setFixedSize(10, 34)
         discrete1Layout.addWidget(self.labelDiscrete5)
 
-        horizontalSpacer5 = QLabel('', self)
-        horizontalSpacer5.setFixedSize(20, 34)
-        discrete1Layout.addWidget(horizontalSpacer5)
+        add_custom_spacer(20,34,discrete1Layout)
         discrete1Layout.addWidget(self.labelDiscrete3)
 
         self.textEditDiscreteNr = QTextEdit(self)
