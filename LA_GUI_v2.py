@@ -42,6 +42,7 @@ class WorkerThread(QThread):
                 self.ls.ping_arduino()
                 data_dict = self.ls.serial_read()
                 self.motor_signals.emit(data_dict)
+
                 self.discrete_meas()
             except:
                 continue
@@ -89,7 +90,8 @@ class WorkerThread(QThread):
                         self.discrete_timer = time.time()
                     # Move the next distance interval if waiting time is over
                     if self.discrete_timer + self.discrete_time <= time.time():
-                        self.discrete_move()
+                        #print(time.time() - self.discrete_timer)
+                        self.discrete_move_one_interval()
                 # Reset the event code and finish discrete sampling.
                 else:
                     self.ls.set_event_code(0)
@@ -131,6 +133,9 @@ class App(QWidget):
 
         horizontalSpacer1 = QSpacerItem(88, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
         horizontalSpacer2 = QSpacerItem(30, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        horizontalSpacer3 = QLabel('', self)
+        horizontalSpacer3.setFixedSize(80, 34)
+
 
         verticalSpacer1 = QSpacerItem(0, 120, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -381,70 +386,72 @@ class App(QWidget):
         self.labelDiscrete.setFixedSize(200, 34)
         self.labelDiscrete.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         discreteLabelLayout.addWidget(self.labelDiscrete)
+        discreteLabelLayout.addItem(QSpacerItem(0, 50, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         discreteTxtLayout = QHBoxLayout()
-        mainLayout.addLayout(discreteTxtLayout, 11, 0)
-        discreteTxtLayout.setAlignment(Qt.AlignCenter)
 
         self.labelDiscrete1 = QLabel('Distance Interval', self)
-        self.labelDiscrete1.setFixedSize(150, 34)
-        discreteTxtLayout.addWidget(self.labelDiscrete1)
-        discreteTxtLayout.addItem(QSpacerItem(90, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.labelDiscrete1.setFixedSize(100, 34)
+        self.labelDiscrete1.setStyleSheet("QLabel {font-size: 12px; color: #263470}")
 
         self.labelDiscrete2 = QLabel('Time Interval', self)
-        self.labelDiscrete2.setFixedSize(120, 34)
-        discreteTxtLayout.addWidget(self.labelDiscrete2)
-        discreteTxtLayout.addItem(QSpacerItem(90, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.labelDiscrete2.setFixedSize(80, 34)
+        self.labelDiscrete2.setStyleSheet("QLabel {font-size: 12px; color: #263470}")
 
-        self.labelDiscrete3 = QLabel('Number of Repetitions', self)
-        self.labelDiscrete3.setFixedSize(150, 34)
-        discreteTxtLayout.addWidget(self.labelDiscrete3)
+        self.labelDiscrete3 = QLabel('Nr of Repetitions', self)
+        self.labelDiscrete3.setFixedSize(100, 34)
+        self.labelDiscrete3.setStyleSheet("QLabel {font-size: 12px; color: #263470}")
 
-        discreteLayout = QHBoxLayout()
-        mainLayout.addLayout(discreteLayout, 12, 0)
-        discreteLayout.setAlignment(Qt.AlignCenter)
+        discrete1Layout = QHBoxLayout()
+        mainLayout.addLayout(discrete1Layout, 11, 0)
+        discrete1Layout.setAlignment(Qt.AlignCenter)
+
+        discrete1Layout.addWidget(self.labelDiscrete1)
 
         self.textEditDiscreteDis = QTextEdit(self)
-        self.textEditDiscreteDis.setFixedSize(88, 34)
-        discreteLayout.addWidget(self.textEditDiscreteDis)
-        discreteLayout.addItem(QSpacerItem(5, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.textEditDiscreteDis.setFixedSize(80, 34)
+        discrete1Layout.addWidget(self.textEditDiscreteDis)
 
         self.comboBoxDiscrete = QComboBox(self)
         self.comboBoxDiscrete.addItems(["mm", "steps", "rev"])
-        self.comboBoxDiscrete.setFixedSize(88, 34)
-        discreteLayout.addWidget(self.comboBoxDiscrete)
-        discreteLayout.addItem(QSpacerItem(50, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.comboBoxDiscrete.setFixedSize(65, 34)
+        discrete1Layout.addWidget(self.comboBoxDiscrete)
+
+        horizontalSpacer4 = QLabel('', self)
+        horizontalSpacer4.setFixedSize(20, 34)
+        discrete1Layout.addWidget(horizontalSpacer4)
+        discrete1Layout.addWidget(self.labelDiscrete2)
 
         self.textEditDiscreteTime = QTextEdit(self)
-        self.textEditDiscreteTime.setFixedSize(88, 34)
-        discreteLayout.addWidget(self.textEditDiscreteTime)
-        discreteLayout.addItem(QSpacerItem(5, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.textEditDiscreteTime.setFixedSize(80, 34)
+        discrete1Layout.addWidget(self.textEditDiscreteTime)
 
-        self.labelDiscrete4 = QLabel('s', self)
-        self.labelDiscrete4.setFixedSize(10, 34)
-        discreteLayout.addWidget(self.labelDiscrete4)
-        discreteLayout.addItem(QSpacerItem(50, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.labelDiscrete5 = QLabel('s', self)
+        self.labelDiscrete5.setFixedSize(10, 34)
+        discrete1Layout.addWidget(self.labelDiscrete5)
+
+        horizontalSpacer5 = QLabel('', self)
+        horizontalSpacer5.setFixedSize(20, 34)
+        discrete1Layout.addWidget(horizontalSpacer5)
+        discrete1Layout.addWidget(self.labelDiscrete3)
 
         self.textEditDiscreteNr = QTextEdit(self)
-        self.textEditDiscreteNr.setFixedSize(88, 34)
-        discreteLayout.addWidget(self.textEditDiscreteNr)
-        discreteLayout.addItem(QSpacerItem(5, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.textEditDiscreteNr.setFixedSize(80, 34)
+        discrete1Layout.addWidget(self.textEditDiscreteNr)
 
-        discreteStartLayout = QHBoxLayout()
-        mainLayout.addLayout(discreteStartLayout, 13, 0)
-        discreteStartLayout.setAlignment(Qt.AlignCenter)
-        discreteStartLayout.addItem(horizontalSpacer2)
+        discrete2Layout = QHBoxLayout()
+        mainLayout.addLayout(discrete2Layout, 12, 0)
+        discrete2Layout.setAlignment(Qt.AlignCenter)
 
         self.pushButtonDiscrete = QPushButton('Start', self)
         self.pushButtonDiscrete.setFixedSize(88, 34)
-        discreteStartLayout.addWidget(self.pushButtonDiscrete)
-        discreteStartLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discrete2Layout.addWidget(self.pushButtonDiscrete)
 
         self.ledDiscrete = QLabel(self)
         self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        discreteStartLayout.addWidget(self.ledDiscrete)
-        discreteStartLayout.addItem(horizontalSpacer2)
-        discreteStartLayout.addItem(QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discrete2Layout.addWidget(self.ledDiscrete)
+        discrete2Layout.addItem(horizontalSpacer2)
+        discrete2Layout.addItem(QSpacerItem(0, 80, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
 
 # -----------------------------------------------------------------------------
