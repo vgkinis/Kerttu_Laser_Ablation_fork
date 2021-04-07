@@ -43,10 +43,11 @@ class WorkerThread(QThread):
         ports = (list(list_ports.comports()))
         port_names = list(map(lambda p : p.device, ports))
         if "COM" in port_names[0]:
-            serial_port = port_names[0]
+            serial_ports = port_names
         else:
-            serial_port = "/dev/" + port_name
-        self.ls.start_serial(serial_port)
+            serial_ports = list(map(lambda p : "/dev/" + p, port_names))
+
+        self.ls.start_serial(serial_port[0])
 
         # Data files
         dir_data = os.path.join(os.getcwd(),"Data")
@@ -111,10 +112,8 @@ class WorkerThread(QThread):
             elif self.ls.event_code == 1 and self.calibrate_start_count != None:
                 full_ls_range = abs(self.ls.abs_pos_stp - self.calibrate_start_count)
                 half_ls_range = abs(full_ls_range)/2
-                print()
                 print("The full range of the linear stage is measured to be: {0} steps, {1} mm.".format(full_ls_range, self.ls.stp_to_mm(full_ls_range)))
                 print("The half range of the linear stage is measured to be: {0} steps, {1} mm.".format(half_ls_range, self.ls.stp_to_mm(half_ls_range)))
-                print()
                 self.ls.set_dir(-1)
                 self.calibrate_start_count = None
                 new_abs_pos = half_ls_range
@@ -169,8 +168,8 @@ class App(QWidget):
         self.left=10
         self.top=10
         self.width=720
-        self.height=720
-        self.setMinimumSize(720, 720)
+        self.height=690
+        self.setMinimumSize(720, 670)
         self.initUI()
 
     def initUI(self):

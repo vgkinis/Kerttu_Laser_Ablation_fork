@@ -231,9 +231,13 @@ if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
     ports = (list(list_ports.comports()))
-    port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
-    serial_port = "/dev/" + port_name
-    ls.start_serial(serial_port)
+    port_names = list(map(lambda p : p.device, ports))
+    if "COM" in port_names[0]:
+        serial_ports = port_names
+    else:
+        serial_ports = list(map(lambda p : "/dev/" + p, port_names))
+
+    ls.start_serial(serial_port[0])
     time.sleep(2)
 
     #ls.send_cmd("S", str(5000))
