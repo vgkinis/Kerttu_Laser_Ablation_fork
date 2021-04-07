@@ -54,15 +54,26 @@ class Laser():
     def go_to_laser_on(self):
         self.send_cmd('ly_oxp2_output_enable')
 
-    def set_power(self, power, unit):
+    def set_pulse_energy(self, energy, unit):
         if unit == "uJ":
-            power_nJ = power * 1000
-            command = 'ly_oxp2_power=' + str(power_nJ)
+            energy_nJ = energy * 1000
+            command = 'ly_oxp2_power=' + str(energy_nJ)
             self.send_cmd(command)
         elif unit == "nJ":
-            power_nJ = power_nJ
-            command = 'ly_oxp2_power=' + str(power_nJ)
+            energy_nJ = energy_nJ
+            command = 'ly_oxp2_power=' + str(energy_nJ)
             self.send_cmd(command)
+
+    def get_measured_pulse_energy(self):
+        self.send_cmd('e_mlp?')
+
+    def set_repetition_rate(self, freq):
+        rep_rates_kHz = {0:50, 1:100, 2:200, 3:299.625, 4:400, 5:500,
+                                6:597.015, 7:707.965, 8:800, 9:898.876, 10:1000}
+
+        command = list(rep_rates_kHz.keys())[list(rep_rates_kHz.values()).index(freq)]
+        self.send_cmd(command)
+
 
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
