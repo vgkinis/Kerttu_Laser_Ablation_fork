@@ -13,11 +13,12 @@ class LinearStage():
     """
 
 #--------------------------------- Initializing --------------------------------
-    def __init__(self, thread_pitch = None, stp_per_rev = None, stage_length = None, json_path = None):
+    def __init__(self, thread_pitch = None, stp_per_rev = None, stage_length = None, tray_length = None, json_path = None):
         self.available = True
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
         self.stage_length = stage_length
+        self.tray_length = tray_length
         self.json_path = json_path
         self.ser = serial.Serial()
         self.loop_time = None
@@ -57,6 +58,7 @@ class LinearStage():
                 self.thread_pitch = json_dict["thread_pitch"]
                 self.stp_per_rev = json_dict["stp_per_rev"]
                 self.stage_length = json_dict["stage_length"]
+                self.tray_length = json_dict["tray_length"]
         return
 
 

@@ -582,16 +582,16 @@ class App(QWidget):
 
 
     def update_graph(self, abs_pos_mm):
-        # TODO : to not hard-coded value in the future
-        stage_len_mm = 1200
+        stage_len_mm = self.wt.ls.stage_length
+        tray_length_mm = self.wt.ls.tray_length
         self.figure_ls.clear()
         plt.figure(num=1)
-        ax = plt.axes(xlim=(0, 1200), ylim=(0, 30))
+        ax = plt.axes(xlim=(0, stage_len_mm), ylim=(0, 30))
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         if self.wt.calibrated == True:
-            rectangle = plt.Rectangle((stage_len_mm/2 - 550/2 + abs_pos_mm, 0), 550, 30, fc='lightblue')
+            rectangle = plt.Rectangle((stage_len_mm/2 - tray_length_mm/2 + abs_pos_mm, 0), tray_length_mm, 30, fc='lightblue')
             plt.gca().add_patch(rectangle)
         else:
             plt.text(0.5,0.5,'Calibrate the stage to see the absolute position',horizontalalignment='center', verticalalignment='center', transform = ax.transAxes)
