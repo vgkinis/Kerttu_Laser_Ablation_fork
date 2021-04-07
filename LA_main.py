@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QTextEdit, QGridLayout, QComb
 from PyQt5.QtCore import pyqtSlot, QRect, Qt, QThread, pyqtSignal
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPalette, QPainter, QBrush, QPen
-
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 
@@ -17,6 +16,8 @@ from datetime import datetime
 from serial.tools import list_ports
 import functools
 import threading
+import csv
+import os
 
 from general_functions import *
 from linear_stage import LinearStage
@@ -28,30 +29,42 @@ class WorkerThread(QThread):
         QThread.__init__(self)
 
     def run(self):
+        # Variables for discrete sampling and calibration
+        self.discrete_sampling = False
+        self.discrete_timer = None
+        self.calibrating = False
+        self.calibrate_start_count = None
+        self.calibrated = False
+
+        # Establish a connection with the linear stage
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
         ports = (list(list_ports.comports()))
         port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
         serial_port = "/dev/" + port_name
         self.ls.start_serial(serial_port)
-        self.discrete_sampling = False
-        self.discrete_timer = None
-        self.calibrating = False
-        self.calibrate_start_count = None
-        self.calibrated = False
+
+        # Data files
+        dir_data = os.path.join(os.getcwd(),"Data")
+        time_stamp = datetime.datetime.now(pytz.timezone(timezone))
+        filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
+
         time.sleep(2)
         while True:
-            try:
-                # Get feedback
-                self.ls.ping_arduino()
-                data_dict = self.ls.serial_read()
-                self.motor_signals.emit(data_dict)
+            with open(filename,"a") as f:
+            writer = csv.writer(f, delimiter=",")
+                try:
+                    # Get feedback
+                    self.ls.ping_arduino()
+                    data_dict = self.ls.serial_read()
+                    self.motor_signals.emit(data_dict)
+                    writer.writerow(data_dict)
 
-                # Calibrate or perform discrete movement if it has been chosen.
-                self.calibrate_sys()
-                self.discrete_movement()
-            except:
-                continue
+                    # Calibrate or perform discrete movement if it has been chosen.
+                    self.calibrate_sys()
+                    self.discrete_movement()
+                except:
+                    continue
 
     def calibrate_sys(self):
         if self.calibrating == True:
