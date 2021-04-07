@@ -14,6 +14,8 @@ class Laser():
 
 #--------------------------------- Initializing --------------------------------
     def __init__(self):
+        self.rep_rates_kHz = {0:50, 1:100, 2:200, 3:299.625, 4:400, 5:500,
+                                6:597.015, 7:707.965, 8:800, 9:898.876, 10:1000}
         return
 
 
@@ -64,15 +66,16 @@ class Laser():
             command = 'ly_oxp2_power=' + str(energy_nJ)
             self.send_cmd(command)
 
+    def set_repetition_rate(self, freq):
+        freq_nr = list(self.rep_rates_kHz.keys())[list(self.rep_rates_kHz.values()).index(freq)]
+        command = 'e_freq=' + str(freq_nr)
+        self.send_cmd(command)
+
     def get_measured_pulse_energy(self):
         self.send_cmd('e_mlp?')
 
-    def set_repetition_rate(self, freq):
-        rep_rates_kHz = {0:50, 1:100, 2:200, 3:299.625, 4:400, 5:500,
-                                6:597.015, 7:707.965, 8:800, 9:898.876, 10:1000}
-
-        command = list(rep_rates_kHz.keys())[list(rep_rates_kHz.values()).index(freq)]
-        self.send_cmd(command)
+    def get_repetition_rate(self):
+        self.send_cmd('e_freq?')
 
 
 #--------------------------------- if __main__ ---------------------------------
