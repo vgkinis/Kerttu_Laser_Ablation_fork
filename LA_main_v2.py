@@ -41,13 +41,16 @@ class WorkerThread(QThread):
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
         ports = (list(list_ports.comports()))
-        port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[0]
-        serial_port = "/dev/" + port_name
+        port_names = list(map(lambda p : p.device, ports))
+        if "COM" in port_names[0]:
+            serial_port = port_names[0]
+        else:
+            serial_port = "/dev/" + port_name
         self.ls.start_serial(serial_port)
 
         # Data files
         dir_data = os.path.join(os.getcwd(),"Data")
-        time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen"))
+        time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen")).strftime("%Y-%m-%d %H.%M.%S.%f+%z")
         self.data_filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
         with open(self.data_filename,"a") as f:
             writer = csv.writer(f, delimiter=",")
