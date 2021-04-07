@@ -52,7 +52,8 @@ if __name__ == "__main__":
     laser.start_serial(serial_ports[0])
     time.sleep(2)
 
-    laser.ser.write(b'ly_oxp2_listen\n')
+    command = 'h'
+    laser.ser.write(str.encode(command + "\n"))
     while True:
         if laser.ser.in_waiting > 0:
             line = ser.readline()
