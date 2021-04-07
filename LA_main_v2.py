@@ -158,7 +158,15 @@ class WorkerThread(QThread):
         self.discrete_nr -= 1
         self.discrete_timer = None
 
+class Color(QWidget):
 
+    def __init__(self, color, *args, **kwargs):
+        super(Color, self).__init__(*args, **kwargs)
+        self.setAutoFillBackground(True)
+
+        palette = self.palette()
+        palette.setColor(QPalette.Window, QColor(color))
+        self.setPalette(palette)
 
 class App(QWidget):
 
@@ -167,7 +175,7 @@ class App(QWidget):
         self.title='Motor control'
         self.left=10
         self.top=10
-        self.width=720
+        self.width=1200
         self.height=690
         self.setMinimumSize(720, 670)
         self.initUI()
