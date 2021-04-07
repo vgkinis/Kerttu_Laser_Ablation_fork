@@ -12,10 +12,11 @@ import matplotlib.pyplot as plt
 
 import sys
 import time
+import pytz
 from datetime import datetime
 from serial.tools import list_ports
 import functools
-import threading
+import schedule
 import csv
 import os
 
@@ -46,25 +47,51 @@ class WorkerThread(QThread):
 
         # Data files
         dir_data = os.path.join(os.getcwd(),"Data")
-        time_stamp = datetime.datetime.now(pytz.timezone(timezone))
-        filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
+        time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen"))
+        self.data_filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
+        with open(self.data_filename,"a") as f:
+            writer = csv.writer(f, delimiter=",")
+            # Pad the header elements
+            maxlen = len(max(self.ls.data_dict, key=len))
+            writer.writerow([(' ' * (maxlen - len(x))) + x for x in self.ls.data_dict])
 
         time.sleep(2)
+        schedule.every(1).seconds.do(self.data_logger)
         while True:
-            with open(filename,"a") as f:
-            writer = csv.writer(f, delimiter=",")
-                try:
-                    # Get feedback
-                    self.ls.ping_arduino()
-                    data_dict = self.ls.serial_read()
-                    self.motor_signals.emit(data_dict)
-                    writer.writerow(data_dict)
+            try:
+                # Get feedback
+                self.ls.ping_arduino()
+                data_dict = self.ls.serial_read()
+                self.motor_signals.emit(data_dict)
+                schedule.run_pending()
 
-                    # Calibrate or perform discrete movement if it has been chosen.
-                    self.calibrate_sys()
-                    self.discrete_movement()
-                except:
-                    continue
+                # Calibrate or perform discrete movement if it has been chosen.
+                self.calibrate_sys()
+                self.discrete_movement()
+
+            except Exception as e:
+                print(e)
+                continue
+
+    def data_logger(self):
+        with open(self.data_filename,"a") as f:
+            writer = csv.writer(f, delimiter=",")
+            data = self.ls.data_dict
+            data_formatted = {"loop_time": "{:11.3f}".format(data["loop_time"]),
+                            "pos_steps": "{:11.3f}".format(data["pos_steps"]),
+                            "pos_rev": "{:11.3f}".format(data["pos_rev"]),
+                            "pos_mm": "{:11.3f}".format(data["pos_mm"]),
+                            "dis_steps": "{:11.3f}".format(data["dis_steps"]),
+                            "dis_mm": "{:11.3f}".format(data["dis_mm"]),
+                            "dis_rev": "{:11.3f}".format(data["dis_rev"]),
+                            "spd_us/step": "{:11.3f}".format(data["spd_us/step"]),
+                            "spd_step/s": "{:11.3f}".format(data["spd_step/s"]),
+                            "spd_rev/s": "{:11.3f}".format(data["spd_rev/s"]),
+                            "spd_mm/s": "{:11.3f}".format(data["spd_mm/s"]),
+                            "direction": "{:11}".format(data["direction"]),
+                            "event_code": "{:11}".format(data["event_code"]),
+                            }
+            writer.writerow(data_formatted.values())
 
     def calibrate_sys(self):
         if self.calibrating == True:
@@ -90,15 +117,10 @@ class WorkerThread(QThread):
                 self.ls.set_abs_pos_stp(new_abs_pos)
                 self.ls.set_event_code(0)
                 dis = abs(new_abs_pos - 0)
+                time.sleep(1)
                 self.ls.move_dis(dis, "steps")
                 self.calibrating = False
                 self.calibrated = True
-
-
-    def stop(self):
-        #self.ser.close()
-        print("stop")
-        self.terminate()
 
     def discrete_startup(self, dis_interval, dis_interval_unit, time_interval, nr):
         self.discrete_sampling = True
@@ -509,7 +531,7 @@ class App(QWidget):
     def set_spd(self):
         val = float(self.textEditSpd.toPlainText())
         if self.wt.calibrating == False and val > 0.0 and self.wt.discrete_sampling == False:
-            self.wt.ls.set_spd(val, self.comboBoxSpd.currentText())
+            self.wt.ls.set_speed(val, self.comboBoxSpd.currentText())
             self.ledSpd.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledSpd.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")

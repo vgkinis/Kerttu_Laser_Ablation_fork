@@ -30,6 +30,21 @@ class LinearStage():
 
         self.event_code = None
 
+        self.data_dict = {"loop_time": None,
+                        "pos_steps": None,
+                        "pos_rev": None,
+                        "pos_mm": None,
+                        "dis_steps": None,
+                        "dis_mm": None,
+                        "dis_rev": None,
+                        "spd_us/step": None,
+                        "spd_step/s": None,
+                        "spd_rev/s": None,
+                        "spd_mm/s": None,
+                        "direction": None,
+                        "event_code": None,
+                        }
+
         return
 
 
@@ -69,7 +84,7 @@ class LinearStage():
             if idx_s < idx_r:
                 line = line[idx_s+1 : idx_r]
                 data = line.split(";")
-                self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = float(data[0])*10**(-3), float(data[1]), int(data[2]), float(data[3]), int(data[4]), int(data[5])
+                self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = round(float(data[0])*10**(-3),3), float(data[1]), int(data[2]), float(data[3]), int(data[4]), int(data[5])
                 self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
                 self.data_dict = {"loop_time": self.loop_time,
                                 "pos_steps": self.abs_pos_stp,
