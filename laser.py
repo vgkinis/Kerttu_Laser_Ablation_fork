@@ -36,10 +36,33 @@ class Laser():
     def serial_read(self):
         return
 
-
-    def send_cmd(self):
+    def send_cmd(self, command):
+        serial_cmd = command + "\n"
+        try:
+            self.ser.write(str.encode(serial_cmd))
+        except:
+            print("Command %s not sent. Could not open serial" %serial_cmd)
         return
 
+#------------------------------- Commands  .......------------------------------
+    def go_to_standby(self):
+        self.send_cmd('ly_oxp2_standby')
+
+    def go_to_listen(self):
+        self.send_cmd('ly_oxp2_listen')
+
+    def go_to_laser_on(self):
+        self.send_cmd('ly_oxp2_output_enable')
+
+    def set_power(self, power, unit):
+        if unit == "uJ":
+            power_nJ = power * 1000
+            command = 'ly_oxp2_power=' + str(power_nJ)
+            self.send_cmd(command)
+        elif unit == "nJ":
+            power_nJ = power_nJ
+            command = 'ly_oxp2_power=' + str(power_nJ)
+            self.send_cmd(command)
 
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
@@ -52,8 +75,7 @@ if __name__ == "__main__":
     laser.start_serial(serial_ports[0])
     time.sleep(2)
 
-    command = 'h'
-    laser.ser.write(str.encode(command + "\n"))
+    laser.send_cmd('h')
     while True:
         if laser.ser.in_waiting > 0:
             line = ser.readline()
