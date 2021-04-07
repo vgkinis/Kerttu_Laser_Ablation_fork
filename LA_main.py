@@ -77,19 +77,20 @@ class WorkerThread(QThread):
         with open(self.data_filename,"a") as f:
             writer = csv.writer(f, delimiter=",")
             data = self.ls.data_dict
-            data_formatted = {"loop_time": "{:11.3f}".format(data["loop_time"]),
-                            "pos_steps": "{:11.3f}".format(data["pos_steps"]),
-                            "pos_rev": "{:11.3f}".format(data["pos_rev"]),
-                            "pos_mm": "{:11.3f}".format(data["pos_mm"]),
-                            "dis_steps": "{:11.3f}".format(data["dis_steps"]),
-                            "dis_mm": "{:11.3f}".format(data["dis_mm"]),
-                            "dis_rev": "{:11.3f}".format(data["dis_rev"]),
-                            "spd_us/step": "{:11.3f}".format(data["spd_us/step"]),
-                            "spd_step/s": "{:11.3f}".format(data["spd_step/s"]),
-                            "spd_rev/s": "{:11.3f}".format(data["spd_rev/s"]),
-                            "spd_mm/s": "{:11.3f}".format(data["spd_mm/s"]),
-                            "direction": "{:11}".format(data["direction"]),
-                            "event_code": "{:11}".format(data["event_code"]),
+            data_formatted = {"loop_time": "{:13.3f}".format(data["loop_time"]),
+                            "loop_time_min": "{:13.3f}".format(data["loop_time_min"]),
+                            "pos_steps": "{:13}".format(data["pos_steps"]),
+                            "pos_rev": "{:13.3f}".format(data["pos_rev"]),
+                            "pos_mm": "{:13.3f}".format(data["pos_mm"]),
+                            "dis_steps": "{:13}".format(data["dis_steps"]),
+                            "dis_mm": "{:13.3f}".format(data["dis_mm"]),
+                            "dis_rev": "{:13.3f}".format(data["dis_rev"]),
+                            "spd_us/step": "{:13.3f}".format(data["spd_us/step"]),
+                            "spd_step/s": "{:13.3f}".format(data["spd_step/s"]),
+                            "spd_rev/s": "{:13.3f}".format(data["spd_rev/s"]),
+                            "spd_mm/s": "{:13.3f}".format(data["spd_mm/s"]),
+                            "direction": "{:13}".format(data["direction"]),
+                            "event_code": "{:13}".format(data["event_code"]),
                             }
             writer.writerow(data_formatted.values())
 
