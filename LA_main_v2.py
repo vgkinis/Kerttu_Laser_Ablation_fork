@@ -41,9 +41,12 @@ class WorkerThread(QThread):
         self.linear_stage_connected = False
         self.laser_connected = False
 
-        # Establish a connection with the linear stage
+        # Create a linear stage instance
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
+
+        # Create a laser instance
+        self.laser = Laser()
 
         while True:
             if self.linear_stage_connected:
@@ -77,6 +80,21 @@ class WorkerThread(QThread):
 
         schedule.every(1).seconds.do(self.data_logger)
 
+    def connect_laser(self):
+        ports = (list(list_ports.comports()))
+        print("Establishing a connection with the laser ...")
+        for port in ports:
+            #print(port.manufacturer, port.device, port.description)
+            if "FTDI" in port.manufacturer:
+                try:
+                    self.laser.start_serial(port.device)
+                    time.sleep(2)
+                    self.laser_connected = True
+                    self.start_data_logger()
+                except Exception as e:
+                    print(e)
+        if self.laser_connected == False:
+            print("Cannot find the laser")
 
     def connect_linear_stage(self):
         ports = (list(list_ports.comports()))
@@ -91,7 +109,7 @@ class WorkerThread(QThread):
                 except Exception as e:
                     print(e)
         if self.linear_stage_connected == False:
-            print("Cannot find the port for linear stage")
+            print("Cannot find the linear stage")
 
     def data_logger(self):
         with open(self.data_filename,"a") as f:
@@ -173,16 +191,6 @@ class WorkerThread(QThread):
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
         self.discrete_nr -= 1
         self.discrete_timer = None
-
-class Color(QWidget):
-
-    def __init__(self, color, *args, **kwargs):
-        super(Color, self).__init__(*args, **kwargs)
-        self.setAutoFillBackground(True)
-
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor(color))
-        self.setPalette(palette)
 
 class App(QWidget):
 
@@ -704,9 +712,9 @@ class App(QWidget):
         connectLayoutLS.addWidget(self.pushButtonConnectLS)
         connectLayoutLS.addItem(horizontalSpacer2)
 
-        self.ledConnectLinearStageLS = QLabel(self)
-        self.ledConnectLinearStageLS.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        connectLayoutLS.addWidget(self.ledConnectLinearStageLS)
+        self.ledConnectLinearStage = QLabel(self)
+        self.ledConnectLinearStage.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        connectLayoutLS.addWidget(self.ledConnectLinearStage)
         #connectLayoutLS.addItem(horizontalSpacer2)
 
 
@@ -750,6 +758,7 @@ class App(QWidget):
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
         self.pushButtonDiscrete.clicked.connect(functools.partial(self.discrete_meas))
         self.pushButtonConnectLS.clicked.connect(functools.partial(self.wt.connect_linear_stage))
+        self.pushButtonConnectL.clicked.connect(functools.partial(self.wt.connect_laser))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
@@ -763,6 +772,12 @@ class App(QWidget):
 
         abs_pos_mm = data_dict["pos_mm"]
         self.update_graph(abs_pos_mm)
+
+        if self.wt.linear_stage_connected == True:
+            self.ledConnectLinearStage.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+        if self.wt.laser_connected == True:
+            self.ledConnectLaser.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def move_pos(self):
         val = float(self.textEditPos.toPlainText())

@@ -23,9 +23,10 @@ class Laser():
 #------------------------------- Serial functions ------------------------------
     def start_serial(self, serial_name):
         try:
-            self.ser = serial.Serial(port_name, 38400, timeout=.1)
+            self.ser = serial.Serial(serial_name, 38400, timeout=.1)
             print("Connection is established")
-        except:
+        except Exception as e:
+            print(e)
             print("Could not open serial")
         return
 
@@ -88,17 +89,15 @@ class Laser():
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
     laser = Laser()
-    if "COM" in port_names[0]:
-        serial_ports = port_names
-    else:
-        serial_ports = list(map(lambda p : "/dev/" + p, port_names))
+    ports = (list(list_ports.comports()))
+    port_names = list(map(lambda p : p.device, ports))
 
-    laser.start_serial(serial_ports[0])
+    laser.start_serial(port_names[0])
     time.sleep(2)
 
-    laser.send_cmd('h')
+    laser.send_cmd('e_freq_available?')
     while True:
         if laser.ser.in_waiting > 0:
-            line = ser.readline()
+            line = laser.ser.readline()
             data = line.decode("utf-8")
             print(data)
