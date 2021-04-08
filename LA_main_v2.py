@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QWidget, QPushButton, QTextEdit, QGridLayout, QComboBox, QHBoxLayout, QVBoxLayout, QApplication, QLCDNumber,
-                             QLabel, QMainWindow, qApp, QSpacerItem, QSizePolicy, QFrame)
+                             QLabel, QMainWindow, qApp, QSpacerItem, QSizePolicy, QFrame, QCheckBox)
 from PyQt5.QtCore import pyqtSlot, QRect, Qt, QThread, pyqtSignal
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPalette, QPainter, QBrush, QPen
@@ -173,7 +173,7 @@ class App(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.title='Motor control'
+        self.title='Laser Ablation'
         self.left=10
         self.top=10
         self.width=1290
@@ -205,7 +205,7 @@ class App(QWidget):
         mainLayout.addLayout(motorLabelLayout, 0, 0)
         motorLabelLayout.setAlignment(Qt.AlignCenter)
 
-        self.labelMotor = QLabel('Motor Control', self)
+        self.labelMotor = QLabel('Linear Stage Control', self)
         self.labelMotor.setStyleSheet("QLabel {font: Times New Roman; font-size: 18px}")
         motorLabelLayout.addWidget(self.labelMotor)
 
@@ -518,6 +518,7 @@ class App(QWidget):
         laserLabelLayout = QHBoxLayout()
         mainLayout.addLayout(laserLabelLayout, 0, 1)
         laserLabelLayout.setAlignment(Qt.AlignCenter)
+        laserLabelLayout.addItem(horizontalSpacer2)
 
         self.labelLaser = QLabel('Laser Control', self)
         self.labelLaser.setStyleSheet("QLabel {font: Times New Roman; font-size: 18px}")
@@ -661,10 +662,55 @@ class App(QWidget):
         connectLabelLayout = QHBoxLayout()
         mainLayout.addLayout(connectLabelLayout, 10, 1)
         connectLabelLayout.setAlignment(Qt.AlignCenter)
+        connectLabelLayout.addItem(horizontalSpacer2)
 
         self.labelConnect = QLabel('Connect', self)
         self.labelConnect.setStyleSheet("QLabel {font: Times New Roman; font-size: 18px}")
         connectLabelLayout.addWidget(self.labelConnect)
+
+        connectLayoutLS = QHBoxLayout()
+        mainLayout.addLayout(connectLayoutLS, 11, 1)
+        connectLayoutLS.setAlignment(Qt.AlignLeft)
+        connectLayoutLS.addItem(horizontalSpacer2)
+
+        self.checkBoxConnectLinearStage = QCheckBox("Linear Stage",self)
+        #self.b.stateChanged.connect(self.clickBox)
+        self.checkBoxConnectLinearStage.resize(320,40)
+        connectLayoutLS.addWidget(self.checkBoxConnectLinearStage)
+        connectLayoutLS.addItem(horizontalSpacer2)
+
+        self.pushButtonConnectLS = QPushButton('Connect', self)
+        self.pushButtonConnectLS.setFixedSize(88, 34)
+        connectLayoutLS.addWidget(self.pushButtonConnectLS)
+        connectLayoutLS.addItem(horizontalSpacer2)
+
+        self.ledConnectLinearStageLS = QLabel(self)
+        self.ledConnectLinearStageLS.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        connectLayoutLS.addWidget(self.ledConnectLinearStageLS)
+        #connectLayoutLS.addItem(horizontalSpacer2)
+
+
+        connectLayoutL = QHBoxLayout()
+        mainLayout.addLayout(connectLayoutL, 12, 1)
+        connectLayoutL.setAlignment(Qt.AlignLeft)
+        connectLayoutL.addItem(horizontalSpacer2)
+
+        self.checkBoxConnectLaser = QCheckBox("Laser             ",self)
+        #self.b.stateChanged.connect(self.clickBox)
+        self.checkBoxConnectLaser.resize(320,40)
+        connectLayoutL.addWidget(self.checkBoxConnectLaser)
+        connectLayoutL.addItem(horizontalSpacer2)
+
+        self.pushButtonConnect = QPushButton('Connect', self)
+        self.pushButtonConnect.setFixedSize(88, 34)
+        connectLayoutL.addWidget(self.pushButtonConnect)
+        connectLayoutL.addItem(horizontalSpacer2)
+
+        self.ledConnectLaser = QLabel(self)
+        self.ledConnectLaser.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        connectLayoutL.addWidget(self.ledConnectLaser)
+        connectLayoutL.addItem(horizontalSpacer2)
+
 
 
 # -----------------------------------------------------------------------------
