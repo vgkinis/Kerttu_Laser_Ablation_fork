@@ -176,9 +176,9 @@ class App(QWidget):
         self.title='Motor control'
         self.left=10
         self.top=10
-        self.width=1200
-        self.height=700
-        self.setMinimumSize(720, 670)
+        self.width=1290
+        self.height=720
+        self.setMinimumSize(1290, 720)
         self.initUI()
 
     def initUI(self):
@@ -526,6 +526,7 @@ class App(QWidget):
         laserLayoutLabelEnable = QHBoxLayout()
         mainLayout.addLayout(laserLayoutLabelEnable, 1, 1)
         laserLayoutLabelEnable.setAlignment(Qt.AlignLeft)
+        laserLayoutLabelEnable.addItem(horizontalSpacer2)
 
         self.labelLaserEnable= QLabel('Enable high power', self)
         self.labelLaserEnable.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
@@ -535,6 +536,7 @@ class App(QWidget):
         laserLayoutEnable = QHBoxLayout()
         mainLayout.addLayout(laserLayoutEnable, 2, 1)
         laserLayoutEnable.setAlignment(Qt.AlignLeft)
+        laserLayoutEnable.addItem(horizontalSpacer2)
 
         self.pushButtonLaserEnable = QPushButton('Enable', self)
         self.pushButtonLaserEnable.setFixedSize(88, 34)
@@ -549,15 +551,17 @@ class App(QWidget):
         laserLayoutLabelRep = QHBoxLayout()
         mainLayout.addLayout(laserLayoutLabelRep, 3, 1)
         laserLayoutLabelRep.setAlignment(Qt.AlignLeft)
+        laserLayoutLabelRep.addItem(horizontalSpacer2)
 
-        self.labelLaserLabelRep= QLabel('Repetition rate', self)
-        self.labelLaserLabelRep.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
-        self.labelLaserLabelRep.setFixedSize(100, 34)
-        laserLayoutLabelRep.addWidget(self.labelLaserLabelRep)
+        self.labelLaserRep= QLabel('Repetition rate', self)
+        self.labelLaserRep.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelLaserRep.setFixedSize(100, 34)
+        laserLayoutLabelRep.addWidget(self.labelLaserRep)
 
         laserLayoutRep = QHBoxLayout()
         mainLayout.addLayout(laserLayoutRep, 4, 1)
         laserLayoutRep.setAlignment(Qt.AlignLeft)
+        laserLayoutRep.addItem(horizontalSpacer2)
 
         self.comboBoxLaserRep = QComboBox(self)
         # TODO : replace with non-hardcoded value
@@ -571,11 +575,22 @@ class App(QWidget):
         self.pushButtonLaserRepSet = QPushButton('Set', self)
         self.pushButtonLaserRepSet.setFixedSize(88, 34)
         laserLayoutRep.addWidget(self.pushButtonLaserRepSet)
+        laserLayoutRep.addItem(horizontalSpacer2)
 
+        self.lcdNumberLaserRep = QLCDNumber(self)
+        self.lcdNumberLaserRep.setFixedSize(100, 34)
+        set_lcd_style(self.lcdNumberLaserRep)
+        laserLayoutRep.addWidget(self.lcdNumberLaserRep)
+
+        self.labelLaserRep2 = QLabel('kHz', self)
+        self.labelLaserRep2.setFixedSize(25, 34)
+        laserLayoutRep.addWidget(self.labelLaserRep2)
+        laserLayoutRep.addItem(horizontalSpacer2)
 
         laserLayoutLabelEnergy = QHBoxLayout()
         mainLayout.addLayout(laserLayoutLabelEnergy, 5, 1)
         laserLayoutLabelEnergy.setAlignment(Qt.AlignLeft)
+        laserLayoutLabelEnergy.addItem(horizontalSpacer2)
 
         self.labelLaserLabelEnergy= QLabel('Pulse energy', self)
         self.labelLaserLabelEnergy.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
@@ -585,6 +600,7 @@ class App(QWidget):
         laserLayoutEnergy = QHBoxLayout()
         mainLayout.addLayout(laserLayoutEnergy, 6, 1)
         laserLayoutEnergy.setAlignment(Qt.AlignLeft)
+        laserLayoutEnergy.addItem(horizontalSpacer2)
 
         self.textEditEnergy = QTextEdit(self)
         self.textEditEnergy.setFixedSize(88, 34)
@@ -600,10 +616,22 @@ class App(QWidget):
         self.pushButtonLaserEnergySet = QPushButton('Set', self)
         self.pushButtonLaserEnergySet.setFixedSize(88, 34)
         laserLayoutEnergy.addWidget(self.pushButtonLaserEnergySet)
+        laserLayoutEnergy.addItem(horizontalSpacer2)
+
+        self.lcdNumberLaserEnergy = QLCDNumber(self)
+        self.lcdNumberLaserEnergy.setFixedSize(100, 34)
+        set_lcd_style(self.lcdNumberLaserEnergy)
+        laserLayoutEnergy.addWidget(self.lcdNumberLaserEnergy)
+
+        self.comboBoxLaserEnergy2 = QComboBox(self)
+        self.comboBoxLaserEnergy2.addItems(["uJ", "nJ"])
+        self.comboBoxLaserEnergy2.setFixedSize(65, 34)
+        laserLayoutEnergy.addWidget(self.comboBoxLaserEnergy2)
 
         laserLayoutStandby = QHBoxLayout()
         mainLayout.addLayout(laserLayoutStandby, 8, 1)
         laserLayoutStandby.setAlignment(Qt.AlignLeft)
+        laserLayoutStandby.addItem(horizontalSpacer2)
 
         self.pushButtonLaserStandby = QPushButton('Standby', self)
         self.pushButtonLaserStandby.setFixedSize(88, 34)
@@ -618,6 +646,7 @@ class App(QWidget):
         laserLayoutListen = QHBoxLayout()
         mainLayout.addLayout(laserLayoutListen, 9, 1)
         laserLayoutListen.setAlignment(Qt.AlignLeft)
+        laserLayoutListen.addItem(horizontalSpacer2)
 
         self.pushButtonLaserListen = QPushButton('Listen', self)
         self.pushButtonLaserListen.setFixedSize(88, 34)
@@ -627,6 +656,15 @@ class App(QWidget):
         self.ledLaserListen = QLabel(self)
         self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         laserLayoutListen.addWidget(self.ledLaserListen)
+
+
+        connectLabelLayout = QHBoxLayout()
+        mainLayout.addLayout(connectLabelLayout, 10, 1)
+        connectLabelLayout.setAlignment(Qt.AlignCenter)
+
+        self.labelConnect = QLabel('Connect', self)
+        self.labelConnect.setStyleSheet("QLabel {font: Times New Roman; font-size: 18px}")
+        connectLabelLayout.addWidget(self.labelConnect)
 
 
 # -----------------------------------------------------------------------------
