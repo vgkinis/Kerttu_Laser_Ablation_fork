@@ -547,33 +547,14 @@ class App(QWidget):
         self.labelLaser.setStyleSheet("QLabel {font: Times New Roman; font-size: 18px}")
         laserLabelLayout.addWidget(self.labelLaser)
 
-        laserLayoutLabelEnable = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutLabelEnable, 1, 1)
-        laserLayoutLabelEnable.setAlignment(Qt.AlignLeft)
-        laserLayoutLabelEnable.addItem(horizontalSpacer2)
-
-        self.labelLaserEnable= QLabel('Enable high power', self)
-        self.labelLaserEnable.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
-        self.labelLaserEnable.setFixedSize(150, 34)
-        laserLayoutLabelEnable.addWidget(self.labelLaserEnable)
-
-        laserLayoutEnable = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutEnable, 2, 1)
-        laserLayoutEnable.setAlignment(Qt.AlignLeft)
-        laserLayoutEnable.addItem(horizontalSpacer2)
-
-        self.pushButtonLaserEnable = QPushButton('Enable', self)
-        self.pushButtonLaserEnable.setFixedSize(88, 34)
-        laserLayoutEnable.addWidget(self.pushButtonLaserEnable)
-        laserLayoutEnable.addItem(QSpacerItem(130, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
-
+        """
         self.ledLaserEnable = QLabel(self)
         self.ledLaserEnable.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        laserLayoutEnable.addWidget(self.ledLaserEnable)
+        laserLayoutEnable.addWidget(self.ledLaserEnable)"""
 
 
         laserLayoutLabelRep = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutLabelRep, 3, 1)
+        mainLayout.addLayout(laserLayoutLabelRep, 1, 1)
         laserLayoutLabelRep.setAlignment(Qt.AlignLeft)
         laserLayoutLabelRep.addItem(horizontalSpacer2)
 
@@ -583,7 +564,7 @@ class App(QWidget):
         laserLayoutLabelRep.addWidget(self.labelLaserRep)
 
         laserLayoutRep = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutRep, 4, 1)
+        mainLayout.addLayout(laserLayoutRep, 2, 1)
         laserLayoutRep.setAlignment(Qt.AlignLeft)
         laserLayoutRep.addItem(horizontalSpacer2)
 
@@ -612,7 +593,7 @@ class App(QWidget):
         laserLayoutRep.addItem(horizontalSpacer2)
 
         laserLayoutLabelEnergy = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutLabelEnergy, 5, 1)
+        mainLayout.addLayout(laserLayoutLabelEnergy, 3, 1)
         laserLayoutLabelEnergy.setAlignment(Qt.AlignLeft)
         laserLayoutLabelEnergy.addItem(horizontalSpacer2)
 
@@ -622,7 +603,7 @@ class App(QWidget):
         laserLayoutLabelEnergy.addWidget(self.labelLaserLabelEnergy)
 
         laserLayoutEnergy = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutEnergy, 6, 1)
+        mainLayout.addLayout(laserLayoutEnergy, 4, 1)
         laserLayoutEnergy.setAlignment(Qt.AlignLeft)
         laserLayoutEnergy.addItem(horizontalSpacer2)
 
@@ -652,34 +633,33 @@ class App(QWidget):
         self.comboBoxLaserEnergy2.setFixedSize(65, 34)
         laserLayoutEnergy.addWidget(self.comboBoxLaserEnergy2)
 
-        laserLayoutStandby = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutStandby, 8, 1)
-        laserLayoutStandby.setAlignment(Qt.AlignLeft)
-        laserLayoutStandby.addItem(horizontalSpacer2)
+        laserLayoutModes = QHBoxLayout()
+        mainLayout.addLayout(laserLayoutModes, 6, 1)
+        laserLayoutModes.setAlignment(Qt.AlignCenter)
+        laserLayoutModes.addItem(QSpacerItem(50, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.pushButtonLaserEnable = QPushButton('Enable', self)
+        self.pushButtonLaserEnable.setFixedSize(88, 34)
+        laserLayoutModes.addWidget(self.pushButtonLaserEnable)
+        laserLayoutModes.addItem(horizontalSpacer2)
 
         self.pushButtonLaserStandby = QPushButton('Standby', self)
         self.pushButtonLaserStandby.setFixedSize(88, 34)
-        laserLayoutStandby.addWidget(self.pushButtonLaserStandby)
-        laserLayoutStandby.addItem(QSpacerItem(130, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        laserLayoutModes.addWidget(self.pushButtonLaserStandby)
+        laserLayoutModes.addItem(horizontalSpacer2)
 
-        self.ledLaserStandby = QLabel(self)
-        self.ledLaserStandby.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        laserLayoutStandby.addWidget(self.ledLaserStandby)
-
-
-        laserLayoutListen = QHBoxLayout()
-        mainLayout.addLayout(laserLayoutListen, 9, 1)
-        laserLayoutListen.setAlignment(Qt.AlignLeft)
-        laserLayoutListen.addItem(horizontalSpacer2)
+        #self.ledLaserStandby = QLabel(self)
+        #self.ledLaserStandby.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        #laserLayoutStandby.addWidget(self.ledLaserStandby)
 
         self.pushButtonLaserListen = QPushButton('Listen', self)
         self.pushButtonLaserListen.setFixedSize(88, 34)
-        laserLayoutListen.addWidget(self.pushButtonLaserListen)
-        laserLayoutListen.addItem(QSpacerItem(130, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        laserLayoutModes.addWidget(self.pushButtonLaserListen)
+        laserLayoutModes.addItem(horizontalSpacer2)
 
-        self.ledLaserListen = QLabel(self)
-        self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        laserLayoutListen.addWidget(self.ledLaserListen)
+        #self.ledLaserListen = QLabel(self)
+        #self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        #laserLayoutListen.addWidget(self.ledLaserListen)
 
 
         connectLabelLayout = QHBoxLayout()
