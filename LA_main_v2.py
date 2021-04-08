@@ -421,9 +421,9 @@ class App(QWidget):
 # --------------------------------- Varia --------------------------------------
         variaLayout = QHBoxLayout()
 
-        mainLayout.addLayout(variaLayout, 9, 0)
+        mainLayout.addLayout(variaLayout, 10, 0)
         variaLayout.setAlignment(Qt.AlignLeft)
-        variaLayout.addItem(verticalSpacer1)
+        #variaLayout.addItem(verticalSpacer1)
         variaLayout.addItem(horizontalSpacer2)
 
         self.pushButtonC = QPushButton('Calibrate', self)
@@ -450,7 +450,7 @@ class App(QWidget):
 # --------------------------------- Graph --------------------------------------
 
         graphLayout = QHBoxLayout()
-        mainLayout.addLayout(graphLayout, 10, 0)
+        mainLayout.addLayout(graphLayout, 11, 0)
 
         self.figure_ls = plt.figure()
         self.figure_ls.set_figheight(0.5)
@@ -465,7 +465,7 @@ class App(QWidget):
 # --------------------------- Discrete movement --------------------------------
 
         discreteLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(discreteLabelLayout, 11, 0)
+        mainLayout.addLayout(discreteLabelLayout, 12, 0)
         discreteLabelLayout.setAlignment(Qt.AlignCenter)
         discreteLabelLayout.addItem(horizontalSpacer2)
 
@@ -490,7 +490,7 @@ class App(QWidget):
         self.labelDiscrete3.setStyleSheet("QLabel {font-size: 12px; color: #263470}")
 
         discreteLayout1 = QHBoxLayout()
-        mainLayout.addLayout(discreteLayout1, 12, 0)
+        mainLayout.addLayout(discreteLayout1, 13, 0)
         discreteLayout1.setAlignment(Qt.AlignCenter)
 
         discreteLayout1.addWidget(self.labelDiscrete1)
@@ -523,7 +523,7 @@ class App(QWidget):
         discreteLayout1.addWidget(self.textEditDiscreteNr)
 
         discreteLayout2 = QHBoxLayout()
-        mainLayout.addLayout(discreteLayout2, 13, 0)
+        mainLayout.addLayout(discreteLayout2, 14, 0)
         discreteLayout2.setAlignment(Qt.AlignCenter)
 
         self.pushButtonDiscrete = QPushButton('Start', self)
@@ -638,29 +638,65 @@ class App(QWidget):
         laserLayoutModes.setAlignment(Qt.AlignCenter)
         laserLayoutModes.addItem(QSpacerItem(50, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.pushButtonLaserEnable = QPushButton('Enable', self)
-        self.pushButtonLaserEnable.setFixedSize(88, 34)
-        laserLayoutModes.addWidget(self.pushButtonLaserEnable)
+        self.pushButtonLaserListen = QPushButton('Listen', self)
+        self.pushButtonLaserListen.setFixedSize(88, 34)
+        self.pushButtonLaserListen.setStyleSheet("background-color: #dbdbdb")
+        laserLayoutModes.addWidget(self.pushButtonLaserListen)
         laserLayoutModes.addItem(horizontalSpacer2)
 
         self.pushButtonLaserStandby = QPushButton('Standby', self)
         self.pushButtonLaserStandby.setFixedSize(88, 34)
+        self.pushButtonLaserStandby.setStyleSheet("background-color: #dbdbdb")
         laserLayoutModes.addWidget(self.pushButtonLaserStandby)
         laserLayoutModes.addItem(horizontalSpacer2)
+
+        self.pushButtonLaserEnable = QPushButton('Enable', self)
+        self.pushButtonLaserEnable.setFixedSize(88, 34)
+        self.pushButtonLaserEnable.setStyleSheet("background-color: #dbdbdb")
+        laserLayoutModes.addWidget(self.pushButtonLaserEnable)
+        laserLayoutModes.addItem(horizontalSpacer2)
+
+        laserLayoutStatus1 = QHBoxLayout()
+        mainLayout.addLayout(laserLayoutStatus1, 8, 1)
+        laserLayoutStatus1.setAlignment(Qt.AlignLeft)
+        laserLayoutStatus1.addItem(horizontalSpacer2)
+
+        self.labelStatusLaserOn= QLabel('Laser on enabled', self)
+        self.labelStatusLaserOn.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusLaserOn.setFixedSize(200, 34)
+        laserLayoutStatus1.addWidget(self.labelStatusLaserOn)
+
+
+        laserLayoutStatus2 = QHBoxLayout()
+        mainLayout.addLayout(laserLayoutStatus2, 9, 1)
+        laserLayoutStatus2.setAlignment(Qt.AlignLeft)
+        laserLayoutStatus2.addItem(horizontalSpacer2)
+
+        self.labelStatusListen= QLabel('Listen', self)
+        self.labelStatusListen.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusListen.setFixedSize(200, 34)
+        laserLayoutStatus2.addWidget(self.labelStatusListen)
+
+        laserLayoutStatus3 = QHBoxLayout()
+        mainLayout.addLayout(laserLayoutStatus3, 10, 1)
+        laserLayoutStatus3.setAlignment(Qt.AlignLeft)
+        laserLayoutStatus3.addItem(horizontalSpacer2)
+
+        self.labelStatusStandby= QLabel('Listen', self)
+        self.labelStatusStandby.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusStandby.setFixedSize(200, 34)
+        laserLayoutStatus3.addWidget(self.labelStatusStandby)
+
 
         #self.ledLaserStandby = QLabel(self)
         #self.ledLaserStandby.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         #laserLayoutStandby.addWidget(self.ledLaserStandby)
 
-        self.pushButtonLaserListen = QPushButton('Listen', self)
-        self.pushButtonLaserListen.setFixedSize(88, 34)
-        laserLayoutModes.addWidget(self.pushButtonLaserListen)
-        laserLayoutModes.addItem(horizontalSpacer2)
-
         #self.ledLaserListen = QLabel(self)
         #self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         #laserLayoutListen.addWidget(self.ledLaserListen)
 
+# ---------------------------- Connect -----------------------------------------
 
         connectLabelLayout = QHBoxLayout()
         mainLayout.addLayout(connectLabelLayout, 11, 1)
