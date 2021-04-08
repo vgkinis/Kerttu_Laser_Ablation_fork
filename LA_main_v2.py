@@ -660,7 +660,7 @@ class App(QWidget):
 
 
         connectLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(connectLabelLayout, 10, 1)
+        mainLayout.addLayout(connectLabelLayout, 11, 1)
         connectLabelLayout.setAlignment(Qt.AlignCenter)
         connectLabelLayout.addItem(horizontalSpacer2)
 
@@ -669,15 +669,20 @@ class App(QWidget):
         connectLabelLayout.addWidget(self.labelConnect)
 
         connectLayoutLS = QHBoxLayout()
-        mainLayout.addLayout(connectLayoutLS, 11, 1)
+        mainLayout.addLayout(connectLayoutLS, 12, 1)
         connectLayoutLS.setAlignment(Qt.AlignLeft)
         connectLayoutLS.addItem(horizontalSpacer2)
 
-        self.checkBoxConnectLinearStage = QCheckBox("Linear Stage",self)
+        self.labelConnectLS = QLabel('Linear Stage', self)
+        self.labelConnectLS.setFixedSize(100, 34)
+        self.labelConnectLS.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        connectLayoutLS.addWidget(self.labelConnectLS)
+
+        #self.checkBoxConnectLinearStage = QCheckBox("Linear Stage",self)
         #self.b.stateChanged.connect(self.clickBox)
-        self.checkBoxConnectLinearStage.resize(320,40)
-        connectLayoutLS.addWidget(self.checkBoxConnectLinearStage)
-        connectLayoutLS.addItem(horizontalSpacer2)
+        #self.checkBoxConnectLinearStage.resize(320,40)
+        #connectLayoutLS.addWidget(self.checkBoxConnectLinearStage)
+        #connectLayoutLS.addItem(horizontalSpacer2)
 
         self.pushButtonConnectLS = QPushButton('Connect', self)
         self.pushButtonConnectLS.setFixedSize(88, 34)
@@ -691,15 +696,20 @@ class App(QWidget):
 
 
         connectLayoutL = QHBoxLayout()
-        mainLayout.addLayout(connectLayoutL, 12, 1)
+        mainLayout.addLayout(connectLayoutL, 13, 1)
         connectLayoutL.setAlignment(Qt.AlignLeft)
         connectLayoutL.addItem(horizontalSpacer2)
 
-        self.checkBoxConnectLaser = QCheckBox("Laser             ",self)
+        self.labelConnectL = QLabel('Laser', self)
+        self.labelConnectL.setFixedSize(100, 34)
+        self.labelConnectL.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        connectLayoutL.addWidget(self.labelConnectL)
+
+        #self.checkBoxConnectLaser = QCheckBox("Laser             ",self)
         #self.b.stateChanged.connect(self.clickBox)
-        self.checkBoxConnectLaser.resize(320,40)
-        connectLayoutL.addWidget(self.checkBoxConnectLaser)
-        connectLayoutL.addItem(horizontalSpacer2)
+        #self.checkBoxConnectLaser.resize(320,40)
+        #connectLayoutL.addWidget(self.checkBoxConnectLaser)
+        #connectLayoutL.addItem(horizontalSpacer2)
 
         self.pushButtonConnect = QPushButton('Connect', self)
         self.pushButtonConnect.setFixedSize(88, 34)
