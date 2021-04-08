@@ -80,17 +80,18 @@ class WorkerThread(QThread):
 
     def connect_linear_stage(self):
         ports = (list(list_ports.comports()))
-        port_names = list(map(lambda p : p.device, ports))
         print("Establishing a connection with the linear stage ...")
-
-        try:
-            self.ls.start_serial(port_names[0])
-            time.sleep(2)
-            self.linear_stage_connected = True
-            self.start_data_logger()
-        except Exception as e:
-            #print(e)
-            print("Can't connect to the linear stage.")
+        for port in ports:
+            if "Arduino" in port.manufacturer:
+                try:
+                    self.ls.start_serial(port.device)
+                    time.sleep(2)
+                    self.linear_stage_connected = True
+                    self.start_data_logger()
+                except Exception as e:
+                    print(e)
+        if self.linear_stage_connected == False:
+            print("Cannot find the port for linear stage")
 
     def data_logger(self):
         with open(self.data_filename,"a") as f:

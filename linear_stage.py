@@ -110,7 +110,7 @@ class LinearStage():
                 return
         else:
             print("Incorrect data received from the linear stage: ", line)
-            return 
+            return
         return
 
 
