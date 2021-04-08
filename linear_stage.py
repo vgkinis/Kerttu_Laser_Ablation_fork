@@ -106,9 +106,11 @@ class LinearStage():
                                 }
                 return self.data_dict
             else:
-                return "failed 2 if", line
+                print("Partial data received from the linear stage: ", line)
+                return
         else:
-            return "failed 1 if", line
+            print("Incorrect data received from the linear stage: ", line)
+            return 
         return
 
 

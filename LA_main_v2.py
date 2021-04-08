@@ -38,18 +38,33 @@ class WorkerThread(QThread):
         self.calibrate_start_count = None
         self.calibrated = False
 
+        self.linear_stage_connected = False
+        self.laser_connected = False
+
         # Establish a connection with the linear stage
         self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
-        ports = (list(list_ports.comports()))
-        port_names = list(map(lambda p : p.device, ports))
-        if "COM" in port_names[0]:
-            serial_ports = port_names
-        else:
-            serial_ports = list(map(lambda p : "/dev/" + p, port_names))
 
-        self.ls.start_serial(serial_port[0])
+        while True:
+            if self.linear_stage_connected:
+                try:
+                    # Get feedback
+                    self.ls.ping_arduino()
+                    data_dict = self.ls.serial_read()
+                    self.motor_signals.emit(data_dict)
+                    schedule.run_pending()
 
+                    # Calibrate or perform discrete movement if it has been chosen.
+                    self.calibrate_sys()
+                    self.discrete_movement()
+
+                except Exception as e:
+                    print(e)
+                    continue
+            if self.laser_connected:
+                print("Laser connected")
+
+    def start_data_logger(self):
         # Data files
         dir_data = os.path.join(os.getcwd(),"Data")
         time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen")).strftime("%Y-%m-%d %H.%M.%S.%f+%z")
@@ -60,23 +75,22 @@ class WorkerThread(QThread):
             maxlen = len(max(self.ls.data_dict, key=len))
             writer.writerow([(' ' * (maxlen - len(x))) + x for x in self.ls.data_dict])
 
-        time.sleep(2)
         schedule.every(1).seconds.do(self.data_logger)
-        while True:
-            try:
-                # Get feedback
-                self.ls.ping_arduino()
-                data_dict = self.ls.serial_read()
-                self.motor_signals.emit(data_dict)
-                schedule.run_pending()
 
-                # Calibrate or perform discrete movement if it has been chosen.
-                self.calibrate_sys()
-                self.discrete_movement()
 
-            except Exception as e:
-                print(e)
-                continue
+    def connect_linear_stage(self):
+        ports = (list(list_ports.comports()))
+        port_names = list(map(lambda p : p.device, ports))
+        print("Establishing a connection with the linear stage ...")
+
+        try:
+            self.ls.start_serial(port_names[0])
+            time.sleep(2)
+            self.linear_stage_connected = True
+            self.start_data_logger()
+        except Exception as e:
+            #print(e)
+            print("Can't connect to the linear stage.")
 
     def data_logger(self):
         with open(self.data_filename,"a") as f:
@@ -711,9 +725,9 @@ class App(QWidget):
         #connectLayoutL.addWidget(self.checkBoxConnectLaser)
         #connectLayoutL.addItem(horizontalSpacer2)
 
-        self.pushButtonConnect = QPushButton('Connect', self)
-        self.pushButtonConnect.setFixedSize(88, 34)
-        connectLayoutL.addWidget(self.pushButtonConnect)
+        self.pushButtonConnectL = QPushButton('Connect', self)
+        self.pushButtonConnectL.setFixedSize(88, 34)
+        connectLayoutL.addWidget(self.pushButtonConnectL)
         connectLayoutL.addItem(horizontalSpacer2)
 
         self.ledConnectLaser = QLabel(self)
@@ -734,6 +748,7 @@ class App(QWidget):
         self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
         self.pushButtonDiscrete.clicked.connect(functools.partial(self.discrete_meas))
+        self.pushButtonConnectLS.clicked.connect(functools.partial(self.wt.connect_linear_stage))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
