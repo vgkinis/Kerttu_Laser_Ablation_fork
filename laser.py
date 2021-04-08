@@ -53,8 +53,15 @@ class Laser():
     def go_to_listen(self):
         self.send_cmd('ly_oxp2_listen')
 
-    def go_to_laser_on(self):
+    def enable_laser(self):
+        self.send_cmd('ly_oxp2_enabled')
+
+    def enable_AOM_laser(self):
         self.send_cmd('ly_oxp2_output_enable')
+
+    def disable_AOM_laser(self):
+        self.send_cmd('ly_oxp2_output_disable')
+
 
     def set_pulse_energy(self, energy, unit):
         if unit == "uJ":

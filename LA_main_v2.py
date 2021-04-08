@@ -22,6 +22,7 @@ import os
 
 from general_functions import *
 from linear_stage import LinearStage
+from laser import Laser
 
 
 class WorkerThread(QThread):
@@ -176,7 +177,7 @@ class App(QWidget):
         self.left=10
         self.top=10
         self.width=1200
-        self.height=690
+        self.height=700
         self.setMinimumSize(720, 670)
         self.initUI()
 
@@ -200,9 +201,16 @@ class App(QWidget):
 
 
 # ---------------------------------- Position ----------------------------------
+        motorLabelLayout = QHBoxLayout()
+        mainLayout.addLayout(motorLabelLayout, 0, 0)
+        motorLabelLayout.setAlignment(Qt.AlignCenter)
+
+        self.labelMotor = QLabel('Motor Control', self)
+        self.labelMotor.setStyleSheet("QLabel {font: Times New Roman; font-size: 18px}")
+        motorLabelLayout.addWidget(self.labelMotor)
 
         posLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(posLabelLayout, 0, 0)
+        mainLayout.addLayout(posLabelLayout, 1, 0)
         posLabelLayout.setAlignment(Qt.AlignLeft)
         posLabelLayout.addItem(horizontalSpacer2)
 
@@ -211,7 +219,7 @@ class App(QWidget):
         posLabelLayout.addWidget(self.labelPos)
 
         posLayout = QHBoxLayout()
-        mainLayout.addLayout(posLayout, 1, 0)
+        mainLayout.addLayout(posLayout, 2, 0)
         posLayout.addItem(horizontalSpacer2)
 
         self.textEditPos = QTextEdit(self)
@@ -250,7 +258,7 @@ class App(QWidget):
 # ---------------------------------- Distance ----------------------------------
 
         disLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(disLabelLayout, 2, 0)
+        mainLayout.addLayout(disLabelLayout, 3, 0)
         disLabelLayout.setAlignment(Qt.AlignLeft)
         disLabelLayout.addItem(horizontalSpacer2)
 
@@ -260,7 +268,7 @@ class App(QWidget):
         disLabelLayout.addWidget(self.labelDis)
 
         disLayout = QHBoxLayout()
-        mainLayout.addLayout(disLayout, 3, 0)
+        mainLayout.addLayout(disLayout, 4, 0)
         disLayout.addItem(horizontalSpacer2)
 
         self.textEditDis = QTextEdit(self)
@@ -299,7 +307,7 @@ class App(QWidget):
 # ----------------------------------- Speed ------------------------------------
 
         spdLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(spdLabelLayout, 4, 0)
+        mainLayout.addLayout(spdLabelLayout, 5, 0)
         spdLabelLayout.setAlignment(Qt.AlignLeft)
         spdLabelLayout.addItem(horizontalSpacer2)
 
@@ -309,7 +317,7 @@ class App(QWidget):
         spdLabelLayout.addWidget(self.labelSpd)
 
         spdLayout = QHBoxLayout()
-        mainLayout.addLayout(spdLayout, 5, 0)
+        mainLayout.addLayout(spdLayout, 6, 0)
         spdLayout.addItem(horizontalSpacer2)
 
         self.textEditSpd = QTextEdit(self)
@@ -348,7 +356,7 @@ class App(QWidget):
 # --------------------------------- Direction ----------------------------------
 
         dirLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(dirLabelLayout, 6, 0)
+        mainLayout.addLayout(dirLabelLayout, 7, 0)
         dirLabelLayout.setAlignment(Qt.AlignLeft)
         dirLabelLayout.addItem(horizontalSpacer2)
 
@@ -358,7 +366,7 @@ class App(QWidget):
         dirLabelLayout.addWidget(self.labelDir)
 
         dirLayout = QHBoxLayout()
-        mainLayout.addLayout(dirLayout, 7, 0)
+        mainLayout.addLayout(dirLayout, 8, 0)
         dirLayout.addItem(horizontalSpacer2)
 
         self.textEditDir = QTextEdit(self)
@@ -390,7 +398,7 @@ class App(QWidget):
 # --------------------------------- Varia --------------------------------------
         variaLayout = QHBoxLayout()
 
-        mainLayout.addLayout(variaLayout, 8, 0)
+        mainLayout.addLayout(variaLayout, 9, 0)
         variaLayout.setAlignment(Qt.AlignLeft)
         variaLayout.addItem(verticalSpacer1)
         variaLayout.addItem(horizontalSpacer2)
@@ -419,7 +427,7 @@ class App(QWidget):
 # --------------------------------- Graph --------------------------------------
 
         graphLayout = QHBoxLayout()
-        mainLayout.addLayout(graphLayout, 9, 0)
+        mainLayout.addLayout(graphLayout, 10, 0)
 
         self.figure_ls = plt.figure()
         self.figure_ls.set_figheight(0.5)
@@ -434,7 +442,7 @@ class App(QWidget):
 # --------------------------- Discrete movement --------------------------------
 
         discreteLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(discreteLabelLayout, 10, 0)
+        mainLayout.addLayout(discreteLabelLayout, 11, 0)
         discreteLabelLayout.setAlignment(Qt.AlignCenter)
         discreteLabelLayout.addItem(horizontalSpacer2)
 
@@ -458,52 +466,61 @@ class App(QWidget):
         self.labelDiscrete3.setFixedSize(100, 34)
         self.labelDiscrete3.setStyleSheet("QLabel {font-size: 12px; color: #263470}")
 
-        discrete1Layout = QHBoxLayout()
-        mainLayout.addLayout(discrete1Layout, 11, 0)
-        discrete1Layout.setAlignment(Qt.AlignCenter)
+        discreteLayout1 = QHBoxLayout()
+        mainLayout.addLayout(discreteLayout1, 12, 0)
+        discreteLayout1.setAlignment(Qt.AlignCenter)
 
-        discrete1Layout.addWidget(self.labelDiscrete1)
+        discreteLayout1.addWidget(self.labelDiscrete1)
 
         self.textEditDiscreteDis = QTextEdit(self)
         self.textEditDiscreteDis.setFixedSize(80, 34)
-        discrete1Layout.addWidget(self.textEditDiscreteDis)
+        discreteLayout1.addWidget(self.textEditDiscreteDis)
 
         self.comboBoxDiscrete = QComboBox(self)
         self.comboBoxDiscrete.addItems(["mm", "steps", "rev"])
         self.comboBoxDiscrete.setFixedSize(65, 34)
-        discrete1Layout.addWidget(self.comboBoxDiscrete)
+        discreteLayout1.addWidget(self.comboBoxDiscrete)
 
-        add_custom_spacer(20,34,discrete1Layout)
-        discrete1Layout.addWidget(self.labelDiscrete2)
+        add_custom_spacer(20,34,discreteLayout1)
+        discreteLayout1.addWidget(self.labelDiscrete2)
 
         self.textEditDiscreteTime = QTextEdit(self)
         self.textEditDiscreteTime.setFixedSize(80, 34)
-        discrete1Layout.addWidget(self.textEditDiscreteTime)
+        discreteLayout1.addWidget(self.textEditDiscreteTime)
 
         self.labelDiscrete5 = QLabel('s', self)
         self.labelDiscrete5.setFixedSize(10, 34)
-        discrete1Layout.addWidget(self.labelDiscrete5)
+        discreteLayout1.addWidget(self.labelDiscrete5)
 
-        add_custom_spacer(20,34,discrete1Layout)
-        discrete1Layout.addWidget(self.labelDiscrete3)
+        add_custom_spacer(20,34,discreteLayout1)
+        discreteLayout1.addWidget(self.labelDiscrete3)
 
         self.textEditDiscreteNr = QTextEdit(self)
         self.textEditDiscreteNr.setFixedSize(80, 34)
-        discrete1Layout.addWidget(self.textEditDiscreteNr)
+        discreteLayout1.addWidget(self.textEditDiscreteNr)
 
-        discrete2Layout = QHBoxLayout()
-        mainLayout.addLayout(discrete2Layout, 12, 0)
-        discrete2Layout.setAlignment(Qt.AlignCenter)
+        discreteLayout2 = QHBoxLayout()
+        mainLayout.addLayout(discreteLayout2, 13, 0)
+        discreteLayout2.setAlignment(Qt.AlignCenter)
 
         self.pushButtonDiscrete = QPushButton('Start', self)
         self.pushButtonDiscrete.setFixedSize(88, 34)
-        discrete2Layout.addWidget(self.pushButtonDiscrete)
+        discreteLayout2.addWidget(self.pushButtonDiscrete)
 
         self.ledDiscrete = QLabel(self)
         self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        discrete2Layout.addWidget(self.ledDiscrete)
-        discrete2Layout.addItem(horizontalSpacer2)
-        discrete2Layout.addItem(QSpacerItem(0, 80, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        discreteLayout2.addWidget(self.ledDiscrete)
+        discreteLayout2.addItem(horizontalSpacer2)
+        discreteLayout2.addItem(QSpacerItem(0, 80, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+# ------------------------------- Laser ----------------------------------------
+        laserLayout1 = QHBoxLayout()
+        mainLayout.addLayout(laserLayout1, 2, 1)
+        laserLayout1.setAlignment(Qt.AlignCenter)
+
+        self.pushButtonLaserEnable = QPushButton('Enable', self)
+        self.pushButtonLaserEnable.setFixedSize(88, 34)
+        laserLayout1.addWidget(self.pushButtonLaserEnable)
 
 
 # -----------------------------------------------------------------------------
