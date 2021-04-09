@@ -884,7 +884,7 @@ class App(QWidget):
             self.ledConnectLaser.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
         self.lcdNumberLaserRep.display(data_dict["rep_rate_kHz"])
-        self.lcdNumberLaserEnergy.display(data_dict["real_energy_" + self.comboBoxLaserEnergy2.currentText()])
+        self.lcdNumberLaserEnergy.display(data_dict["energy_" + self.comboBoxLaserEnergy2.currentText()])
 
         turn_led_on_off(self.ledLaserOn, data_dict["status_laser_on_enabled"])
         turn_led_on_off(self.ledLaserOnDis, data_dict["status_laser_on_disabled"])
