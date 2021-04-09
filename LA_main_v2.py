@@ -670,7 +670,7 @@ class App(QWidget):
         laserLayoutStatus1.addItem(horizontalSpacer2)
 
         self.labelStatusLaserOn= QLabel('Laser on enabled', self)
-        self.labelStatusLaserOn.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusLaserOn.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusLaserOn.setFixedSize(170, 34)
         laserLayoutStatus1.addWidget(self.labelStatusLaserOn)
 
@@ -680,7 +680,7 @@ class App(QWidget):
         laserLayoutStatus1.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelStatusListen= QLabel('Listen', self)
-        self.labelStatusListen.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusListen.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusListen.setFixedSize(170, 34)
         laserLayoutStatus1.addWidget(self.labelStatusListen)
 
@@ -694,7 +694,7 @@ class App(QWidget):
         laserLayoutStatus2.addItem(horizontalSpacer2)
 
         self.labelStatusLaserOnDis= QLabel('Laser on disabled', self)
-        self.labelStatusLaserOnDis.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusLaserOnDis.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusLaserOnDis.setFixedSize(170, 34)
         laserLayoutStatus2.addWidget(self.labelStatusLaserOnDis)
 
@@ -704,7 +704,7 @@ class App(QWidget):
         laserLayoutStatus2.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelStatusWarning= QLabel('Warning', self)
-        self.labelStatusWarning.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusWarning.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusWarning.setFixedSize(170, 34)
         laserLayoutStatus2.addWidget(self.labelStatusWarning)
 
@@ -718,7 +718,7 @@ class App(QWidget):
         laserLayoutStatus3.addItem(horizontalSpacer2)
 
         self.labelStatusStandby= QLabel('Standby', self)
-        self.labelStatusStandby.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusStandby.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusStandby.setFixedSize(170, 34)
         laserLayoutStatus3.addWidget(self.labelStatusStandby)
 
@@ -728,7 +728,7 @@ class App(QWidget):
         laserLayoutStatus3.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelStatusError= QLabel('Error', self)
-        self.labelStatusError.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusError.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusError.setFixedSize(170, 34)
         laserLayoutStatus3.addWidget(self.labelStatusError)
 
@@ -742,7 +742,7 @@ class App(QWidget):
         laserLayoutStatus4.addItem(horizontalSpacer2)
 
         self.labelStatusSetup= QLabel('Setup', self)
-        self.labelStatusSetup.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusSetup.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusSetup.setFixedSize(170, 34)
         laserLayoutStatus4.addWidget(self.labelStatusSetup)
 
@@ -752,18 +752,13 @@ class App(QWidget):
         laserLayoutStatus4.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelStatusPower= QLabel('Power', self)
-        self.labelStatusPower.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusPower.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px; color: #263470}")
         self.labelStatusPower.setFixedSize(170, 34)
         laserLayoutStatus4.addWidget(self.labelStatusPower)
 
         self.ledLaserPower = QLabel(self)
         self.ledLaserPower.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         laserLayoutStatus4.addWidget(self.ledLaserPower)
-
-
-        #self.ledLaserListen = QLabel(self)
-        #self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        #laserLayoutListen.addWidget(self.ledLaserListen)
 
 # ---------------------------- Connect -----------------------------------------
 
