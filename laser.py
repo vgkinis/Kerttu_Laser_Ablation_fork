@@ -17,8 +17,8 @@ class Laser():
         self.rep_rates_kHz = {0:50, 1:100, 2:200, 3:299.625, 4:400, 5:500,
                                 6:597.015, 7:707.965, 8:800, 9:898.876, 10:1000}
         self.data_dict = {"rep_rate_kHz": -999,
-                        "real_energy_nJ": -999,
-                        "real_energy_uJ": -999,
+                        "energy_nJ": -999,
+                        "energy_uJ": -999,
                         "status_laser_on_enabled": -999,
                         "status_laser_on_disabled": -999,
                         "status_standby": -999,
@@ -60,19 +60,19 @@ class Laser():
                 elif "nJ" in data:
                     energy_nJ = float(data.split("nJ")[0].strip(" "))
                     energy_uJ = energy_nJ/1000.0
-                    self.data_dict["real_energy_nJ"] = energy_nJ
-                    self.data_dict["real_energy_uJ"] = energy_uJ
+                    self.data_dict["energy_nJ"] = energy_nJ
+                    self.data_dict["energy_uJ"] = energy_uJ
                 elif "ly_oxp2_dev_status " in data:
                     status_dec = int(data.split(" ")[1])
                     status_bin = np.binary_repr(status_dec, width=8)
-                    self.data_dict["status_laser_on_enabled"] = status_bin[0]
-                    self.data_dict["status_laser_on_disabled"] = status_bin[1]
-                    self.data_dict["status_standby"] = status_bin[2]
-                    self.data_dict["status_setup"] = status_bin[3]
-                    self.data_dict["status_listen"] = status_bin[4]
-                    self.data_dict["status_warning"] = status_bin[5]
-                    self.data_dict["status_error"] = status_bin[6]
-                    self.data_dict["status_power"] = status_bin[7]
+                    self.data_dict["status_laser_on_enabled"] = int(status_bin[0])
+                    self.data_dict["status_laser_on_disabled"] = int(status_bin[1])
+                    self.data_dict["status_standby"] = int(status_bin[2])
+                    self.data_dict["status_setup"] = int(status_bin[3])
+                    self.data_dict["status_listen"] = int(status_bin[4])
+                    self.data_dict["status_warning"] = int(status_bin[5])
+                    self.data_dict["status_error"] = int(status_bin[6])
+                    self.data_dict["status_power"] = int(status_bin[7])
         return self.data_dict
 
     def send_cmd(self, command):

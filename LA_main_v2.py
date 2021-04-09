@@ -90,10 +90,12 @@ class WorkerThread(QThread):
         time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen")).strftime("%Y-%m-%d %H.%M.%S.%f+%z")
         self.data_filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
         with open(self.data_filename,"a") as f:
+            column_names = list(self.ls.data_dict)
+            column_names += ["rep_rate_kHz", "energy_nJ", "energy_uJ"]
             writer = csv.writer(f, delimiter=",")
             # Pad the header elements
-            maxlen = len(max(self.data_dict, key=len))
-            writer.writerow([(' ' * (maxlen - len(x))) + x for x in self.data_dict])
+            maxlen = len(max(column_names, key=len))
+            writer.writerow([(' ' * (maxlen - len(x))) + x for x in column_names])
 
         schedule.every(1).seconds.do(self.data_logger)
 
@@ -146,7 +148,9 @@ class WorkerThread(QThread):
                             "spd_mm/s": "{:13.3f}".format(data["spd_mm/s"]),
                             "direction": "{:13}".format(data["direction"]),
                             "event_code": "{:13}".format(data["event_code"]),
-                            "rep_rate_kHz: "{:13.3f}".format(),
+                            "rep_rate_kHz": "{:13.3f}".format(data["rep_rate_kHz"]),
+                            "energy_nJ": "{:13.3f}".format(data["energy_nJ"]),
+                            "energy_uJ": "{:13.3f}".format(data["energy_uJ"])
                             }
             writer.writerow(data_formatted.values())
 
@@ -886,9 +890,9 @@ class App(QWidget):
         turn_led_on_off(self.ledLaserOnDis, data_dict["status_laser_on_disabled"])
         turn_led_on_off(self.ledLaserStandby, data_dict["status_standby"])
         turn_led_on_off(self.ledLaserSetup, data_dict["status_setup"])
-        turn_led_on_off(self.ledLaserPower, data_dict["status_listen"])
-        turn_led_on_off(self.ledLaserPower, data_dict["status_warning"])
-        turn_led_on_off(self.ledLaserPower, data_dict["status_error"])
+        turn_led_on_off(self.ledLaserListen, data_dict["status_listen"])
+        turn_led_on_off(self.ledLaserWarning, data_dict["status_warning"])
+        turn_led_on_off(self.ledLaserError, data_dict["status_error"])
         turn_led_on_off(self.ledLaserPower, data_dict["status_power"])
 
     def move_pos(self):
