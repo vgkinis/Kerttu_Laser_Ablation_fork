@@ -74,6 +74,8 @@ class Laser():
                 self.data_dict["status_warning"] = int(status_bin[5])
                 self.data_dict["status_error"] = int(status_bin[6])
                 self.data_dict["status_power"] = int(status_bin[7])
+            if "AOMAMP" in data:
+                print(data)
         self.data_dict["epoch_time"] = self.epoch_time
         return self.data_dict
 
@@ -141,15 +143,9 @@ if __name__ == "__main__":
     laser.start_serial(port_names[0])
     time.sleep(2)
 
-
-    laser.ping_laser_module()
-    time.sleep(2)
-    print(laser.serial_read())
-
-    #laser.send_cmd('e_freq?')
-    #laser.send_cmd('ly_oxp2_dev_status?')
-    #while True:
-    #    if laser.ser.in_waiting > 0:
-    #        line = laser.ser.readline()
-    #        #data = line.decode("utf-8")
-    #        print(line)
+    laser.send_cmd('ly_oxp2_power=1')
+    while True:
+        if laser.ser.in_waiting > 0:
+            line = laser.ser.readline()
+            data = line.decode("utf-8")
+            print(line)

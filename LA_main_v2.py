@@ -181,11 +181,14 @@ class WorkerThread(QThread):
                 self.calibrating = False
                 self.calibrated = True
 
-    def discrete_startup(self, dis_interval, dis_interval_unit, time_interval, nr):
+    def discrete_startup(self, dis_interval, dis_interval_unit, time_interval, nr, with_laser):
         self.discrete_sampling = True
         self.discrete_dis = dis_interval
         self.discrete_dis_unit = dis_interval_unit
         self.discrete_time = time_interval
+        self.discrete_laser = with_laser
+        if self.discrete_laser == True:
+            self.laser.go_to_standby()
         self.ls.set_event_code(4)
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
         self.discrete_nr = nr-1
@@ -556,6 +559,11 @@ class App(QWidget):
         mainLayout.addLayout(discreteLayout2, 14, 0)
         discreteLayout2.setAlignment(Qt.AlignCenter)
 
+        self.checkBoxDiscreteLaser = QCheckBox("Enable laser emission during discrete movement",self)
+        self.checkBoxDiscreteLaser.resize(320,40)
+        discreteLayout2.addWidget(self.checkBoxDiscreteLaser)
+        discreteLayout2.addItem(horizontalSpacer2)
+
         self.pushButtonDiscrete = QPushButton('Start', self)
         self.pushButtonDiscrete.setFixedSize(88, 34)
         discreteLayout2.addWidget(self.pushButtonDiscrete)
@@ -802,12 +810,6 @@ class App(QWidget):
         self.labelConnectLS.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         connectLayoutLS.addWidget(self.labelConnectLS)
 
-        #self.checkBoxConnectLinearStage = QCheckBox("Linear Stage",self)
-        #self.b.stateChanged.connect(self.clickBox)
-        #self.checkBoxConnectLinearStage.resize(320,40)
-        #connectLayoutLS.addWidget(self.checkBoxConnectLinearStage)
-        #connectLayoutLS.addItem(horizontalSpacer2)
-
         self.pushButtonConnectLS = QPushButton('Connect', self)
         self.pushButtonConnectLS.setFixedSize(88, 34)
         connectLayoutLS.addWidget(self.pushButtonConnectLS)
@@ -828,12 +830,6 @@ class App(QWidget):
         self.labelConnectL.setFixedSize(100, 34)
         self.labelConnectL.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
         connectLayoutL.addWidget(self.labelConnectL)
-
-        #self.checkBoxConnectLaser = QCheckBox("Laser             ",self)
-        #self.b.stateChanged.connect(self.clickBox)
-        #self.checkBoxConnectLaser.resize(320,40)
-        #connectLayoutL.addWidget(self.checkBoxConnectLaser)
-        #connectLayoutL.addItem(horizontalSpacer2)
 
         self.pushButtonConnectL = QPushButton('Connect', self)
         self.pushButtonConnectL.setFixedSize(88, 34)
@@ -949,9 +945,17 @@ class App(QWidget):
             val_dis_unit = self.comboBoxDiscrete.currentText()
             val_time = float(self.textEditDiscreteTime.toPlainText())
             val_nr = float(self.textEditDiscreteNr.toPlainText())
+            with_laser = self.checkBoxDiscreteLaser.isChecked()
             if val_dis > 0.0 and val_time > 0.0 and val_nr > 0.0:
-                self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-                self.wt.discrete_startup(val_dis, val_dis_unit, val_time, val_nr)
+                if with_laser == False:
+                    self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+                    self.wt.discrete_startup(val_dis, val_dis_unit, val_time, val_nr, with_laser)
+                else:
+                    if self.wt.laser_connected == True:
+                        self.ledDiscrete.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+                        self.wt.discrete_startup(val_dis, val_dis_unit, val_time, val_nr, with_laser)
+                    else:
+                        self.ledDiscrete.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
             else:
                 self.ledDiscrete.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
@@ -970,6 +974,7 @@ class App(QWidget):
     def set_laser_energy(self):
         energy = float(self.textEditEnergy.toPlainText())
         unit = self.comboBoxLaserEnergy.currentText()
+        print(energy, unit)
         self.wt.laser.set_pulse_energy(energy, unit)
 
 
