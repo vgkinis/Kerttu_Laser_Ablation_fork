@@ -201,9 +201,13 @@ class WorkerThread(QThread):
                 if self.discrete_nr > 0:
                     # Start the timer
                     if self.discrete_timer == None:
+                        if self.discrete_laser == True:
+                            self.laser.enable_laser()
                         self.discrete_timer = time.time()
                     # Move the next distance interval if waiting time is over
                     if self.discrete_timer + self.discrete_time <= time.time():
+                        if self.discrete_laser == True:
+                            self.laser.go_to_standby()
                         #print(time.time() - self.discrete_timer)
                         self.discrete_move_one_interval()
                 # Reset the event code and finish discrete sampling.
