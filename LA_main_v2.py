@@ -91,7 +91,7 @@ class WorkerThread(QThread):
         self.data_filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
         with open(self.data_filename,"a") as f:
             column_names = list(self.ls.data_dict)
-            column_names += ["rep_rate_kHz", "energy_nJ", "energy_uJ"]
+            column_names += ["rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time"]
             writer = csv.writer(f, delimiter=",")
             # Pad the header elements
             maxlen = len(max(column_names, key=len))
@@ -150,7 +150,8 @@ class WorkerThread(QThread):
                             "event_code": "{:13}".format(data["event_code"]),
                             "rep_rate_kHz": "{:13.3f}".format(data["rep_rate_kHz"]),
                             "energy_nJ": "{:13.3f}".format(data["energy_nJ"]),
-                            "energy_uJ": "{:13.3f}".format(data["energy_uJ"])
+                            "energy_uJ": "{:13.3f}".format(data["energy_uJ"]),
+                            "epoch_time": "{:13.3f}".format(data["epoch_time"])
                             }
             writer.writerow(data_formatted.values())
 
@@ -599,7 +600,6 @@ class App(QWidget):
         laserLayoutRep.addItem(horizontalSpacer2)
 
         self.comboBoxLaserRep = QComboBox(self)
-        # TODO : replace with non-hardcoded value
         rep_rates_kHz = {0:"  50.000 kHz", 1:" 100.000 kHz", 2:" 200.000 kHz", 3:" 299.625 kHz", 4:" 400.000 kHz", 5:" 500.000 kHz",
                                 6:" 597.015 kHz", 7:" 707.965 kHz", 8:" 800.000 kHz", 9:" 898.876 kHz", 10:"1 000.000 kHz"}
         self.comboBoxLaserRep.addItems(rep_rates_kHz.values())
@@ -859,8 +859,15 @@ class App(QWidget):
         self.pushButtonR.clicked.connect(functools.partial(self.reset_sys))
         self.pushButtonC.clicked.connect(functools.partial(self.calibrate_sys))
         self.pushButtonDiscrete.clicked.connect(functools.partial(self.discrete_meas))
+
         self.pushButtonConnectLS.clicked.connect(functools.partial(self.wt.connect_linear_stage))
         self.pushButtonConnectL.clicked.connect(functools.partial(self.wt.connect_laser))
+
+        self.pushButtonLaserEnergySet.clicked.connect(functools.partial(self.set_laser_energy))
+        self.pushButtonLaserRepSet.clicked.connect(functools.partial(self.set_laser_rep_rate))
+        self.pushButtonLaserListen.clicked.connect(functools.partial(self.wt.laser.go_to_listen))
+        self.pushButtonLaserStandby.clicked.connect(functools.partial(self.wt.laser.go_to_standby))
+        self.pushButtonLaserEnable.clicked.connect(functools.partial(self.wt.laser.enable_laser))
 
         app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
 
@@ -949,6 +956,19 @@ class App(QWidget):
                 self.ledDiscrete.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         else:
             self.ledDiscrete.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+
+    def set_laser_rep_rate(self):
+        rep_rates_kHz = {0:"  50.000 kHz", 1:" 100.000 kHz", 2:" 200.000 kHz", 3:" 299.625 kHz", 4:" 400.000 kHz", 5:" 500.000 kHz",
+                                6:" 597.015 kHz", 7:" 707.965 kHz", 8:" 800.000 kHz", 9:" 898.876 kHz", 10:"1 000.000 kHz"}
+        rep_rate = self.comboBoxLaserRep.currentText()
+        rep_rate_nr = rep_rates_kHz.keys()[rep_rates_kHz.values().index(rep_rate)]
+        self.wt.laser.set_repetition_rate(freq_nr)
+
+    def set_laser_energy(self):
+        energy = float(self.textEditEnergy.toPlainText())
+        unit = self.comboBoxLaserEnergy.currentText()
+        self.wt.laser.set_pulse_energy(energy, unit)
 
 
 
