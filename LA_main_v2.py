@@ -417,13 +417,22 @@ class App(QWidget):
         dirLayout.addItem(horizontalSpacer1)
         dirLayout.addItem(horizontalSpacer2)
 
+        emptyLayout1 = QHBoxLayout()
+        mainLayout.addLayout(emptyLayout1, 9, 0)
+        emptyLayout1.setAlignment(Qt.AlignLeft)
+        emptyLayout1.addItem(horizontalSpacer2)
+
+        self.emptyLabel1 = QLabel(' ', self)
+        self.emptyLabel1.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.emptyLabel1.setFixedSize(111, 34)
+        emptyLayout1.addWidget(self.emptyLabel1)
+
 
 # --------------------------------- Varia --------------------------------------
         variaLayout = QHBoxLayout()
 
         mainLayout.addLayout(variaLayout, 10, 0)
         variaLayout.setAlignment(Qt.AlignLeft)
-        #variaLayout.addItem(verticalSpacer1)
         variaLayout.addItem(horizontalSpacer2)
 
         self.pushButtonC = QPushButton('Calibrate', self)
@@ -434,18 +443,17 @@ class App(QWidget):
         self.pushButtonR = QPushButton('Reset', self)
         self.pushButtonR.setFixedSize(88, 34)
         variaLayout.addWidget(self.pushButtonR)
-        variaLayout.addItem(QSpacerItem(128, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        variaLayout.addItem(QSpacerItem(128, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.labelEvent = QLabel('Event Code', self)
         variaLayout.addWidget(self.labelEvent)
-        variaLayout.addItem(QSpacerItem(10, 34, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        variaLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.lcdNumberEvent = QLCDNumber(self)
-        self.lcdNumberEvent.setFixedSize(100, 34)
+        self.lcdNumberEvent.setFixedSize(100, 0)
         set_lcd_style(self.lcdNumberEvent)
         variaLayout.addWidget(self.lcdNumberEvent)
 
-        variaLayout.addItem(QSpacerItem(0, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
 # --------------------------------- Graph --------------------------------------
 
@@ -459,7 +467,7 @@ class App(QWidget):
 
         graphLayout.addWidget(self.canvas_ls)
 
-        variaLayout.addItem(QSpacerItem(0, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        variaLayout.addItem(QSpacerItem(0, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
 
 # --------------------------- Discrete movement --------------------------------
@@ -663,34 +671,95 @@ class App(QWidget):
 
         self.labelStatusLaserOn= QLabel('Laser on enabled', self)
         self.labelStatusLaserOn.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
-        self.labelStatusLaserOn.setFixedSize(200, 34)
+        self.labelStatusLaserOn.setFixedSize(170, 34)
         laserLayoutStatus1.addWidget(self.labelStatusLaserOn)
 
+        self.ledLaserOn = QLabel(self)
+        self.ledLaserOn.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus1.addWidget(self.ledLaserOn)
+        laserLayoutStatus1.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelStatusListen= QLabel('Listen', self)
+        self.labelStatusListen.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusListen.setFixedSize(170, 34)
+        laserLayoutStatus1.addWidget(self.labelStatusListen)
+
+        self.ledLaserListen = QLabel(self)
+        self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus1.addWidget(self.ledLaserListen)
 
         laserLayoutStatus2 = QHBoxLayout()
         mainLayout.addLayout(laserLayoutStatus2, 9, 1)
         laserLayoutStatus2.setAlignment(Qt.AlignLeft)
         laserLayoutStatus2.addItem(horizontalSpacer2)
 
-        self.labelStatusListen= QLabel('Listen', self)
-        self.labelStatusListen.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
-        self.labelStatusListen.setFixedSize(200, 34)
-        laserLayoutStatus2.addWidget(self.labelStatusListen)
+        self.labelStatusLaserOnDis= QLabel('Laser on disabled', self)
+        self.labelStatusLaserOnDis.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusLaserOnDis.setFixedSize(170, 34)
+        laserLayoutStatus2.addWidget(self.labelStatusLaserOnDis)
+
+        self.ledLaserOnDis = QLabel(self)
+        self.ledLaserOnDis.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus2.addWidget(self.ledLaserOnDis)
+        laserLayoutStatus2.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelStatusWarning= QLabel('Warning', self)
+        self.labelStatusWarning.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusWarning.setFixedSize(170, 34)
+        laserLayoutStatus2.addWidget(self.labelStatusWarning)
+
+        self.ledLaserWarning = QLabel(self)
+        self.ledLaserWarning.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus2.addWidget(self.ledLaserWarning)
 
         laserLayoutStatus3 = QHBoxLayout()
         mainLayout.addLayout(laserLayoutStatus3, 10, 1)
         laserLayoutStatus3.setAlignment(Qt.AlignLeft)
         laserLayoutStatus3.addItem(horizontalSpacer2)
 
-        self.labelStatusStandby= QLabel('Listen', self)
+        self.labelStatusStandby= QLabel('Standby', self)
         self.labelStatusStandby.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
-        self.labelStatusStandby.setFixedSize(200, 34)
+        self.labelStatusStandby.setFixedSize(170, 34)
         laserLayoutStatus3.addWidget(self.labelStatusStandby)
 
+        self.ledLaserStandby = QLabel(self)
+        self.ledLaserStandby.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus3.addWidget(self.ledLaserStandby)
+        laserLayoutStatus3.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        #self.ledLaserStandby = QLabel(self)
-        #self.ledLaserStandby.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
-        #laserLayoutStandby.addWidget(self.ledLaserStandby)
+        self.labelStatusError= QLabel('Error', self)
+        self.labelStatusError.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusError.setFixedSize(170, 34)
+        laserLayoutStatus3.addWidget(self.labelStatusError)
+
+        self.ledLaserError = QLabel(self)
+        self.ledLaserError.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus3.addWidget(self.ledLaserError)
+
+        laserLayoutStatus4 = QHBoxLayout()
+        mainLayout.addLayout(laserLayoutStatus4, 11, 1)
+        laserLayoutStatus4.setAlignment(Qt.AlignLeft)
+        laserLayoutStatus4.addItem(horizontalSpacer2)
+
+        self.labelStatusSetup= QLabel('Setup', self)
+        self.labelStatusSetup.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusSetup.setFixedSize(170, 34)
+        laserLayoutStatus4.addWidget(self.labelStatusSetup)
+
+        self.ledLaserSetup = QLabel(self)
+        self.ledLaserSetup.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus4.addWidget(self.ledLaserSetup)
+        laserLayoutStatus4.addItem(QSpacerItem(80, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        self.labelStatusPower= QLabel('Power', self)
+        self.labelStatusPower.setStyleSheet("QLabel {font: Times New Roman; font-size: 15px}")
+        self.labelStatusPower.setFixedSize(170, 34)
+        laserLayoutStatus4.addWidget(self.labelStatusPower)
+
+        self.ledLaserPower = QLabel(self)
+        self.ledLaserPower.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+        laserLayoutStatus4.addWidget(self.ledLaserPower)
+
 
         #self.ledLaserListen = QLabel(self)
         #self.ledLaserListen.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
@@ -699,7 +768,7 @@ class App(QWidget):
 # ---------------------------- Connect -----------------------------------------
 
         connectLabelLayout = QHBoxLayout()
-        mainLayout.addLayout(connectLabelLayout, 11, 1)
+        mainLayout.addLayout(connectLabelLayout, 12, 1)
         connectLabelLayout.setAlignment(Qt.AlignCenter)
         connectLabelLayout.addItem(horizontalSpacer2)
 
@@ -708,7 +777,7 @@ class App(QWidget):
         connectLabelLayout.addWidget(self.labelConnect)
 
         connectLayoutLS = QHBoxLayout()
-        mainLayout.addLayout(connectLayoutLS, 12, 1)
+        mainLayout.addLayout(connectLayoutLS, 13, 1)
         connectLayoutLS.setAlignment(Qt.AlignLeft)
         connectLayoutLS.addItem(horizontalSpacer2)
 
@@ -735,7 +804,7 @@ class App(QWidget):
 
 
         connectLayoutL = QHBoxLayout()
-        mainLayout.addLayout(connectLayoutL, 13, 1)
+        mainLayout.addLayout(connectLayoutL, 14, 1)
         connectLayoutL.setAlignment(Qt.AlignLeft)
         connectLayoutL.addItem(horizontalSpacer2)
 
