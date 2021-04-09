@@ -75,8 +75,7 @@ class WorkerThread(QThread):
                 try:
                     laser_data = self.laser.serial_read()
                     self.data_dict.update(laser_data)
-                except Exception as e:
-                    print(e)
+                except:
                     continue
 
             if self.laser_connected or self.linear_stage_connected:
@@ -874,33 +873,34 @@ class App(QWidget):
 
     def slot_method(self, data_dict):
         # Linear Stage parameters
-        self.lcdNumberPos.display(data_dict["pos_" + self.comboBoxPosFb.currentText()])
-        self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
-        self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
-        self.lcdNumberDir.display(data_dict["direction"])
-        self.lcdNumberEvent.display(data_dict["event_code"])
-
-        abs_pos_mm = data_dict["pos_mm"]
-        self.update_graph(abs_pos_mm)
-
         if self.wt.linear_stage_connected == True:
+            self.lcdNumberPos.display(data_dict["pos_" + self.comboBoxPosFb.currentText()])
+            self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
+            self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
+            self.lcdNumberDir.display(data_dict["direction"])
+            self.lcdNumberEvent.display(data_dict["event_code"])
+
+            abs_pos_mm = data_dict["pos_mm"]
+            self.update_graph(abs_pos_mm)
+
             self.ledConnectLinearStage.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
         # Laser parameters
         if self.wt.laser_connected == True:
+            self.lcdNumberLaserRep.display(data_dict["rep_rate_kHz"])
+            self.lcdNumberLaserEnergy.display(data_dict["energy_" + self.comboBoxLaserEnergy2.currentText()])
+
+            turn_led_on_off(self.ledLaserOn, data_dict["status_laser_on_enabled"])
+            turn_led_on_off(self.ledLaserOnDis, data_dict["status_laser_on_disabled"])
+            turn_led_on_off(self.ledLaserStandby, data_dict["status_standby"])
+            turn_led_on_off(self.ledLaserSetup, data_dict["status_setup"])
+            turn_led_on_off(self.ledLaserListen, data_dict["status_listen"])
+            turn_led_on_off(self.ledLaserWarning, data_dict["status_warning"])
+            turn_led_on_off(self.ledLaserError, data_dict["status_error"])
+            turn_led_on_off(self.ledLaserPower, data_dict["status_power"])
+
             self.ledConnectLaser.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
-        self.lcdNumberLaserRep.display(data_dict["rep_rate_kHz"])
-        self.lcdNumberLaserEnergy.display(data_dict["energy_" + self.comboBoxLaserEnergy2.currentText()])
-
-        turn_led_on_off(self.ledLaserOn, data_dict["status_laser_on_enabled"])
-        turn_led_on_off(self.ledLaserOnDis, data_dict["status_laser_on_disabled"])
-        turn_led_on_off(self.ledLaserStandby, data_dict["status_standby"])
-        turn_led_on_off(self.ledLaserSetup, data_dict["status_setup"])
-        turn_led_on_off(self.ledLaserListen, data_dict["status_listen"])
-        turn_led_on_off(self.ledLaserWarning, data_dict["status_warning"])
-        turn_led_on_off(self.ledLaserError, data_dict["status_error"])
-        turn_led_on_off(self.ledLaserPower, data_dict["status_power"])
 
     def move_pos(self):
         val = float(self.textEditPos.toPlainText())
@@ -962,8 +962,10 @@ class App(QWidget):
         rep_rates_kHz = {0:"  50.000 kHz", 1:" 100.000 kHz", 2:" 200.000 kHz", 3:" 299.625 kHz", 4:" 400.000 kHz", 5:" 500.000 kHz",
                                 6:" 597.015 kHz", 7:" 707.965 kHz", 8:" 800.000 kHz", 9:" 898.876 kHz", 10:"1 000.000 kHz"}
         rep_rate = self.comboBoxLaserRep.currentText()
-        rep_rate_nr = rep_rates_kHz.keys()[rep_rates_kHz.values().index(rep_rate)]
-        self.wt.laser.set_repetition_rate(freq_nr)
+        for nr, value in rep_rates_kHz.items():
+            if value == rep_rate:
+                rep_rate_nr = nr
+                self.wt.laser.set_repetition_rate(rep_rate_nr)
 
     def set_laser_energy(self):
         energy = float(self.textEditEnergy.toPlainText())
