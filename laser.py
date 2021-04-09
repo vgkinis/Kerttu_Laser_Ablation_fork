@@ -79,9 +79,11 @@ class Laser():
         self.data_dict["epoch_time"] = self.epoch_time
         return self.data_dict
 
-    def send_cmd(self, command):
+    def send_cmd(self, command, print_cmd=True):
         serial_cmd = command + "\n"
         try:
+            if print_cmd:
+                print("Sending laser command: ", command)
             self.ser.write(str.encode(serial_cmd))
         except:
             print("Command %s not sent. Could not open serial" %serial_cmd)
@@ -125,13 +127,13 @@ class Laser():
         self.send_cmd(command)
 
     def get_measured_pulse_energy(self):
-        self.send_cmd('e_mlp?')
+        self.send_cmd('e_mlp?', False)
 
     def get_repetition_rate(self):
-        self.send_cmd('e_freq?')
+        self.send_cmd('e_freq?', False)
 
     def get_status(self):
-        self.send_cmd('ly_oxp2_dev_status?')
+        self.send_cmd('ly_oxp2_dev_status?', False)
 
 
 #--------------------------------- if __main__ ---------------------------------

@@ -125,7 +125,7 @@ class LinearStage():
             try:
                 self.ser.write(str.encode(serial_cmd))
                 if "W" not in serial_cmd:
-                    print("Sending command: ", serial_cmd)
+                    print("Sending linear stage command: ", serial_cmd)
             except:
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
