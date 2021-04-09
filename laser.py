@@ -16,6 +16,18 @@ class Laser():
     def __init__(self):
         self.rep_rates_kHz = {0:50, 1:100, 2:200, 3:299.625, 4:400, 5:500,
                                 6:597.015, 7:707.965, 8:800, 9:898.876, 10:1000}
+        self.data_dict = {"rep_rate_kHz": -999,
+                        "real_energy_nJ": -999,
+                        "real_energy_uJ": -999,
+                        "status_laser_on_enabled": -999,
+                        "status_laser_on_disabled": -999,
+                        "status_standby": -999,
+                        "status_setup": -999,
+                        "status_listen": -999,
+                        "status_warning": -999,
+                        "status_error": -999,
+                        "status_power": -999,
+                        }
         return
 
 
@@ -37,7 +49,31 @@ class Laser():
         return
 
     def serial_read(self):
-        return
+        for i in range(6):
+            if self.ser.in_waiting > 0:
+                line = self.ser.readline()
+                data = line.decode("utf-8").strip("\n")
+                if "Frequency index parameter: " in data:
+                    rep_rate_nr = int(data.split(": ")[1])
+                    rep_rate = self.rep_rates_kHz[rep_rate_nr]
+                    self.data_dict["rep_rate_kHz"] = rep_rate
+                elif "nJ" in data:
+                    energy_nJ = float(data.split("nJ")[0].strip(" "))
+                    energy_uJ = energy_nJ/1000.0
+                    self.data_dict["real_energy_nJ"] = energy_nJ
+                    self.data_dict["real_energy_uJ"] = energy_uJ
+                elif "ly_oxp2_dev_status " in data:
+                    status_dec = int(data.split(" ")[1])
+                    status_bin = np.binary_repr(status_dec, width=8)
+                    self.data_dict["status_laser_on_enabled"] = status_bin[0]
+                    self.data_dict["status_laser_on_disabled"] = status_bin[1]
+                    self.data_dict["status_standby"] = status_bin[2]
+                    self.data_dict["status_setup"] = status_bin[3]
+                    self.data_dict["status_listen"] = status_bin[4]
+                    self.data_dict["status_warning"] = status_bin[5]
+                    self.data_dict["status_error"] = status_bin[6]
+                    self.data_dict["status_power"] = status_bin[7]
+        return self.data_dict
 
     def send_cmd(self, command):
         serial_cmd = command + "\n"
@@ -46,6 +82,11 @@ class Laser():
         except:
             print("Command %s not sent. Could not open serial" %serial_cmd)
         return
+
+    def ping_laser_module(self):
+        self.get_repetition_rate()
+        self.get_measured_pulse_energy()
+        self.get_status()
 
 #------------------------------- Commands  .......------------------------------
     def go_to_standby(self):
@@ -85,6 +126,9 @@ class Laser():
     def get_repetition_rate(self):
         self.send_cmd('e_freq?')
 
+    def get_status(self):
+        self.send_cmd('ly_oxp2_dev_status?')
+
 
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
@@ -95,9 +139,15 @@ if __name__ == "__main__":
     laser.start_serial(port_names[0])
     time.sleep(2)
 
-    laser.send_cmd('e_freq_available?')
-    while True:
-        if laser.ser.in_waiting > 0:
-            line = laser.ser.readline()
-            data = line.decode("utf-8")
-            print(data)
+
+    laser.ping_laser_module()
+    time.sleep(2)
+    print(laser.serial_read())
+
+    #laser.send_cmd('e_freq?')
+    #laser.send_cmd('ly_oxp2_dev_status?')
+    #while True:
+    #    if laser.ser.in_waiting > 0:
+    #        line = laser.ser.readline()
+    #        #data = line.decode("utf-8")
+    #        print(line)

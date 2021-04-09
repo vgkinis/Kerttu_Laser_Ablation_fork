@@ -26,7 +26,7 @@ from laser import Laser
 
 
 class WorkerThread(QThread):
-    motor_signals = pyqtSignal(dict, name='motor_signals')
+    signals = pyqtSignal(dict, name='signals')
     def __init__(self, parent=None):
         QThread.__init__(self)
 
@@ -48,14 +48,20 @@ class WorkerThread(QThread):
         # Create a laser instance
         self.laser = Laser()
 
+        self.data_dict = {}
+        self.data_dict.update(self.ls.data_dict)
+        self.data_dict.update(self.laser.data_dict)
+
         while True:
+            if self.laser_connected:
+                self.laser.ping_laser_module()
+
             if self.linear_stage_connected:
                 try:
                     # Get feedback
                     self.ls.ping_arduino()
-                    data_dict = self.ls.serial_read()
-                    self.motor_signals.emit(data_dict)
-                    schedule.run_pending()
+                    motor_data = self.ls.serial_read()
+                    self.data_dict.update(motor_data)
 
                     # Calibrate or perform discrete movement if it has been chosen.
                     self.calibrate_sys()
@@ -64,8 +70,19 @@ class WorkerThread(QThread):
                 except Exception as e:
                     print(e)
                     continue
+
             if self.laser_connected:
-                print("Laser connected")
+                try:
+                    laser_data = self.laser.serial_read()
+                    self.data_dict.update(laser_data)
+                except Exception as e:
+                    print(e)
+                    continue
+
+            if self.laser_connected or self.linear_stage_connected:
+                self.signals.emit(self.data_dict)
+                schedule.run_pending()
+
 
     def start_data_logger(self):
         # Data files
@@ -75,8 +92,8 @@ class WorkerThread(QThread):
         with open(self.data_filename,"a") as f:
             writer = csv.writer(f, delimiter=",")
             # Pad the header elements
-            maxlen = len(max(self.ls.data_dict, key=len))
-            writer.writerow([(' ' * (maxlen - len(x))) + x for x in self.ls.data_dict])
+            maxlen = len(max(self.data_dict, key=len))
+            writer.writerow([(' ' * (maxlen - len(x))) + x for x in self.data_dict])
 
         schedule.every(1).seconds.do(self.data_logger)
 
@@ -92,7 +109,7 @@ class WorkerThread(QThread):
                     self.laser_connected = True
                     self.start_data_logger()
                 except Exception as e:
-                    print(e)
+                    print("Exception in connect_laser():", e)
         if self.laser_connected == False:
             print("Cannot find the laser")
 
@@ -114,7 +131,7 @@ class WorkerThread(QThread):
     def data_logger(self):
         with open(self.data_filename,"a") as f:
             writer = csv.writer(f, delimiter=",")
-            data = self.ls.data_dict
+            data = self.data_dict
             data_formatted = {"loop_time": "{:13.3f}".format(data["loop_time"]),
                             "loop_time_min": "{:13.3f}".format(data["loop_time_min"]),
                             "pos_steps": "{:13}".format(data["pos_steps"]),
@@ -129,6 +146,7 @@ class WorkerThread(QThread):
                             "spd_mm/s": "{:13.3f}".format(data["spd_mm/s"]),
                             "direction": "{:13}".format(data["direction"]),
                             "event_code": "{:13}".format(data["event_code"]),
+                            "rep_rate_kHz: "{:13.3f}".format(),
                             }
             writer.writerow(data_formatted.values())
 
@@ -829,7 +847,7 @@ class App(QWidget):
 # -----------------------------------------------------------------------------
         self.wt=WorkerThread() # This is the thread object
         self.wt.start()
-        self.wt.motor_signals.connect(self.slot_method)
+        self.wt.signals.connect(self.slot_method)
         self.pushButtonPos.clicked.connect(functools.partial(self.move_pos))
         self.pushButtonSpd.clicked.connect(functools.partial(self.set_spd))
         self.pushButtonDir.clicked.connect(functools.partial(self.set_dir))
@@ -844,6 +862,7 @@ class App(QWidget):
 
 
     def slot_method(self, data_dict):
+        # Linear Stage parameters
         self.lcdNumberPos.display(data_dict["pos_" + self.comboBoxPosFb.currentText()])
         self.lcdNumberDis.display(data_dict["dis_" + self.comboBoxDisFb.currentText()])
         self.lcdNumberSpd.display(data_dict["spd_" + self.comboBoxSpdFb.currentText()])
@@ -856,8 +875,21 @@ class App(QWidget):
         if self.wt.linear_stage_connected == True:
             self.ledConnectLinearStage.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
+        # Laser parameters
         if self.wt.laser_connected == True:
             self.ledConnectLaser.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
+
+        self.lcdNumberLaserRep.display(data_dict["rep_rate_kHz"])
+        self.lcdNumberLaserEnergy.display(data_dict["real_energy_" + self.comboBoxLaserEnergy2.currentText()])
+
+        turn_led_on_off(self.ledLaserOn, data_dict["status_laser_on_enabled"])
+        turn_led_on_off(self.ledLaserOnDis, data_dict["status_laser_on_disabled"])
+        turn_led_on_off(self.ledLaserStandby, data_dict["status_standby"])
+        turn_led_on_off(self.ledLaserSetup, data_dict["status_setup"])
+        turn_led_on_off(self.ledLaserPower, data_dict["status_listen"])
+        turn_led_on_off(self.ledLaserPower, data_dict["status_warning"])
+        turn_led_on_off(self.ledLaserPower, data_dict["status_error"])
+        turn_led_on_off(self.ledLaserPower, data_dict["status_power"])
 
     def move_pos(self):
         val = float(self.textEditPos.toPlainText())

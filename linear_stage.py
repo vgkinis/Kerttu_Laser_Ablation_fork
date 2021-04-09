@@ -31,20 +31,20 @@ class LinearStage():
 
         self.event_code = None
 
-        self.data_dict = {"loop_time": None,
-                        "loop_time_min": None,
-                        "pos_steps": None,
-                        "pos_rev": None,
-                        "pos_mm": None,
-                        "dis_steps": None,
-                        "dis_mm": None,
-                        "dis_rev": None,
-                        "spd_us/step": None,
-                        "spd_step/s": None,
-                        "spd_rev/s": None,
-                        "spd_mm/s": None,
-                        "direction": None,
-                        "event_code": None,
+        self.data_dict = {"loop_time": -999,
+                        "loop_time_min": -999,
+                        "pos_steps": -999,
+                        "pos_rev": -999,
+                        "pos_mm": -999,
+                        "dis_steps": -999,
+                        "dis_mm": -999,
+                        "dis_rev": -999,
+                        "spd_us/step": -999,
+                        "spd_step/s": -999,
+                        "spd_rev/s": -999,
+                        "spd_mm/s": -999,
+                        "direction": -999,
+                        "event_code": -999,
                         }
 
         return
