@@ -939,7 +939,7 @@ class App(QWidget):
             self.ledDir.setStyleSheet("QLabel {background-color : red; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
 
     def calibrate_sys(self):
-        if self.wt.discrete_sampling == False:
+        if self.wt.linear_stage_connected == True and self.wt.discrete_sampling == False:
             self.wt.calibrating = True
 
     def reset_sys(self):
