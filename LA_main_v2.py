@@ -64,10 +64,6 @@ class WorkerThread(QThread):
                     motor_data = self.ls.serial_read()
                     self.data_dict.update(motor_data)
 
-                    # Calibrate or perform discrete movement if it has been chosen.
-                    self.calibrate_sys()
-                    self.discrete_movement()
-
                 except Exception as e:
                     print(e)
                     continue
@@ -78,6 +74,11 @@ class WorkerThread(QThread):
                     self.data_dict.update(laser_data)
                 except:
                     continue
+
+            if self.linear_stage_connected:
+                # Calibrate or perform discrete movement if it has been chosen.
+                self.calibrate_sys()
+                self.discrete_movement()
 
             if self.laser_connected or self.linear_stage_connected:
                 self.signals.emit(self.data_dict)
@@ -685,19 +686,19 @@ class App(QWidget):
 
         self.pushButtonLaserListen = QPushButton('Listen', self)
         self.pushButtonLaserListen.setFixedSize(88, 34)
-        self.pushButtonLaserListen.setStyleSheet("background-color: #dbdbdb")
+        #self.pushButtonLaserListen.setStyleSheet("background-color: #dbdbdb")
         laserLayoutModes.addWidget(self.pushButtonLaserListen)
         laserLayoutModes.addItem(horizontalSpacer2)
 
         self.pushButtonLaserStandby = QPushButton('Standby', self)
         self.pushButtonLaserStandby.setFixedSize(88, 34)
-        self.pushButtonLaserStandby.setStyleSheet("background-color: #dbdbdb")
+        #self.pushButtonLaserStandby.setStyleSheet("background-color: #dbdbdb")
         laserLayoutModes.addWidget(self.pushButtonLaserStandby)
         laserLayoutModes.addItem(horizontalSpacer2)
 
         self.pushButtonLaserEnable = QPushButton('Enable', self)
         self.pushButtonLaserEnable.setFixedSize(88, 34)
-        self.pushButtonLaserEnable.setStyleSheet("background-color: #dbdbdb")
+        #self.pushButtonLaserEnable.setStyleSheet("background-color: #dbdbdb")
         laserLayoutModes.addWidget(self.pushButtonLaserEnable)
         laserLayoutModes.addItem(horizontalSpacer2)
 
@@ -879,7 +880,8 @@ class App(QWidget):
             self.reset_sys()
         if self.wt.laser_connected:
             self.wt.laser.go_to_listen()
-        sys.exit()
+        QApplication.instance().quit()
+        #sys.exit()
 
     def slot_method(self, data_dict):
         # Linear Stage parameters

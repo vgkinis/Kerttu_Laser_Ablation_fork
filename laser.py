@@ -75,8 +75,9 @@ class Laser():
                 self.data_dict["status_warning"] = int(status_bin[5])
                 self.data_dict["status_error"] = int(status_bin[6])
                 self.data_dict["status_power"] = int(status_bin[7])
-            if "AOMAMP" in data:
-                print(data)
+            #if "AOMAMP" in data:
+            #    print(data)
+
         self.data_dict["epoch_time"] = self.epoch_time
         return self.data_dict
 
@@ -91,6 +92,7 @@ class Laser():
         return
 
     def ping_laser_module(self):
+        self.ser.flush()
         if self.ping_order_nr == 0:
             self.get_repetition_rate()
             self.ping_order_nr += 1
