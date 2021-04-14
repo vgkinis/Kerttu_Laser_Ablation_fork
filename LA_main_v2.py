@@ -175,10 +175,10 @@ class WorkerThread(QThread):
                 self.calibrate_start_count = None
                 new_abs_pos = half_ls_range
                 self.ls.set_abs_pos_stp(new_abs_pos)
-                self.ls.set_event_code(0)
                 dis = abs(new_abs_pos - 0)
                 time.sleep(1)
                 self.ls.move_dis(dis, "steps")
+                self.ls.set_event_code(0)
                 self.calibrating = False
                 self.calibrated = True
 
@@ -872,8 +872,14 @@ class App(QWidget):
         self.pushButtonLaserStandby.clicked.connect(functools.partial(self.wt.laser.go_to_standby))
         self.pushButtonLaserEnable.clicked.connect(functools.partial(self.wt.laser.enable_laser))
 
-        app.aboutToQuit.connect(QApplication.instance().quit) #to stop the thread when closing the GUI
+        app.aboutToQuit.connect(self.quit_app) #to stop the thread when closing the GUI
 
+    def quit_app(self):
+        if self.wt.linear_stage_connected:
+            self.reset_sys()
+        if self.wt.laser_connected:
+            self.wt.laser.go_to_listen()
+        sys.exit()
 
     def slot_method(self, data_dict):
         # Linear Stage parameters
