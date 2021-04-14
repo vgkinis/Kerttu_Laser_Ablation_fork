@@ -51,6 +51,7 @@ class WorkerThread(QThread):
         self.data_dict = {}
         self.data_dict.update(self.ls.data_dict)
         self.data_dict.update(self.laser.data_dict)
+        time.sleep(2)
 
         while True:
             if self.laser_connected:
