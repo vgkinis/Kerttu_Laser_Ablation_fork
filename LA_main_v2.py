@@ -27,7 +27,7 @@ from laser import Laser
 
 
 class WorkerThread(QThread):
-    signals = pyqtSignal(boolean, name='signals')
+    signals = pyqtSignal(bool, name='signals')
     def __init__(self, parent=None):
         QThread.__init__(self)
 
