@@ -59,11 +59,15 @@ class Laser():
                 rep_rate_nr = int(data.split(": ")[1])
                 rep_rate = self.rep_rates_kHz[rep_rate_nr]
                 self.data_dict["rep_rate_kHz"] = rep_rate
+                self.data_dict["epoch_time"] = self.epoch_time
+                return True
             elif "nJ" in data:
                 energy_nJ = float(data.split("nJ")[0].strip(" "))
                 energy_uJ = energy_nJ/1000.0
                 self.data_dict["energy_nJ"] = energy_nJ
                 self.data_dict["energy_uJ"] = energy_uJ
+                self.data_dict["epoch_time"] = self.epoch_time
+                return True
             elif "ly_oxp2_dev_status " in data:
                 status_dec = int(data.split(" ")[1])
                 status_bin = np.binary_repr(status_dec, width=8)
@@ -75,11 +79,11 @@ class Laser():
                 self.data_dict["status_warning"] = int(status_bin[5])
                 self.data_dict["status_error"] = int(status_bin[6])
                 self.data_dict["status_power"] = int(status_bin[7])
+                self.data_dict["epoch_time"] = self.epoch_time
+                return True
             #if "AOMAMP" in data:
             #    print(data)
-
-        self.data_dict["epoch_time"] = self.epoch_time
-        return self.data_dict
+        return False #self.data_dict
 
     def send_cmd(self, command, print_cmd=True):
         serial_cmd = command + "\n"
@@ -92,20 +96,20 @@ class Laser():
         return
 
     def ping_laser_module(self):
-        self.ser.flush()
-        if self.ping_order_nr == 0:
-            self.get_repetition_rate()
-            self.ping_order_nr += 1
+        if self.ser.in_waiting == 0:
+            if self.ping_order_nr == 0:
+                self.get_repetition_rate()
+                self.ping_order_nr += 1
 
-        elif self.ping_order_nr == 1:
-            self.get_measured_pulse_energy()
-            self.ping_order_nr += 1
+            elif self.ping_order_nr == 1:
+                self.get_measured_pulse_energy()
+                self.ping_order_nr += 1
 
-        elif self.ping_order_nr == 2:
-            self.get_status()
-            self.ping_order_nr = 0
+            elif self.ping_order_nr == 2:
+                self.get_status()
+                self.ping_order_nr = 0
 
-        self.epoch_time = time.time()
+            self.epoch_time = time.time()
 
 #------------------------------- Commands  .......------------------------------
     def go_to_standby(self):
