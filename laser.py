@@ -30,6 +30,7 @@ class Laser():
                         "status_power": -999,
                         "epoch_time": self.epoch_time,
                         }
+        self.ping_order_nr = 0
         return
 
 
@@ -90,9 +91,18 @@ class Laser():
         return
 
     def ping_laser_module(self):
-        self.get_repetition_rate()
-        self.get_measured_pulse_energy()
-        self.get_status()
+        if self.ping_order_nr == 0:
+            self.get_repetition_rate()
+            self.ping_order_nr += 1
+            
+        elif self.ping_order_nr == 1:
+            self.get_measured_pulse_energy()
+            self.ping_order_nr += 1
+
+        else self.ping_order_nr == 2
+            self.get_status()
+            self.ping_order_nr = 0
+
         self.epoch_time = time.time()
 
 #------------------------------- Commands  .......------------------------------
