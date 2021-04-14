@@ -482,7 +482,7 @@ class App(QWidget):
         variaLayout.addItem(QSpacerItem(10, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.lcdNumberEvent = QLCDNumber(self)
-        self.lcdNumberEvent.setFixedSize(100, 0)
+        #self.lcdNumberEvent.setFixedSize(100, 0)
         set_lcd_style(self.lcdNumberEvent)
         variaLayout.addWidget(self.lcdNumberEvent)
 
