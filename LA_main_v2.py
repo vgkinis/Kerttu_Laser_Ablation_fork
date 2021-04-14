@@ -53,8 +53,6 @@ class WorkerThread(QThread):
         self.data_dict.update(self.ls.data_dict)
         self.data_dict.update(self.laser.data_dict)
         time.sleep(2)
-        #x = threading.Thread(target=self.read_laser_data, daemon=True)
-        #x.start()
 
         while True:
             if self.laser_connected or self.linear_stage_connected:

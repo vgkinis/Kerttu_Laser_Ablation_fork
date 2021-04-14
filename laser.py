@@ -97,7 +97,7 @@ class Laser():
 
     def ping_laser_module(self):
         if self.ser.in_waiting == 0:
-            if self.ping_order_nr == 0:
+            """if self.ping_order_nr == 0:
                 self.get_repetition_rate()
                 self.ping_order_nr += 1
 
@@ -107,7 +107,14 @@ class Laser():
 
             elif self.ping_order_nr == 2:
                 self.get_status()
+                self.ping_order_nr = 0"""
+
+            if self.ping_order_nr == 10:
+                self.get_repetition_rate()
                 self.ping_order_nr = 0
+            self.get_measured_pulse_energy()
+            self.get_status()
+            self.ping_order_nr += 1
 
             self.epoch_time = time.time()
 
