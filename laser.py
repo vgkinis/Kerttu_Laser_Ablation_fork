@@ -94,12 +94,12 @@ class Laser():
         if self.ping_order_nr == 0:
             self.get_repetition_rate()
             self.ping_order_nr += 1
-            
+
         elif self.ping_order_nr == 1:
             self.get_measured_pulse_energy()
             self.ping_order_nr += 1
 
-        else self.ping_order_nr == 2
+        elif self.ping_order_nr == 2
             self.get_status()
             self.ping_order_nr = 0
 
