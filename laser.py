@@ -52,7 +52,7 @@ class Laser():
         return
 
     def serial_read(self):
-        if self.ser.in_waiting > 0:
+        while self.ser.in_waiting > 0:
             line = self.ser.readline()
             data = line.decode("utf-8").strip("\n")
             if "Frequency index parameter: " in data:
@@ -60,14 +60,14 @@ class Laser():
                 rep_rate = self.rep_rates_kHz[rep_rate_nr]
                 self.data_dict["rep_rate_kHz"] = rep_rate
                 self.data_dict["epoch_time"] = self.epoch_time
-                return True
+                #return True
             elif "nJ" in data:
                 energy_nJ = float(data.split("nJ")[0].strip(" "))
                 energy_uJ = energy_nJ/1000.0
                 self.data_dict["energy_nJ"] = energy_nJ
                 self.data_dict["energy_uJ"] = energy_uJ
                 self.data_dict["epoch_time"] = self.epoch_time
-                return True
+                #return True
             elif "ly_oxp2_dev_status " in data:
                 status_dec = int(data.split(" ")[1])
                 status_bin = np.binary_repr(status_dec, width=8)
@@ -80,10 +80,10 @@ class Laser():
                 self.data_dict["status_error"] = int(status_bin[6])
                 self.data_dict["status_power"] = int(status_bin[7])
                 self.data_dict["epoch_time"] = self.epoch_time
-                return True
+                #return True
             #if "AOMAMP" in data:
             #    print(data)
-        return False #self.data_dict
+        #return False #self.data_dict
 
     def send_cmd(self, command, print_cmd=True):
         serial_cmd = command + "\n"
@@ -109,7 +109,7 @@ class Laser():
                 self.get_status()
                 self.ping_order_nr = 0"""
 
-            if self.ping_order_nr == 10:
+            if self.ping_order_nr == 5:
                 self.get_repetition_rate()
                 self.ping_order_nr = 0
             self.get_measured_pulse_energy()
@@ -168,7 +168,8 @@ if __name__ == "__main__":
     laser.start_serial(port_names[0])
     time.sleep(2)
 
-    laser.send_cmd('ly_oxp2_power=1')
+    laser.send_cmd('h?')
+    laser.send_cmd('e_freq?')
     while True:
         if laser.ser.in_waiting > 0:
             line = laser.ser.readline()

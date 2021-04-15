@@ -24,7 +24,7 @@ long steps_to_do = 0;
 void setup() {
   pinMode(stp, OUTPUT);
   pinMode(dir, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(38400);
   reset_pins();
   attachInterrupt(digitalPinToInterrupt(end1), detect_endstop1, FALLING);
   attachInterrupt(digitalPinToInterrupt(end2), detect_endstop2, FALLING);

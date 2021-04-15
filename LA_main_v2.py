@@ -62,8 +62,11 @@ class WorkerThread(QThread):
                 if self.laser_connected:
                     self.laser.ping_laser_module()
 
-                    if self.laser.serial_read() == True:
-                        self.data_dict.update(self.laser.data_dict)
+                    #if self.laser.serial_read() == True:
+                    #    self.data_dict.update(self.laser.data_dict)
+
+                    self.laser.serial_read()
+                    self.data_dict.update(self.laser.data_dict)
 
                 if self.linear_stage_connected:
                     try:
@@ -173,7 +176,7 @@ class WorkerThread(QThread):
                 new_abs_pos = half_ls_range
                 self.ls.set_abs_pos_stp(new_abs_pos)
                 dis = abs(new_abs_pos - 0)
-                time.sleep(1)
+                #time.sleep(1)
                 self.ls.move_dis(dis, "steps")
                 self.ls.set_event_code(0)
                 self.calibrating = False

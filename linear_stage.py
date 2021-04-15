@@ -65,7 +65,7 @@ class LinearStage():
 #------------------------------- Serial functions ------------------------------
     def start_serial(self, serial_name):
         try:
-            self.ser = serial.Serial(serial_name, 9600, timeout=.1)
+            self.ser = serial.Serial(serial_name, 38400, timeout=.1)
             print("Connection is established")
         except:
             print("Could not open serial")
