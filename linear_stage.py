@@ -90,7 +90,6 @@ class LinearStage():
                 self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = float(data[0])*10**(-3), float(data[1]), int(data[2]), float(data[3]), int(data[4]), int(data[5])
                 self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
                 self.data_dict = {"loop_time": round(self.loop_time, 3),
-                                "loop_time_min": round(self.loop_time/60.0, 3),
                                 "pos_steps": self.abs_pos_stp,
                                 "pos_rev": self.stp_to_rev(self.abs_pos_stp),
                                 "pos_mm": self.abs_pos_mm,

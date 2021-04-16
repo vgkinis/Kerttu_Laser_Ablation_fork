@@ -16,10 +16,9 @@ import pytz
 from datetime import datetime
 from serial.tools import list_ports
 import functools
-import schedule
+#import schedule
 import csv
 import os
-import threading
 
 from general_functions import *
 from linear_stage import LinearStage
@@ -52,12 +51,18 @@ class WorkerThread(QThread):
         self.data_dict = {}
         self.data_dict.update(self.ls.data_dict)
         self.data_dict.update(self.laser.data_dict)
+        self.logger_interval = 1
+        self.logger_last_log = None
         time.sleep(2)
 
         while True:
             if self.laser_connected or self.linear_stage_connected:
                 self.signals.emit(True)
-                schedule.run_pending()
+                #schedule.run_pending()
+
+                if self.logger_last_log + self.logger_interval <= time.time():
+                    self.logger_last_log = time.time()
+                    self.data_logger()
 
                 if self.laser_connected:
                     try:
@@ -89,15 +94,20 @@ class WorkerThread(QThread):
         dir_data = os.path.join(os.getcwd(),"Data")
         time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen")).strftime("%Y-%m-%d %H.%M.%S.%f+%z")
         self.data_filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
-        with open(self.data_filename,"a") as f:
-            column_names = list(self.ls.data_dict)
+        with open(self.data_filename,"w") as f:
+            column_names = "log_epoch_time"
+            column_names += list(self.ls.data_dict)
             column_names += ["rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time"]
-            writer = csv.writer(f, delimiter=",")
+            out_string = "%s\t"*18
+            out_string = out_string[:-1] %tuple(column_names)
+            f.write(out_string)
+            #writer = csv.writer(f, delimiter="\t")
             # Pad the header elements
-            maxlen = len(max(column_names, key=len))
-            writer.writerow([(' ' * (maxlen - len(x))) + x for x in column_names])
+            #maxlen = len(max(column_names, key=len))
+            #writer.writerow([(' ' * (maxlen - len(x))) + x for x in column_names])
+        self.logger_last_log = time.time()
 
-        schedule.every(1).seconds.do(self.data_logger)
+        #schedule.every(1).seconds.do(self.data_logger)
 
     def connect_laser(self):
         ports = (list(list_ports.comports()))
@@ -133,29 +143,31 @@ class WorkerThread(QThread):
             print("Cannot find the linear stage")
 
     def data_logger(self):
-        with open(self.data_filename,"a") as f:
-            writer = csv.writer(f, delimiter=",")
-            data = self.data_dict
-            data_formatted = {"loop_time": "{:13.3f}".format(data["loop_time"]),
-                            "loop_time_min": "{:13.3f}".format(data["loop_time_min"]),
-                            "pos_steps": "{:13}".format(data["pos_steps"]),
-                            "pos_rev": "{:13.3f}".format(data["pos_rev"]),
-                            "pos_mm": "{:13.3f}".format(data["pos_mm"]),
-                            "dis_steps": "{:13}".format(data["dis_steps"]),
-                            "dis_mm": "{:13.3f}".format(data["dis_mm"]),
-                            "dis_rev": "{:13.3f}".format(data["dis_rev"]),
-                            "spd_us/step": "{:13.3f}".format(data["spd_us/step"]),
-                            "spd_step/s": "{:13.3f}".format(data["spd_step/s"]),
-                            "spd_rev/s": "{:13.3f}".format(data["spd_rev/s"]),
-                            "spd_mm/s": "{:13.3f}".format(data["spd_mm/s"]),
-                            "direction": "{:13}".format(data["direction"]),
-                            "event_code": "{:13}".format(data["event_code"]),
-                            "rep_rate_kHz": "{:13.3f}".format(data["rep_rate_kHz"]),
-                            "energy_nJ": "{:13.3f}".format(data["energy_nJ"]),
-                            "energy_uJ": "{:13.3f}".format(data["energy_uJ"]),
-                            "epoch_time": "{:13.3f}".format(data["epoch_time"])
-                            }
-            writer.writerow(data_formatted.values())
+        with open(self.data_filename,"a+") as f:
+            f.write("bla")
+            #writer = csv.writer(f, delimiter=",")
+            #data = self.data_dict
+            # data_formatted = {"loop_time": "{:13.3f}".format(data["loop_time"]),
+            #                 "loop_time_min": "{:13.3f}".format(data["loop_time_min"]),
+            #                 "pos_steps": "{:13}".format(data["pos_steps"]),
+            #                 "pos_rev": "{:13.3f}".format(data["pos_rev"]),
+            #                 "pos_mm": "{:13.3f}".format(data["pos_mm"]),
+            #                 "dis_steps": "{:13}".format(data["dis_steps"]),
+            #                 "dis_mm": "{:13.3f}".format(data["dis_mm"]),
+            #                 "dis_rev": "{:13.3f}".format(data["dis_rev"]),
+            #                 "spd_us/step": "{:13.3f}".format(data["spd_us/step"]),
+            #                 "spd_step/s": "{:13.3f}".format(data["spd_step/s"]),
+            #                 "spd_rev/s": "{:13.3f}".format(data["spd_rev/s"]),
+            #                 "spd_mm/s": "{:13.3f}".format(data["spd_mm/s"]),
+            #                 "direction": "{:13}".format(data["direction"]),
+            #                 "event_code": "{:13}".format(data["event_code"]),
+            #                 "rep_rate_kHz": "{:13.3f}".format(data["rep_rate_kHz"]),
+            #                 "energy_nJ": "{:13.3f}".format(data["energy_nJ"]),
+            #                 "energy_uJ": "{:13.3f}".format(data["energy_uJ"]),
+            #                 "epoch_time": "{:13.3f}".format(data["epoch_time"])
+            #                 }
+
+            #writer.writerow(data_formatted.values())
 
     def calibrate_sys(self):
         if self.calibrating == True:
