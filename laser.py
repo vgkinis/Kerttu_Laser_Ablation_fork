@@ -91,7 +91,8 @@ class Laser():
             if print_cmd:
                 print("Sending laser command: ", command)
             self.ser.write(str.encode(serial_cmd))
-        except:
+        except Exception as e:
+            print(e)
             print("Command %s not sent. Could not open serial" %serial_cmd)
         return
 

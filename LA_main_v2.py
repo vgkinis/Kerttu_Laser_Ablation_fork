@@ -60,13 +60,14 @@ class WorkerThread(QThread):
                 schedule.run_pending()
 
                 if self.laser_connected:
-                    self.laser.ping_laser_module()
-
-                    #if self.laser.serial_read() == True:
-                    #    self.data_dict.update(self.laser.data_dict)
-
-                    self.laser.serial_read()
-                    self.data_dict.update(self.laser.data_dict)
+                    try:
+                        self.laser.ping_laser_module()
+                        #if self.laser.serial_read() == True:
+                        #    self.data_dict.update(self.laser.data_dict)
+                        self.laser.serial_read()
+                        self.data_dict.update(self.laser.data_dict)
+                    except Exception as e:
+                        print(e)
 
                 if self.linear_stage_connected:
                     try:
@@ -77,7 +78,6 @@ class WorkerThread(QThread):
 
                     except Exception as e:
                         print(e)
-                        continue
 
                     # Calibrate or perform discrete movement if it has been chosen.
                     self.calibrate_sys()
@@ -109,7 +109,8 @@ class WorkerThread(QThread):
                     self.laser.start_serial(port.device)
                     time.sleep(2)
                     self.laser_connected = True
-                    self.start_data_logger()
+                    if self.linear_stage_connected == False:
+                        self.start_data_logger()
                 except Exception as e:
                     print("Exception in connect_laser():", e)
         if self.laser_connected == False:
@@ -124,7 +125,8 @@ class WorkerThread(QThread):
                     self.ls.start_serial(port.device)
                     time.sleep(2)
                     self.linear_stage_connected = True
-                    self.start_data_logger()
+                    if self.laser_connected == False:
+                        self.start_data_logger()
                 except Exception as e:
                     print(e)
         if self.linear_stage_connected == False:
@@ -204,12 +206,13 @@ class WorkerThread(QThread):
                     if self.discrete_timer == None:
                         if self.discrete_laser == True:
                             self.laser.enable_laser()
-                            self.laser.enable_AOM_laser()
+                            #self.laser.enable_AOM_laser()
                         self.discrete_timer = time.time()
                     # Move the next distance interval if waiting time is over
                     if self.discrete_timer + self.discrete_time <= time.time():
                         if self.discrete_laser == True:
-                            self.laser.disable_AOM_laser()
+                            #self.laser.disable_AOM_laser()
+                            self.laser.go_to_standby()
                         #print(time.time() - self.discrete_timer)
                         self.discrete_move_one_interval()
                 # Reset the event code and finish discrete sampling.
@@ -844,11 +847,16 @@ class App(QWidget):
         connectLayoutL.addWidget(self.pushButtonConnectL)
         connectLayoutL.addItem(horizontalSpacer2)
 
+
         self.ledConnectLaser = QLabel(self)
         self.ledConnectLaser.setStyleSheet("QLabel {background-color : whitesmoke; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
         connectLayoutL.addWidget(self.ledConnectLaser)
         connectLayoutL.addItem(horizontalSpacer2)
 
+        self.pushButtonStartFile = QPushButton('Start New Data File', self)
+        self.pushButtonStartFile.setFixedSize(170, 34)
+        connectLayoutL.addWidget(self.pushButtonStartFile)
+        connectLayoutL.addItem(horizontalSpacer2)
 
 
 # -----------------------------------------------------------------------------
@@ -872,6 +880,7 @@ class App(QWidget):
         self.pushButtonLaserListen.clicked.connect(functools.partial(self.wt.laser.go_to_listen))
         self.pushButtonLaserStandby.clicked.connect(functools.partial(self.wt.laser.go_to_standby))
         self.pushButtonLaserEnable.clicked.connect(functools.partial(self.wt.laser.enable_laser))
+        self.pushButtonStartFile.clicked.connect(functools.partial(self.wt.start_data_logger))
 
         app.aboutToQuit.connect(self.quit_app) #to stop the thread when closing the GUI
 
