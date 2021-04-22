@@ -97,19 +97,34 @@ class WorkerThread(QThread):
         time_stamp = datetime.now(pytz.timezone("Europe/Copenhagen")).strftime("%Y-%m-%d %H.%M.%S.%f+%z")
         self.data_filename = os.path.join(dir_data,"LA_data_" + str(time_stamp) + ".csv")
         with open(self.data_filename,"w") as f:
+            # Log timestamp
             column_names = ["log_epoch_time"]
-            column_names += list(self.ls.data_dict)
+            # Linear Stage parameters
+            column_names += ["loop_time", "pos_steps", "pos_rev", "pos_mm", "dis_steps", "dis_rev", "dis_mm", "spd_us/step", "spd_step/s", "spd_rev/s", "spd_mm/s", "direction", "event_code"]
+            # Laser parameters
             column_names += ["rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time"]
             out_string = "%s\t"*(len(column_names)-1) + "%s\n"
             out_string = out_string %tuple(column_names)
             f.write(out_string)
-            #writer = csv.writer(f, delimiter="\t")
-            # Pad the header elements
-            #maxlen = len(max(column_names, key=len))
-            #writer.writerow([(' ' * (maxlen - len(x))) + x for x in column_names])
         self.logger_last_log_time = time.time()
 
-        #schedule.every(1).seconds.do(self.data_logger)
+
+    def data_logger(self):
+        with open(self.data_filename,"a+") as f:
+            # timestamp
+            out_string0 = "%0.2f" %(self.logger_last_log_time)
+            # Linear Stage parameters: Arduino loop time; absolute position in
+            # steps, revolutions and mm-s
+            out_string1 = "\t%0.2f\t%i\t%0.2f\t%0.2f" %itemgetter("loop_time", "pos_steps", "pos_rev", "pos_mm")(self.ls.data_dict)
+            # Distance in steps, revolutions, millimeters
+            out_string2 = "\t%i\t%0.2f\t%0.2f" %itemgetter("dis_steps", "dis_rev", "dis_mm")(self.ls.data_dict)
+            # Speed in us/step,step/s, rev/s, mm/s; direction; event code
+            out_string3 = "\t%i\t%0.2f\t%0.2f\t%0.2f\t%i\t%i" %itemgetter("spd_us/step", "spd_step/s", "spd_rev/s", "spd_mm/s", "direction", "event_code")(self.ls.data_dict)
+            # Laser parameters: repetition rate; pulse energy in nJ and uJ;
+            # epoch time of the last update of one of the parameters
+            out_string4 = "\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n" %itemgetter("rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time")(self.laser.data_dict)
+            out_string = out_string0 + out_string1 + out_string2 + out_string3 + out_string4
+            f.write(out_string)
 
     def connect_laser(self):
         ports = (list(list_ports.comports()))
@@ -143,23 +158,6 @@ class WorkerThread(QThread):
                     print(e)
         if self.linear_stage_connected == False:
             print("Cannot find the linear stage")
-
-    def data_logger(self):
-        with open(self.data_filename,"a+") as f:
-            # timestamp
-            out_string0 = "%0.2f" %(self.logger_last_log_time)
-            # Linear Stage parameters: Arduino loop time; absolute position in
-            # steps, revolutions and mm-s
-            out_string1 = "\t%0.2f\t%i\t%0.2f\t%0.2f" %itemgetter("loop_time", "pos_steps", "pos_rev", "pos_mm")(self.ls.data_dict)
-            # Distance in steps, revolutions, millimeters
-            out_string2 = "\t%i\t%0.2f\t%0.2f" %itemgetter("dis_steps", "dis_rev", "dis_mm")(self.ls.data_dict)
-            # Speed in us/step,step/s, rev/s, mm/s; direction; event code
-            out_string3 = "\t%i\t%0.2f\t%0.2f\t%0.2f\t%i\t%i" %itemgetter("spd_us/step", "spd_step/s", "spd_rev/s", "spd_mm/s", "direction", "event_code")(self.ls.data_dict)
-            # Laser parameters: repetition rate; pulse energy in nJ and uJ;
-            # epoch time of the last update of one of the parameters
-            out_string4 = "\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n" %itemgetter("rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time")(self.laser.data_dict)
-            out_string = out_string0 + out_string1 + out_string2 + out_string3 + out_string4
-            f.write(out_string)
 
     def calibrate_sys(self):
         if self.calibrating == True:

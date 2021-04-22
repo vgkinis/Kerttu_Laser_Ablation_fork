@@ -32,7 +32,6 @@ class LinearStage():
         self.event_code = None
 
         self.data_dict = {"loop_time": -999,
-                        "loop_time_min": -999,
                         "pos_steps": -999,
                         "pos_rev": -999,
                         "pos_mm": -999,
