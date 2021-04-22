@@ -19,6 +19,7 @@ import functools
 #import schedule
 import csv
 import os
+from operator import itemgetter
 
 from general_functions import *
 from linear_stage import LinearStage
@@ -99,8 +100,8 @@ class WorkerThread(QThread):
             column_names = ["log_epoch_time"]
             column_names += list(self.ls.data_dict)
             column_names += ["rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time"]
-            out_string = "%s\t"*19
-            out_string = out_string[:-1] %tuple(column_names)
+            out_string = "%s\t"*(len(column_names)-1) + "%s\n"
+            out_string = out_string %tuple(column_names)
             f.write(out_string)
             #writer = csv.writer(f, delimiter="\t")
             # Pad the header elements
@@ -146,41 +147,19 @@ class WorkerThread(QThread):
     def data_logger(self):
         with open(self.data_filename,"a+") as f:
             # timestamp
-            out_string0 = str(self.logger_last_log_time)
+            out_string0 = "%0.2f" %(self.logger_last_log_time)
             # Linear Stage parameters: Arduino loop time; absolute position in
             # steps, revolutions and mm-s
-            out_string1 = "\t%0.2f\t%i\t%0.2f\t%0.2f" %tuple(self.ls.data_dict[0:4])
-            # Distance in steps, revolutions, millimeters; speed in us/step,
-            # step/s, rev/s, mm/s; direction; event code
-            out_string2 = "\t%i\t%0.2f\t%0.2f\t%i\t%0.2f\t%0.2f\t%i\t%i" %tuple(self.ls.data_dict[4:])
+            out_string1 = "\t%0.2f\t%i\t%0.2f\t%0.2f" %itemgetter("loop_time", "pos_steps", "pos_rev", "pos_mm")(self.ls.data_dict)
+            # Distance in steps, revolutions, millimeters
+            out_string2 = "\t%i\t%0.2f\t%0.2f" %itemgetter("dis_steps", "dis_rev", "dis_mm")(self.ls.data_dict)
+            # Speed in us/step,step/s, rev/s, mm/s; direction; event code
+            out_string3 = "\t%i\t%0.2f\t%0.2f\t%0.2f\t%i\t%i" %itemgetter("spd_us/step", "spd_step/s", "spd_rev/s", "spd_mm/s", "direction", "event_code")(self.ls.data_dict)
             # Laser parameters: repetition rate; pulse energy in nJ and uJ;
             # epoch time of the last update of one of the parameters
-            out_string3 = "\t%0.2f\t%0.2f\t%0.2f\t%0.2f" %tuple(self.laser.data_dict)
-            out_string = out_string0 + out_string1 + out_string2 + out_string3
+            out_string4 = "\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n" %itemgetter("rep_rate_kHz", "energy_nJ", "energy_uJ", "epoch_time")(self.laser.data_dict)
+            out_string = out_string0 + out_string1 + out_string2 + out_string3 + out_string4
             f.write(out_string)
-            #writer = csv.writer(f, delimiter=",")
-            #data = self.data_dict
-            # data_formatted = {"loop_time": "{:13.3f}".format(data["loop_time"]),
-            #                 "loop_time_min": "{:13.3f}".format(data["loop_time_min"]),
-            #                 "pos_steps": "{:13}".format(data["pos_steps"]),
-            #                 "pos_rev": "{:13.3f}".format(data["pos_rev"]),
-            #                 "pos_mm": "{:13.3f}".format(data["pos_mm"]),
-            #                 "dis_steps": "{:13}".format(data["dis_steps"]),
-            #                 "dis_mm": "{:13.3f}".format(data["dis_mm"]),
-            #                 "dis_rev": "{:13.3f}".format(data["dis_rev"]),
-            #                 "spd_us/step": "{:13.3f}".format(data["spd_us/step"]),
-            #                 "spd_step/s": "{:13.3f}".format(data["spd_step/s"]),
-            #                 "spd_rev/s": "{:13.3f}".format(data["spd_rev/s"]),
-            #                 "spd_mm/s": "{:13.3f}".format(data["spd_mm/s"]),
-            #                 "direction": "{:13}".format(data["direction"]),
-            #                 "event_code": "{:13}".format(data["event_code"]),
-            #                 "rep_rate_kHz": "{:13.3f}".format(data["rep_rate_kHz"]),
-            #                 "energy_nJ": "{:13.3f}".format(data["energy_nJ"]),
-            #                 "energy_uJ": "{:13.3f}".format(data["energy_uJ"]),
-            #                 "epoch_time": "{:13.3f}".format(data["epoch_time"])
-            #                 }
-
-            #writer.writerow(data_formatted.values())
 
     def calibrate_sys(self):
         if self.calibrating == True:
