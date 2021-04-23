@@ -919,6 +919,8 @@ class App(QWidget):
             self.lcdNumberDir.display(self.wt.ls.data_dict["direction"])
             self.lcdNumberEvent.display(self.wt.ls.data_dict["event_code"])
 
+            turn_led_on_off(self.ledDiscrete, self.wt.discrete_sampling)
+
             abs_pos_mm = self.wt.ls.data_dict["pos_mm"]
             self.update_graph(abs_pos_mm)
 
