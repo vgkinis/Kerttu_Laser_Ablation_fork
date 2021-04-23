@@ -172,7 +172,7 @@ class WorkerThread(QThread):
                 self.ls.move_dis(self.ls.stage_length, "mm")
             elif self.ls.event_code == 1 and self.calibrate_start_count != None:
                 full_ls_range = abs(self.ls.abs_pos_stp - self.calibrate_start_count)
-                half_ls_range = abs(full_ls_range)/2
+                half_ls_range = int(full_ls_range)/2
                 print("The full range of the linear stage is measured to be: {0} steps, {1} mm.".format(full_ls_range, self.ls.stp_to_mm(full_ls_range)))
                 print("The half range of the linear stage is measured to be: {0} steps, {1} mm.".format(half_ls_range, self.ls.stp_to_mm(half_ls_range)))
                 self.ls.set_dir(-1)
