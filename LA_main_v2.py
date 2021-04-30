@@ -38,6 +38,7 @@ class WorkerThread(QThread):
         self.calibrating = False
         self.calibrate_start_count = None
         self.calibrated = False
+        self.graph_half_range = None
 
         self.linear_stage_connected = False
         self.laser_connected = False
@@ -172,7 +173,8 @@ class WorkerThread(QThread):
                 self.ls.move_dis(self.ls.stage_length, "mm")
             elif self.ls.event_code == 1 and self.calibrate_start_count != None:
                 full_ls_range = abs(self.ls.abs_pos_stp - self.calibrate_start_count)
-                half_ls_range = int(full_ls_range)/2
+                half_ls_range = int(full_ls_range/2)
+                self.graph_half_range = self.ls.stp_to_mm(half_ls_range)
                 print("Calibration: full range is {0} steps, {1} mm.".format(full_ls_range, self.ls.stp_to_mm(full_ls_range)))
                 print("Calibration: half range is: {0} steps, {1} mm.".format(half_ls_range, self.ls.stp_to_mm(half_ls_range)))
                 self.ls.set_dir(-1)
@@ -1017,8 +1019,15 @@ class App(QWidget):
         self.figure_ls.clear()
         plt.figure(num=1)
         ax = plt.axes(xlim=(0, stage_len_mm), ylim=(0, 30))
+        #ax2 = ax.twiny()
+        #if self.wt.graph_half_range != None:
+        #    ax.set_ylabel(self.wt.graph_half_range, rotation=90)
+        #    ax2.set_ylabel(self.wt.graph_half_range, rotation=90)
+        #ax.set_yticklabels([])
+        #ax2.set_yticklabels([])
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
+        #ax2.get_xaxis().set_visible(False)
 
         if self.wt.calibrated == True:
             rectangle = plt.Rectangle((stage_len_mm/2 - tray_length_mm/2 + abs_pos_mm, 0), tray_length_mm, 30, fc='lightblue')
