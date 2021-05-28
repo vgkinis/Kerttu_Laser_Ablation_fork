@@ -62,14 +62,12 @@ class WorkerThread(QThread):
 
                 if self.logger_last_log_time != None:
                     if self.logger_last_log_time + self.logger_interval <= time.time():
-                        # self.logger_last_log_time = time.time()
+                        self.logger_last_log_time = time.time()
                         self.data_logger()
 
                 if self.laser_connected:
                     try:
                         self.laser.ping_laser_module()
-                        #if self.laser.serial_read() == True:
-                        #    self.data_dict.update(self.laser.data_dict)
                         self.laser.serial_read()
                         self.data_dict.update(self.laser.data_dict)
                     except Exception as e:
@@ -77,7 +75,6 @@ class WorkerThread(QThread):
 
                 if self.linear_stage_connected:
                     try:
-                        # Get feedback
                         self.ls.ping_arduino()
                         motor_data = self.ls.serial_read()
                         self.data_dict.update(motor_data)
