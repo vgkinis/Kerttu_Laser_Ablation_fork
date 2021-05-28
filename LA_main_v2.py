@@ -1019,15 +1019,8 @@ class App(QWidget):
         self.figure_ls.clear()
         plt.figure(num=1)
         ax = plt.axes(xlim=(0, stage_len_mm), ylim=(0, 30))
-        #ax2 = ax.twiny()
-        #if self.wt.graph_half_range != None:
-        #    ax.set_ylabel(self.wt.graph_half_range, rotation=90)
-        #    ax2.set_ylabel(self.wt.graph_half_range, rotation=90)
-        #ax.set_yticklabels([])
-        #ax2.set_yticklabels([])
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
-        #ax2.get_xaxis().set_visible(False)
 
         if self.wt.calibrated == True:
             rectangle = plt.Rectangle((stage_len_mm/2 - tray_length_mm/2 + abs_pos_mm, 0), tray_length_mm, 30, fc='lightblue')
