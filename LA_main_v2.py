@@ -67,6 +67,7 @@ class WorkerThread(QThread):
 
                 if self.laser_connected:
                     try:
+                        # Get feedback from the laser
                         self.laser.ping_laser_module()
                         self.laser.serial_read()
                         self.data_dict.update(self.laser.data_dict)
@@ -75,6 +76,7 @@ class WorkerThread(QThread):
 
                 if self.linear_stage_connected:
                     try:
+                        # Get feedback from the linear stage
                         self.ls.ping_arduino()
                         motor_data = self.ls.serial_read()
                         self.data_dict.update(motor_data)
