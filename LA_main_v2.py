@@ -64,7 +64,7 @@ class WorkerThread(QThread):
 
                 if self.logger_last_log_time != None:
                     if self.logger_last_log_time + self.logger_interval <= time.time():
-                        self.logger_last_log_time = time.time()
+                        # self.logger_last_log_time = time.time()
                         self.data_logger()
 
                 if self.laser_connected:
