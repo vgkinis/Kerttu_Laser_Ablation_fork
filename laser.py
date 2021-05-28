@@ -81,8 +81,6 @@ class Laser():
                 self.data_dict["status_power"] = int(status_bin[7])
                 self.data_dict["epoch_time"] = self.epoch_time
                 #return True
-            #if "AOMAMP" in data:
-            #    print(data)
         #return False #self.data_dict
 
     def send_cmd(self, command, print_cmd=True):
@@ -98,18 +96,6 @@ class Laser():
 
     def ping_laser_module(self):
         if self.ser.in_waiting == 0:
-            """if self.ping_order_nr == 0:
-                self.get_repetition_rate()
-                self.ping_order_nr += 1
-
-            elif self.ping_order_nr == 1:
-                self.get_measured_pulse_energy()
-                self.ping_order_nr += 1
-
-            elif self.ping_order_nr == 2:
-                self.get_status()
-                self.ping_order_nr = 0"""
-
             if self.ping_order_nr == 5:
                 self.get_repetition_rate()
                 self.ping_order_nr = 0
