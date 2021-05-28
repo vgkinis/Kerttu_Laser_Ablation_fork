@@ -16,7 +16,6 @@ import pytz
 from datetime import datetime
 from serial.tools import list_ports
 import functools
-#import schedule
 import csv
 import os
 from operator import itemgetter
@@ -60,7 +59,6 @@ class WorkerThread(QThread):
         while True:
             if self.laser_connected or self.linear_stage_connected:
                 self.signals.emit(True)
-                #schedule.run_pending()
 
                 if self.logger_last_log_time != None:
                     if self.logger_last_log_time + self.logger_interval <= time.time():
