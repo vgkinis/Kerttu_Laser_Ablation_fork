@@ -13,6 +13,7 @@ def add_custom_spacer(x,y,layout):
     spacer.setFixedSize(x, y)
     layout.addWidget(spacer)
 
+
 def turn_led_on_off(led, checked):
     if checked:
         led.setStyleSheet("QLabel {background-color : forestgreen; border-color : black; border-width : 2px; border-style : solid; border-radius : 10px; min-height: 18px; min-width: 18px; max-height: 18px; max-width:18px}")
