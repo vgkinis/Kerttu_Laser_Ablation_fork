@@ -1,6 +1,4 @@
-#comment
-#comment 2
-#comment 3
+
 import numpy as np
 import serial
 import os
@@ -8,22 +6,16 @@ import time
 import json
 from serial.tools import list_ports
 
-
-
-
-
 class LinearStage():
     """
 
     """
 
 #--------------------------------- Initializing --------------------------------
-    def __init__(self, thread_pitch = None, stp_per_rev = None, stage_length = None, tray_length = None, json_path = None):
-        self.available = True
+    def __init__(self, thread_pitch = None, stp_per_rev = None, stage_length = None, json_path = None):
         self.thread_pitch = thread_pitch
         self.stp_per_rev = stp_per_rev
         self.stage_length = stage_length
-        self.tray_length = tray_length
         self.json_path = json_path
         self.ser = serial.Serial()
         self.loop_time = None
@@ -36,23 +28,45 @@ class LinearStage():
 
         self.event_code = None
 
-        self.data_dict = {"loop_time": -999,
-                        "pos_steps": -999,
-                        "pos_rev": -999,
-                        "pos_mm": -999,
-                        "dis_steps": -999,
-                        "dis_mm": -999,
-                        "dis_rev": -999,
-                        "spd_us/step": -999,
-                        "spd_step/s": -999,
-                        "spd_rev/s": -999,
-                        "spd_mm/s": -999,
-                        "direction": -999,
-                        "event_code": -999,
-                        }
+        self.count_range_start = None
 
         return
 
+    def sequence(self, seq_list):
+        """
+        Executes a series of moves with a motor taken from a tuple of lists.
+        Finishes a full move before moving on to the next command in the tuple.
+        Logs data every 2 seconds.
+        Parameters:
+        seq_list : A tuple of lists. Each list is structured as:
+        [(Direction (1 for up, -1 down), velocity (mm/s), distance (mm))]
+        Outputs:
+        log.log : a log file containing: time since start, direction, spd_us/step, spd_mm/
+        s, dis_steps.
+        """
+        f = open("./log.log", "w")
+        t_init = time.time()
+        t_1 = time.time()
+        write_delay = 2
+        for j in seq_list:
+            self.set_dir(int(j[0]))
+            self.set_speed(spd = float(j[1]), unit = "mm/s")
+            self.move_dis(dis = float(j[2]), unit = "mm")
+            while True:
+                t_2 = time.time()
+                if t_2 - t_1 >= write_delay:
+                    t_1 = time.time()
+                    self.ping_arduino()
+                    data_s = self.serial_read()
+                    str_out = "%0.4f\t%i\t%0.4e\t%0.5f\t%0.1f\t%0.1f\n" %(t_1 - t_init, data_s["direction"],data_s["spd_us/step"], data_s["spd_mm/s"], data_s["dis_steps"], data_s["dis_mm"])
+                    f.write(str_out)
+                    print(str_out)
+                    if data_s["dis_steps"]==0:
+                        break
+                else:
+                    continue
+        f.close()
+        return
 
     def read_json(self):
         if self.json_path:
@@ -62,14 +76,13 @@ class LinearStage():
                 self.thread_pitch = json_dict["thread_pitch"]
                 self.stp_per_rev = json_dict["stp_per_rev"]
                 self.stage_length = json_dict["stage_length"]
-                self.tray_length = json_dict["tray_length"]
         return
 
 
 #------------------------------- Serial functions ------------------------------
     def start_serial(self, serial_name):
         try:
-            self.ser = serial.Serial(serial_name, 38400, timeout=.1)
+            self.ser = serial.Serial(serial_name, 9600, timeout=.1)
             print("Connection is established")
         except:
             print("Could not open serial")
@@ -91,35 +104,32 @@ class LinearStage():
             if idx_s < idx_r:
                 line = line[idx_s+1 : idx_r]
                 data = line.split(";")
-                self.loop_time, self.abs_pos_stp, self.dis_stp, self.spd_us, self.direction, self.event_code = float(data[0])*10**(-3), float(data[1]), int(data[2]), float(data[3]), int(data[4]), int(data[5])
+                self.loop_time, self.abs_pos_stp, dis_stp, spd_us, direction, self.event_code = float(data[0])*10**(-3), float(data[1]), float(data[2]), float(data[3]), int(data[4]), int(data[5])
                 self.abs_pos_mm = self.stp_to_mm(self.abs_pos_stp)
-                self.data_dict = {"loop_time": round(self.loop_time, 3),
+                data_dict = {"loop_time": self.loop_time,
                                 "pos_steps": self.abs_pos_stp,
                                 "pos_rev": self.stp_to_rev(self.abs_pos_stp),
                                 "pos_mm": self.abs_pos_mm,
-                                "dis_steps": self.dis_stp,
-                                "dis_rev": self.stp_to_rev(self.dis_stp),
-                                "dis_mm": self.stp_to_mm(self.dis_stp),
-                                "spd_us/step": self.spd_us,
-                                "spd_step/s": self.us_stp_to_stp_s(self.spd_us),
-                                "spd_rev/s": self.us_stp_to_rev_s(self.spd_us),
-                                "spd_mm/s": self.us_stp_to_mm_s(self.spd_us),
-                                "direction": self.direction,
+                                "dis_steps": dis_stp,
+                                "dis_mm": self.stp_to_mm(dis_stp),
+                                "dis_rev": self.stp_to_rev(dis_stp),
+                                "spd_us/step": spd_us,
+                                "spd_step/s": self.us_stp_to_stp_s(spd_us),
+                                "spd_rev/s": self.us_stp_to_rev_s(spd_us),
+                                "spd_mm/s": self.us_stp_to_mm_s(spd_us),
+                                "direction": direction,
                                 "event_code": self.event_code,
                                 }
-                return self.data_dict
+                return data_dict
             else:
-                print("Partial data received from the linear stage: ", line)
-                return
+                return "failed 2 if", line
         else:
-            print("Incorrect data received from the linear stage: ", line)
-            return
-        return
+            return "failed 1 if", line
 
 
     def send_cmd(self, cat, parameter=""):
         """ Sends a command for one of the following categories: S - steps,
-        V - speed, P - position, D - direction, R - reset,
+        V - velocity (speed), P - position, D - direction, R - reset,
         E - event code, A - absolute position, "W" - write from Arduino"""
         if cat not in ["S", "V", "P", "D", "R", "E", "A", "W"]:
             print("Unkown command category: %s" %cat)
@@ -128,7 +138,7 @@ class LinearStage():
             try:
                 self.ser.write(str.encode(serial_cmd))
                 if "W" not in serial_cmd:
-                    print("Sending linear stage command: ", serial_cmd)
+                    print("Sending command: ", serial_cmd)
             except:
                 print("Command %s not sent. Could not open serial" %serial_cmd)
         return
@@ -167,7 +177,7 @@ class LinearStage():
     def rev_s_to_us_stp(self, rev_s):
         return 1e6/(self.thread_pitch*self.stp_per_rev)
 
-#--------------------------------- Set -----------------------------------------
+#--------------------------------- Set & Get -----------------------------------
 
     def set_speed(self, spd, unit):
         spd = float(spd)
@@ -227,25 +237,65 @@ class LinearStage():
     def ping_arduino(self):
         self.send_cmd("W")
 
+    def get_velocity(self):
+        return
+
+    def get_direction(self):
+        return
+
+    def get_current_position(self):
+        return
+
+    def calibrate_sys(self):
+        if self.event_code == 0:
+            self.set_event_code(4)
+            self.set_dir(-1)
+            self.move_dis(self.stage_length, "mm")
+        elif self.event_code == 2:
+            self.set_event_code(4)
+            self.set_dir(1)
+            self.count_range_start = self.abs_pos_stp
+            self.move_dis(self.stage_length, "mm")
+        elif self.event_code == 1 and self.count_range_start != None:
+            full_ls_range = abs(self.abs_pos_stp - self.count_range_start)
+            half_ls_range = abs(full_ls_range)/2
+            print()
+            print("full_ls_range", full_ls_range)
+            print("half_ls_range", half_ls_range)
+            print()
+            self.set_dir(-1)
+            self.count_range_start = None
+            new_abs_pos = half_ls_range
+            self.set_abs_pos_stp(new_abs_pos)
+            self.set_event_code(0)
+            dis = abs(new_abs_pos - 0)
+            self.move_dis(dis, "steps")
+        return
+
+
     def reset_sys(self):
         self.set_event_code(0)
+        time.sleep(2)
         self.send_cmd("R")
+
 
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
     ports = (list(list_ports.comports()))
-    port_names = list(map(lambda p : p.device, ports))
-    if "COM" in port_names[0]:
-        serial_ports = port_names
-    else:
-        serial_ports = list(map(lambda p : "/dev/" + p, port_names))
-
-    ls.start_serial(serial_port[0])
+    port_name = list(map(lambda p : p["ttyACM" in p.device], ports))[1]
+    serial_port = "/dev/" + port_name
+    ls.start_serial(serial_port)
     time.sleep(2)
 
-    #ls.send_cmd("S", str(5000))
-    #ls.send_cmd("W")
-    #print(ls.serial_read())
-    ls.discrete_meas(3, 40, 5)
+    ls.send_cmd("S", str(5000))
+    ls.send_cmd("W")
+    print(ls.serial_read())
+    time.sleep(10)
+    ls.send_cmd("D", str(1))
+    ls.send_cmd("W")
+    print(ls.serial_read())
+    ls.send_cmd("S", str(1000))
+    ls.send_cmd("W")
+    print(ls.serial_read())
