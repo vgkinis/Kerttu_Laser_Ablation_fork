@@ -1,0 +1,8 @@
+{
+  "stepper_name": "iHSS60-36-30-21-38",
+  "stp_per_rev": 5000,
+  "thread_pitch": 0.1421,
+  "_thread_pitch_units": "mm",
+  "stage_length": 1200,
+  "_stage_length_units": "mm"
+}
