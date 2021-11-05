@@ -202,7 +202,7 @@ class LinearStage():
         return self.us_stp_to_stp_s(us_stp)/self.stp_per_rev
 
     def rev_s_to_us_stp(self, rev_s):
-        return 1e6/(self.thread_pitch*self.stp_per_rev)
+        return 1e6/(rev_s*self.stp_per_rev)
 
 #--------------------------------- Set -----------------------------------------
 
