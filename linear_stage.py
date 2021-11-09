@@ -270,19 +270,22 @@ class LinearStage():
 
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
-    ls = LinearStage(json_path="linear_stage.json")
+    ls = LinearStage(json_path="linear_stage_bubble-free.json")
     ls.read_json()
     ports = (list(list_ports.comports()))
-    port_names = list(map(lambda p : p.device, ports))
+    print(ports)
+    port_names = list(map(lambda p : p.name, ports))
     if "COM" in port_names[0]:
         serial_ports = port_names
     else:
         serial_ports = list(map(lambda p : "/dev/" + p, port_names))
+        print(serial_ports)
 
-    ls.start_serial(serial_port[0])
+    ls.start_serial(serial_ports[0])
     time.sleep(2)
 
     #ls.send_cmd("S", str(5000))
     #ls.send_cmd("W")
     #print(ls.serial_read())
-    ls.discrete_meas(3, 40, 5)
+
+    ls.sequence(([1, 2, 3], [1, 2, 3]))
