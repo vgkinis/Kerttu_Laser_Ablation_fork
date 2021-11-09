@@ -143,9 +143,10 @@ class WorkerThread(QThread):
 
     def connect_linear_stage(self):
         ports = (list(list_ports.comports()))
+        print(ports)
         print("Establishing a connection with the linear stage ...")
         for port in ports:
-            if "Arduino" in port.manufacturer:
+            if "Arduino" in str(port.manufacturer):
                 try:
                     self.ls.start_serial(port.device)
                     time.sleep(2)

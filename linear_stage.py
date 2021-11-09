@@ -281,11 +281,12 @@ if __name__ == "__main__":
         serial_ports = list(map(lambda p : "/dev/" + p, port_names))
         print(serial_ports)
 
-    ls.start_serial(serial_ports[0])
-    time.sleep(2)
+    ls.start_serial(serial_ports[1])
+    time.sleep(1)
+
 
     #ls.send_cmd("S", str(5000))
     #ls.send_cmd("W")
     #print(ls.serial_read())
 
-    ls.sequence(([1, 2, 3], [1, 2, 3]))
+    ls.sequence(([1, 0.1, 100], [-1, 0.1, 100]))
