@@ -288,5 +288,5 @@ if __name__ == "__main__":
     #ls.send_cmd("S", str(5000))
     #ls.send_cmd("W")
     #print(ls.serial_read())
-
-    ls.sequence(([1, 0.1, 100], [-1, 0.1, 100]))
+    #ls.reset_sys()
+    #ls.sequence(([-1, 10, 300], [-1, 10, 300]))
