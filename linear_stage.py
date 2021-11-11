@@ -229,7 +229,7 @@ class LinearStage():
             self.sent_pos_stp = stp
             self.send_cmd("S", abs(self.sent_pos_stp))
         elif unit == "rev":
-            self.sent_pos_stp = rev_to_stp(dis)
+            self.sent_pos_stp = self.rev_to_stp(dis)
             self.sent_pos_mm = self.stp_to_mm(self.sent_pos_stp)
             self.send_cmd("S", abs(self.sent_pos_stp))
 
