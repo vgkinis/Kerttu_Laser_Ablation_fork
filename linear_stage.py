@@ -1,15 +1,10 @@
-#comment
-#comment 2
-#comment 3
+
 import numpy as np
 import serial
 import os
 import time
 import json
 from serial.tools import list_ports
-
-
-
 
 
 class LinearStage():
@@ -273,13 +268,13 @@ if __name__ == "__main__":
     ls = LinearStage(json_path="linear_stage_bubble-free.json")
     ls.read_json()
     ports = (list(list_ports.comports()))
-    print(ports)
+    #print(ports)
     port_names = list(map(lambda p : p.name, ports))
     if "COM" in port_names[0]:
         serial_ports = port_names
     else:
         serial_ports = list(map(lambda p : "/dev/" + p, port_names))
-        print(serial_ports)
+     #   print(serial_ports)
 
     ls.start_serial(serial_ports[1])
     time.sleep(1)
@@ -291,3 +286,4 @@ if __name__ == "__main__":
     #print(ls.serial_read())
     #ls.reset_sys()
     #ls.sequence(([-1, 10, 300], [-1, 10, 300]))
+ 
