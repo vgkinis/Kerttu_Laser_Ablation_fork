@@ -1,4 +1,4 @@
- from PyQt5.QtWidgets import (QWidget, QPushButton, QTextEdit, QGridLayout, QComboBox, QHBoxLayout, QVBoxLayout, QApplication, QLCDNumber,
+from PyQt5.QtWidgets import (QWidget, QPushButton, QTextEdit, QGridLayout, QComboBox, QHBoxLayout, QVBoxLayout, QApplication, QLCDNumber,
                              QLabel, QMainWindow, qApp, QSpacerItem, QSizePolicy, QFrame, QCheckBox)
 from PyQt5.QtCore import pyqtSlot, QRect, Qt, QThread, pyqtSignal
 from PyQt5 import QtCore

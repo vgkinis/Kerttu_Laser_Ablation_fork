@@ -283,6 +283,7 @@ if __name__ == "__main__":
 
     ls.start_serial(serial_ports[1])
     time.sleep(1)
+    #ls.sequence([(-1, 1, 110), (-1, 1, 110)])
 
 
     #ls.send_cmd("S", str(5000))
