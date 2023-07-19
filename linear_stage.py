@@ -101,10 +101,10 @@ class LinearStage():
 #------------------------------- Serial functions ------------------------------
     def start_serial(self, serial_name):
         try:
-            self.ser = serial.Serial(serial_name, 38400, timeout=.1)
+            self.ser = serial.Serial(serial_name, 9600, timeout=.1)
             print("Connection is established")
-        except:
-            print("Could not open serial")
+        except Exception as e:
+            print(e)
         return
 
 
@@ -265,20 +265,21 @@ class LinearStage():
 
 #--------------------------------- if __main__ ---------------------------------
 if __name__ == "__main__":
-    ls = LinearStage(json_path="linear_stage_bubble-free.json")
+    ls = LinearStage(json_path="linear_stage.json")
     ls.read_json()
-    ports = (list(list_ports.comports()))
-    #print(ports)
+    ports = list_ports.comports()
+    print(ports)
     port_names = list(map(lambda p : p.name, ports))
-    if "COM" in port_names[0]:
-        serial_ports = port_names
-    else:
-        serial_ports = list(map(lambda p : "/dev/" + p, port_names))
-     #   print(serial_ports)
 
-    ls.start_serial(serial_ports[1])
-    time.sleep(1)
-    #ls.sequence([(-1, 1, 110), (-1, 1, 110)])
+    print("Establishing a connection with the linear stage ...")
+    for port in ports:
+        if "Arduino" in port.manufacturer:
+            try:
+                ls.start_serial(port.device)
+                time.sleep(2)
+            except Exception as e:
+                print(e)
+
 
 
     #ls.send_cmd("S", str(5000))
@@ -287,3 +288,15 @@ if __name__ == "__main__":
     #ls.reset_sys()
     #ls.sequence(([-1, 10, 300], [-1, 10, 300]))
  
+#  A possible way to open the port can also be the following using the grep command:
+#  import serial.tools.list_ports
+#  ports=serial.tools.list_ports.grep("Arduino")
+#  for p in ports:
+#   portNum=p.name
+# try:
+#     arduino = serial.Serial()
+#     arduino.port=portNum
+#     arduino.baudrate=115200
+#     arduino.timeout=1
+#     arduino.open()
+#     time.sleep(2)

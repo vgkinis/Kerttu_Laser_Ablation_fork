@@ -43,7 +43,7 @@ class WorkerThread(QThread):
         self.laser_connected = False
 
         # Create a linear stage instance
-        self.ls = LinearStage(json_path="linear_stage_bubble-free.json")
+        self.ls = LinearStage(json_path="linear_stage.json")
         self.ls.read_json()
 
         # Create a laser instance
