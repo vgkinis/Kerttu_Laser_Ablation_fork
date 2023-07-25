@@ -168,6 +168,7 @@ class LinearStage():
 #--------------------------------- Conversions ---------------------------------
 
     # Functions for distance
+    #possible fix for the mm discretezation 
     def stp_to_mm(self, stp):
         return int((self.thread_pitch*stp)/self.stp_per_rev)
 
