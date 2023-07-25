@@ -15,7 +15,7 @@ float steprev = 3200 ; //Step number per revolution : define with button on step
 //unsigned int time = ((distrev*2)/(steprev*speed))*1000 ; //delay for the pulse signal in mseconds
 float revpersec = 0.01;
 unsigned int time=1e3/(revpersec*steprev*1); //ms.step
-unsigned int quick_time = time/4;
+unsigned int quick_time = time;
 
 void loop() {
   int resvalue=0; 
