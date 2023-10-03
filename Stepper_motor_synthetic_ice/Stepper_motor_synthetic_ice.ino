@@ -20,16 +20,20 @@ unsigned int quick_time = time/2;
 void loop() {
   int resvalue=0; 
   resvalue = digitalRead(RES);
-  //resvalue = analogRead(A0);
-  //Serial.println(resvalue);
+//  Serial.println(resvalue);
+//  resvalue = analogRead(A0);
+//  Serial.println(resvalue);
 
   int spdmaxvalue=0;
   spdmaxvalue = digitalRead(spdMAX);
+  //Serial.println(spdmaxvalue);
+
 
   if(spdmaxvalue == LOW && resvalue == LOW){
     digitalWrite(spd,HIGH);
     delay(time);
     digitalWrite(spd,LOW);
+
    }
   else if (spdmaxvalue == HIGH && resvalue ==LOW) {
     digitalWrite(spd,HIGH);
