@@ -233,7 +233,7 @@ class WorkerThread(QThread):
 class App(QWidget):
 
     def __init__(self):
-        super().__init__()
+        super(App, self).__init__()
         self.title='Laser Ablation'
         self.left=10
         self.top=10
