@@ -146,15 +146,15 @@ class WorkerThread(QThread):
         print(ports)
         print("Establishing a connection with the linear stage ...")
         for port in ports:
-            if "Arduino" in str(port.manufacturer):
-                try:
-                    self.ls.start_serial(port.device)
-                    time.sleep(2)
-                    self.linear_stage_connected = True
-                    if self.laser_connected == False:
-                        self.start_data_logger()
-                except Exception as e:
-                    print(e)
+            try:
+                self.ls.start_serial(port.device)
+                time.sleep(2)
+                self.linear_stage_connected = True
+                if self.laser_connected == False:
+                    self.start_data_logger()
+                return
+            except Exception as e:
+                pass
         if self.linear_stage_connected == False:
             print("Cannot find the linear stage")
 
@@ -193,7 +193,9 @@ class WorkerThread(QThread):
         self.discrete_time = time_interval
         self.discrete_laser = with_laser
         if self.discrete_laser == True:
-            self.laser.go_to_standby()
+            # Enable the laser ONCE, but keep optical output OFF initially (AOM closed)
+            self.laser.enable_laser()          # ly_oxp2_enabled
+            self.laser.disable_AOM_laser()     # ly_oxp2_output_disable
         self.ls.set_event_code(4)
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
         self.discrete_nr = nr-1
@@ -207,19 +209,20 @@ class WorkerThread(QThread):
                     # Start the timer
                     if self.discrete_timer == None:
                         if self.discrete_laser == True:
-                            self.laser.enable_laser()
-                            #self.laser.enable_AOM_laser()
+                            #self.laser.enable_laser()
+                            self.laser.enable_AOM_laser()
                         self.discrete_timer = time.time()
                     # Move the next distance interval if waiting time is over
                     if self.discrete_timer + self.discrete_time <= time.time():
                         if self.discrete_laser == True:
-                            #self.laser.disable_AOM_laser()
-                            self.laser.go_to_standby()
+                            self.laser.disable_AOM_laser()
+                            #self.laser.go_to_standby()
                         #print(time.time() - self.discrete_timer)
                         self.discrete_move_one_interval()
                 # Reset the event code and finish discrete sampling.
                 else:
                     if self.discrete_laser == True:
+                        self.laser.disable_AOM_laser()
                         self.laser.go_to_standby()
                     self.ls.set_event_code(0)
                     self.discrete_sampling = False
