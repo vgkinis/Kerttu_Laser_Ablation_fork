@@ -196,6 +196,7 @@ class WorkerThread(QThread):
             # Enable the laser ONCE, but keep optical output OFF initially (AOM closed)
             self.laser.enable_laser()          # ly_oxp2_enabled
             self.laser.disable_AOM_laser()     # ly_oxp2_output_disable
+            time.sleep(5)
         self.ls.set_event_code(4)
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
         self.discrete_nr = nr-1
