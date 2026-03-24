@@ -79,7 +79,8 @@ class WorkerThread(QThread):
                         # Get feedback from the linear stage
                         self.ls.ping_arduino()
                         motor_data = self.ls.serial_read()
-                        self.data_dict.update(motor_data)
+                        if motor_data != None:
+                            self.data_dict.update(motor_data)
 
                     except Exception as e:
                         print(e)
@@ -87,6 +88,7 @@ class WorkerThread(QThread):
                     # Calibrate or perform discrete movement if it has been chosen.
                     self.calibrate_sys()
                     self.discrete_movement()
+            time.sleep(0.05)
 
 
     def start_data_logger(self):
@@ -198,6 +200,7 @@ class WorkerThread(QThread):
             # Enable the laser ONCE, but keep optical output OFF initially (AOM closed)
             self.laser.enable_laser()          # ly_oxp2_enabled
             self.laser.disable_AOM_laser()     # ly_oxp2_output_disable
+            time.sleep(5)
         self.ls.set_event_code(4)
         self.ls.move_dis(self.discrete_dis, self.discrete_dis_unit)
         self.discrete_nr = nr-1
