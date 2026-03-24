@@ -182,7 +182,9 @@ class WorkerThread(QThread):
                 dis = abs(new_abs_pos - 0)
                 #time.sleep(1)
                 self.ls.move_dis(dis, "steps")
+                print("booo!")
                 self.ls.set_event_code(0)
+                print("booo1!")
                 self.calibrating = False
                 self.calibrated = True
 
