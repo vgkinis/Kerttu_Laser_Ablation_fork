@@ -79,8 +79,7 @@ class WorkerThread(QThread):
                         # Get feedback from the linear stage
                         self.ls.ping_arduino()
                         motor_data = self.ls.serial_read()
-                        if motor_data != None:
-                            self.data_dict.update(motor_data)
+                        self.data_dict.update(motor_data)
 
                     except Exception as e:
                         print(e)
@@ -88,7 +87,6 @@ class WorkerThread(QThread):
                     # Calibrate or perform discrete movement if it has been chosen.
                     self.calibrate_sys()
                     self.discrete_movement()
-            time.sleep(0.05)
 
 
     def start_data_logger(self):
